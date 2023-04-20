@@ -43,7 +43,7 @@ public class StarBouncer : MonoBehaviourPun {
             trackObject.transform.localScale = new(3f / 4f, 3f / 4f, 1f);
             stationary = false;
             passthrough = true;
-            sRenderer.color = new(1, 1, 1, 0.55f);
+            sRenderer.color = new(1, 1, 1, 1f);
             gameObject.layer = Layers.LayerHitsNothing;
             int direction = (int) data[0];
             left = direction <= 1;

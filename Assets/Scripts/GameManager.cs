@@ -17,6 +17,7 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IConnectionCallbacks, IMatchmakingCallbacks {
 
+    
     private static GameManager _instance;
     public static GameManager Instance {
         get {
@@ -53,7 +54,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     //Audio
     public AudioSource music, sfx;
-    private LoopingMusic loopMusic;
+    public LoopingMusic loopMusic;
     public Enums.MusicState? musicState = null;
 
     public GameObject localPlayer;
@@ -323,6 +324,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public void OnJoinRoomFailed(short returnCode, string message) { }
     public void OnJoinRandomFailed(short returnCode, string message) { }
     public void OnLeftRoom() {
+
         OnDisconnected(DisconnectCause.DisconnectByServerLogic);
     }
 
@@ -558,6 +560,24 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         if (canvas)
             SceneManager.UnloadSceneAsync("Loading");
+
+
+        //Music alternating made like the original
+        //it starts playing SNOW and alternates with OVERWORLD theme each game
+        if (SceneManager.GetActiveScene().buildIndex >= 2 && SceneManager.GetActiveScene().buildIndex <= 6 ) {
+            if (GlobalController.Instance.musicOrdering % 2 == 0)
+            {
+                mainMusic = (MusicData)Resources.Load("Scriptables/Music/MusicLevelSnow");
+            }
+            else {
+                mainMusic = (MusicData)Resources.Load("Scriptables/Music/MusicLevelOverworld");
+            }
+            if (!spectating) {
+                GlobalController.Instance.musicOrdering++;
+            }
+        
+        }
+            
     }
 
     IEnumerator CountdownSound(float t, float times) { //The match countdown sound system. t is the tempo, and times is the # of times the sound will play (variable if match is started at 10s or less)
@@ -576,6 +596,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             }
         }
     }
+
 
     private IEnumerator EndGame(Player winner) {
         PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = false });
@@ -756,18 +777,18 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     }
 
     private void HandleMusic() {
-        bool invincible = false;
-        bool mega = false;
         bool speedup = false;
 
         foreach (var player in players) {
             if (!player)
                 continue;
-
-            if (player.state == Enums.PowerupState.MegaMushroom && player.giantTimer != 15)
-                mega = true;
             if (player.invincible > 0)
-                invincible = true;
+            {
+                if (player.photonView.IsMine)
+                {
+                    PlaySong(Enums.MusicState.Starman, invincibleMusic);
+                }
+            }
             if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false)
                 speedup = true;
             if (player.lives == 1 && players.Count <= 2)
@@ -776,13 +797,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         speedup |= players.All(pl => !pl || pl.lives == 1 || pl.lives == 0);
 
-        if (mega) {
-            PlaySong(Enums.MusicState.MegaMushroom, megaMushroomMusic);
-        } else if (invincible) {
-            PlaySong(Enums.MusicState.Starman, invincibleMusic);
-        } else {
-            PlaySong(Enums.MusicState.Normal, mainMusic);
-        }
+        
+        PlaySong(Enums.MusicState.Normal, mainMusic);
+        
 
         loopMusic.FastMusic = speedup;
     }

@@ -14,7 +14,7 @@ public class GlobalController : Singleton<GlobalController>, IInRoomCallbacks, I
 
     public PlayerColorSet[] skins;
     public Gradient rainbowGradient;
-
+    public int musicOrdering = 0;
     public GameObject ndsCanvas, fourByThreeImage, anyAspectImage, graphy;
 
     public RenderTexture ndsTexture;
