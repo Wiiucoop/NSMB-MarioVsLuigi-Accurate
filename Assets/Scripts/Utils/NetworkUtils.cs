@@ -29,7 +29,7 @@ namespace NSMB.Utils {
             [Enums.NetRoomProperties.Lives] = -1,
             [Enums.NetRoomProperties.Time] = -1,
             [Enums.NetRoomProperties.DrawTime] = false,
-            [Enums.NetRoomProperties.NewPowerups] = true,
+            [Enums.NetRoomProperties.NewPowerups] = false,
             [Enums.NetRoomProperties.GameStarted] = false,
             [Enums.NetRoomProperties.HostName] = "",
             [Enums.NetRoomProperties.Debug] = false,

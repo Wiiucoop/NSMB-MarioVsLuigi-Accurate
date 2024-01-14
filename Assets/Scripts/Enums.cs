@@ -24,7 +24,7 @@ public static class Enums {
         [PowerupState.FireFlower] = new(2),
         [PowerupState.IceFlower] = new(2),
         [PowerupState.PropellerMushroom] = new(2),
-        [PowerupState.BlueShell] = new(2),
+        [PowerupState.BlueShell] = new(3),
         [PowerupState.MegaMushroom] = new(4),
     };
     public enum PowerupState : byte {

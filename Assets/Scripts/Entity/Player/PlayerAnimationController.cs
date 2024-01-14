@@ -48,8 +48,10 @@ public class PlayerAnimationController : MonoBehaviourPun {
         DisableAllModels();
 
         if (photonView) {
-            enableGlow = !photonView.IsMine;
-            if (!photonView.IsMine)
+            if(GameManager.Instance.players.Count > 2){
+                enableGlow = !photonView.IsMine;
+            }
+            if (!photonView.IsMine && GameManager.Instance.players.Count > 2)
                 GameManager.Instance.CreateNametag(controller);
 
             PlayerColorSet colorSet = GlobalController.Instance.skins[(int) photonView.Owner.CustomProperties[Enums.NetPlayerProperties.PlayerColor]];
@@ -388,4 +390,6 @@ public class PlayerAnimationController : MonoBehaviourPun {
         propellerHelmet.SetActive(false);
         animator.avatar = smallAvatar;
     }
+
+
 }

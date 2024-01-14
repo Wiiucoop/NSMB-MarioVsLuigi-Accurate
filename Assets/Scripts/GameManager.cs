@@ -777,29 +777,38 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     }
 
     private void HandleMusic() {
+        bool invincible = false;
+        bool mega = false;
         bool speedup = false;
 
         foreach (var player in players) {
             if (!player)
                 continue;
-            if (player.invincible > 0)
-            {
-                if (player.photonView.IsMine)
-                {
-                    PlaySong(Enums.MusicState.Starman, invincibleMusic);
-                }
-            }
+
             if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false)
                 speedup = true;
             if (player.lives == 1 && players.Count <= 2)
                 speedup = true;
+
+            if (!player.photonView.IsMine)
+                continue;
+
+            if (player.state == Enums.PowerupState.MegaMushroom && player.giantTimer != 15)
+                mega = true;
+            if (player.invincible > 0)
+                invincible = true;
+            
         }
 
         speedup |= players.All(pl => !pl || pl.lives == 1 || pl.lives == 0);
 
-        
-        PlaySong(Enums.MusicState.Normal, mainMusic);
-        
+        if (mega) {
+            PlaySong(Enums.MusicState.MegaMushroom, megaMushroomMusic);
+        } else if (invincible) {
+            PlaySong(Enums.MusicState.Starman, invincibleMusic);
+        } else {
+            PlaySong(Enums.MusicState.Normal, mainMusic);
+        }
 
         loopMusic.FastMusic = speedup;
     }

@@ -128,8 +128,16 @@ public class BobombWalk : HoldableEntity {
             }
         }
 
-        if (physics.onGround && physics.hitRoof)
-            photonView.RPC("SpecialKill", RpcTarget.All);
+        if (physics.onGround && physics.hitRoof){
+
+            sRenderer.enabled = false;
+            hitbox.enabled = false;
+            detonated = true;
+
+            Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+            PhotonNetwork.Destroy(gameObject);
+        }
+            
     }
     #endregion
 
@@ -146,7 +154,7 @@ public class BobombWalk : HoldableEntity {
         if (!photonView.IsMine)
             return;
 
-        RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position + new Vector3(0,0.5f), 1f, Vector2.zero);
+        RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position + new Vector3(0,0.5f), 0.8f, Vector2.zero);
         foreach (RaycastHit2D hit in hits) {
             GameObject obj = hit.collider.gameObject;
 
