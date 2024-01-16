@@ -859,6 +859,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         usedPropellerThisJump = true;
     }
 
+
     public void OnReserveItem(InputAction.CallbackContext context) {
         if (!photonView.IsMine || GameManager.Instance.paused || GameManager.Instance.gameover)
             return;
@@ -932,7 +933,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 afstate = powerup.state;
                 //todo: add invincibility frames
                 
-                Debug.Log("PODERZAO");
+             //   Debug.Log("PODERZAO");
                 StartCoroutine(powerupAnim());
             }
 
@@ -942,13 +943,13 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 afstate = powerup.state;
                 //todo: add invincibility frames
                 
-                Debug.Log("PODERZAO222");
+              //  Debug.Log("PODERZAO222");
               //  StartCoroutine(powerupAnim());
           
 
 
         }
-        Debug.Log("AFTERIF");
+       // Debug.Log("AFTERIF");
 
         if (powerup.state == Enums.PowerupState.MegaMushroom && state != Enums.PowerupState.MegaMushroom) {
 
@@ -1041,6 +1042,9 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     [PunRPC]
     public void Powerdown(bool ignoreInvincible) {
         if (!ignoreInvincible && (hitInvincibilityCounter > 0 || invincible > 0))
+            return;
+
+        if(!powerupCompleted)
             return;
 
         previousState = state;
@@ -1507,22 +1511,24 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
             powerupCompleted = false;
 
-            yield return new WaitForSeconds(0.1f); 
-        
-            state = befstate;
-            
-            yield return new WaitForSeconds(0.1f); 
-        
-            state = afstate;
-            
-            yield return new WaitForSeconds(0.1f); 
-        
-            state = befstate;
+            if(befstate != Enums.PowerupState.PropellerMushroom){
 
-            yield return new WaitForSeconds(0.1f); 
-        
-            state = afstate;
+                yield return new WaitForSeconds(0.1f); 
+            
+                state = befstate;
+                
+                yield return new WaitForSeconds(0.1f); 
+            
+                state = afstate;
+                
+                yield return new WaitForSeconds(0.1f); 
+            
+                state = befstate;
 
+                yield return new WaitForSeconds(0.1f); 
+
+            }
+            state = afstate;
             powerupCompleted = true;
         }else{
             yield return new WaitForSeconds(0.41f); 
@@ -1764,7 +1770,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         animator.SetBool("knockforwards", facingRight != fromRight);
 
         float megaVelo = (state == Enums.PowerupState.MegaMushroom ? 3 : 1);
-        if(fireballKnockback){
+        if(fireballKnockback){//Reduces fireball knockback distance
             body.velocity = new Vector2((fromRight ? -1 : 1), 0);
 
         }else{
@@ -1781,7 +1787,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             
             
        
-
+        //Accuracy: Mechanic that damages the player on FORTRESS in that first brick block.
         if (onGround && !fireball){
             body.position += Vector2.up * 0.15f;
             StartCoroutine(blockSquish());

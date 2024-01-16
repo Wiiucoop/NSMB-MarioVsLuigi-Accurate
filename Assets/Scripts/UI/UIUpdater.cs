@@ -96,11 +96,16 @@ public class UIUpdater : MonoBehaviour {
             coins = player.coins;
             uiCoins.text = Utils.GetSymbolString("Cx" + coins + "/" + GameManager.Instance.coinRequirement);
         }
-
+//ACCURACY: Player HEADS as life counter instead of numbers
         if (player.lives >= 0) {
             if (player.lives != lives) {
                 lives = player.lives;
-                uiLives.text = Utils.GetCharacterData(player.photonView.Owner).uistring + Utils.GetSymbolString("x" + lives);
+                string lifeIcon = Utils.GetCharacterData(player.photonView.Owner).uistring;
+                string lifeAmount = "";
+                for(int i = 0; i<player.lives; i++){
+                    lifeAmount += ""+lifeIcon;
+                }
+                uiLives.text = lifeAmount;
             }
         } else {
             livesParent.SetActive(false);

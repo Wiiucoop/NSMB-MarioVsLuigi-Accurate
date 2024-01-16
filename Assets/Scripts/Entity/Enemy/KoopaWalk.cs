@@ -183,8 +183,6 @@ public class KoopaWalk : HoldableEntity {
             photonView.RPC(nameof(SetLeft), RpcTarget.All, damageDirection.x > 0);
         } else if (player.sliding || player.inShell || player.invincible > 0 || player.state == Enums.PowerupState.MegaMushroom) {
             bool originalFacing = player.facingRight;
-            if (shell && !stationary && player.inShell && Mathf.Sign(body.velocity.x) != Mathf.Sign(player.body.velocity.x))
-                player.photonView.RPC(nameof(PlayerController.Knockback), RpcTarget.All, player.body.position.x < body.position.x, 0, true, photonView.ViewID);
             photonView.RPC(nameof(SpecialKill), RpcTarget.All, !originalFacing, false, player.StarCombo++);
         } else if (player.groundpound && player.state != Enums.PowerupState.MiniMushroom && attackedFromAbove) {
             photonView.RPC(nameof(EnterShell), RpcTarget.All);
