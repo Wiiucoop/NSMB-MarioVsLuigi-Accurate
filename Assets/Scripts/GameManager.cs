@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         private set => _instance = value;
     }
 
-    public MusicData mainMusic, invincibleMusic, megaMushroomMusic;
+    public MusicData mainMusic, invincibleMusic;
 
     public int levelMinTileX, levelMinTileY, levelWidthTile, levelHeightTile;
     public float cameraMinY, cameraHeightY, cameraMinX = -1000, cameraMaxX = 1000;
@@ -778,7 +778,6 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     private void HandleMusic() {
         bool invincible = false;
-        bool mega = false;
         bool speedup = false;
 
         foreach (var player in players) {
@@ -793,8 +792,6 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             if (!player.photonView.IsMine)
                 continue;
 
-            if (player.state == Enums.PowerupState.MegaMushroom && player.giantTimer != 15)
-                mega = true;
             if (player.invincible > 0)
                 invincible = true;
             
@@ -802,9 +799,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         speedup |= players.All(pl => !pl || pl.lives == 1 || pl.lives == 0);
 
-        if (mega) {
-            PlaySong(Enums.MusicState.MegaMushroom, megaMushroomMusic);
-        } else if (invincible) {
+        if (invincible) {
             PlaySong(Enums.MusicState.Starman, invincibleMusic);
         } else {
             PlaySong(Enums.MusicState.Normal, mainMusic);
@@ -828,6 +823,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         hostExitUI.SetActive(false);
         EventSystem.current.SetSelectedGameObject(pauseButton);
     }
+
+
+
+
 
     public void AttemptQuit() {
 

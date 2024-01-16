@@ -3886,7 +3886,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 76.65
+  m_fontSize: 59.45
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5245,7 +5245,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainMusic: {fileID: 11400000, guid: 488f1c737d498714c951d86c1a790bcc, type: 2}
   invincibleMusic: {fileID: 11400000, guid: fb397722d9ffbb145a088ac9ce60908c, type: 2}
-  megaMushroomMusic: {fileID: 11400000, guid: 3fb519076901a294493ae6e0c10c979b, type: 2}
   levelMinTileX: -30
   levelMinTileY: -12
   levelWidthTile: 50
@@ -5271,6 +5270,7 @@ MonoBehaviour:
   nametagPrefab: {fileID: 7542548910130765567}
   music: {fileID: 3063105634746227037}
   sfx: {fileID: 8814515203468784576}
+  loopMusic: {fileID: 0}
   localPlayer: {fileID: 0}
   paused: 0
   loaded: 0

@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 public class UpdateChecker {
 
-    private static readonly string API_URL = "http://api.github.com/repos/ipodtouch0218/NSMB-MarioVsLuigi/releases/latest";
+    private static readonly string API_URL = "http://api.github.com/repos/Wiiucoop/NSMB-MarioVsLuigi-Accurate/releases/latest";
 
     /// <summary>
     /// Returns if we're up to date, OR newer, compared to the latest GitHub release version number
@@ -17,7 +17,7 @@ public class UpdateChecker {
         //get http results
         HttpWebRequest request = (HttpWebRequest) WebRequest.Create(API_URL);
         request.Accept = "application/json";
-        request.UserAgent = "ipodtouch0218/NSMB-MarioVsLuigi";
+        request.UserAgent = "Wiiucoop/NSMB-MarioVsLuigi-Accurate";
 
         HttpWebResponse response = (HttpWebResponse) await request.GetResponseAsync();
 
