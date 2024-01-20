@@ -4,7 +4,7 @@ using TMPro;
 [RequireComponent(typeof(TMP_Text))]
 public class SlantText : MonoBehaviour {
 
-    [SerializeField] private float slopeAmount = 0, firstChar = 0, secondChar = 0;
+  //  [SerializeField] private float slopeAmount = 0, firstChar = 0, secondChar = 0;
 
     private TMP_Text text;
     private TMP_SubMeshUI subtext;
@@ -22,6 +22,8 @@ public class SlantText : MonoBehaviour {
     }
 
     public void MoveVerts(Object a) {
+        return;
+        /*
         if (!text || a != text)
             return;
 
@@ -55,5 +57,5 @@ public class SlantText : MonoBehaviour {
 
         mesh.vertices = verts;
         subtext.canvasRenderer.SetMesh(mesh);
-    }
+    */}
 }

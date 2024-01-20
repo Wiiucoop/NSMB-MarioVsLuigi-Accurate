@@ -513,7 +513,8 @@ namespace NSMB.Utils {
             ['9'] = 20,
             ['x'] = 21,
             ['C'] = 22,
-            ['S'] = 23,
+            ['s'] = 0,
+            ['S'] = 26,
             ['/'] = 24,
             [':'] = 25,
         };
@@ -555,6 +556,27 @@ namespace NSMB.Utils {
             }
             return ret.ToString();
         }
+
+        public static string GetSymbolString(string str, float fontSize, Dictionary<char, byte> dict = null)
+        {
+            if (dict == null)
+                dict = uiSymbols;
+
+            StringBuilder ret = new StringBuilder();
+            foreach (char c in str)
+            {
+                if (dict.TryGetValue(c, out byte index))
+                {
+                    ret.Append("<sprite=").Append(index).Append(">").Append("<size=").Append(fontSize).Append(">");
+                }
+                else
+                {
+                    ret.Append(c);
+                }
+            }
+            return ret.ToString();
+        }
+
 
         public static Color GetPlayerColor(Player player, float s = 1, float v = 1) {
 

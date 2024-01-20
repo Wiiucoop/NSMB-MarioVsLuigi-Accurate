@@ -803,6 +803,11 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         if (lives == -1)
             return;
 
+        if (lives > 5){
+            lives = 5;
+            livesEnabled.SetIsOnWithoutNotify(false);
+        }
+
         livesField.SetTextWithoutNotify(lives.ToString());
     }
     public void SetLives(TMP_InputField input) {
@@ -1296,8 +1301,16 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             return;
 
         int.TryParse(input.text, out int newValue);
-        if (newValue < 1) {
+        if (newValue < 3) {
+            newValue = 3;
+            input.text = newValue.ToString();
+        }
+        if (newValue > 3 && newValue < 10) {
             newValue = 5;
+            input.text = newValue.ToString();
+        }
+        if (newValue > 10) {
+            newValue = 10;
             input.text = newValue.ToString();
         }
         if (newValue == (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.StarRequirement])

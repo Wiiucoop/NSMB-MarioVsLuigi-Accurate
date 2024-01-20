@@ -13,7 +13,7 @@ public class UIUpdater : MonoBehaviour {
     public GameObject playerTrackTemplate, starTrackTemplate;
     public PlayerController player;
     public Sprite storedItemNull;
-    public TMP_Text uiStars, uiCoins, uiDebug, uiLives, uiCountdown;
+    public TMP_Text uiStar1,uiStar2,uiStar3,uiStar4,uiStar5, uiCoins, uiDebug, uiLives, uiCountdown;
     public Image itemReserve, itemColor;
     public float pingSample = 0;
 
@@ -21,6 +21,7 @@ public class UIUpdater : MonoBehaviour {
     private GameObject starsParent, coinsParent, livesParent, timerParent;
     private readonly List<Image> backgrounds = new();
     private bool uiHidden;
+    private bool shouldAnimate = false;
 
     private int coins = -1, stars = -1, lives = -1, timer = -1;
 
@@ -28,12 +29,12 @@ public class UIUpdater : MonoBehaviour {
         Instance = this;
         pingSample = PhotonNetwork.GetPing();
 
-        starsParent = uiStars.transform.parent.gameObject;
+       // starsParent = uiStars.transform.parent.gameObject;
         coinsParent = uiCoins.transform.parent.gameObject;
         livesParent = uiLives.transform.parent.gameObject;
         timerParent = uiCountdown.transform.parent.gameObject;
 
-        backgrounds.Add(starsParent.GetComponentInChildren<Image>());
+       // backgrounds.Add(starsParent.GetComponentInChildren<Image>());
         backgrounds.Add(coinsParent.GetComponentInChildren<Image>());
         backgrounds.Add(livesParent.GetComponentInChildren<Image>());
         backgrounds.Add(timerParent.GetComponentInChildren<Image>());
@@ -50,7 +51,7 @@ public class UIUpdater : MonoBehaviour {
 
         uiDebug.text = "<mark=#000000b0 padding=\"20, 20, 20, 20\"><font=\"defaultFont\">Ping: " + (int) pingSample + "ms</font>";
 
-        //Player stuff update.
+        //Player stuff update.//
         if (!player && GameManager.Instance.localPlayer)
             player = GameManager.Instance.localPlayer.GetComponent<PlayerController>();
 
@@ -84,17 +85,119 @@ public class UIUpdater : MonoBehaviour {
         itemReserve.sprite = player.storedPowerup != null ? player.storedPowerup.reserveSprite : storedItemNull;
     }
 
+
+private System.Collections.IEnumerator WavyAnimation(TMP_Text uiStar)
+{
+    float originalSize = uiStar.fontSize;
+    float newSize = originalSize * 1.5f;  // Adjust the scale factor as needed
+    float frequency = 1.0f;
+    if(uiStar.GetParsedText().Contains("<sprite=26>")){
+        frequency = 1.3f;  // Adjust the frequency of the wavy for the 5-STAR SYMBOL
+    }
+    Debug.Log(uiStar.GetParsedText());
+    float elapsedTime = 0f; //
+
+    while (shouldAnimate)
+    {
+        float t = Mathf.Sin(elapsedTime * frequency * 2 * Mathf.PI) * 0.5f + 0.5f; // Sine function for wavy effect
+        float lerpedSize = Mathf.Lerp(originalSize, newSize, t);
+        uiStar.fontSize = lerpedSize;
+
+        elapsedTime += Time.deltaTime;
+        yield return null;
+    }
+    uiStar.fontSize = originalSize;
+}
+
+private System.Collections.IEnumerator DelayWinningStarAnim()
+{
+    yield return new WaitForSeconds(0.1f);
+    StartCoroutine(WavyAnimation(uiStar1));
+    yield return new WaitForSeconds(0.1f);
+    StartCoroutine(WavyAnimation(uiStar2));
+    yield return new WaitForSeconds(0.1f);
+    StartCoroutine(WavyAnimation(uiStar3));
+    yield return new WaitForSeconds(0.1f);
+    StartCoroutine(WavyAnimation(uiStar4));
+    yield return new WaitForSeconds(0.1f);
+    StartCoroutine(WavyAnimation(uiStar5));
+}
+
+
+private void flushStars() {
+    uiStar2.text = "";
+    uiStar3.text = "";
+    uiStar4.text = "";
+    uiStar5.text = "";
+}
+
     private void UpdateTextUI() {
         if (!player || GameManager.Instance.gameover)
             return;
+//ACCURACY: STAR ICON as counter instead of numbers
 
-        if (player.stars != stars) {
-            stars = player.stars;
-            uiStars.text = Utils.GetSymbolString("Sx" + stars + "/" + GameManager.Instance.starRequirement);
+    if (player.stars != stars)
+    {
+        stars = player.stars;
+        string singlestar = Utils.GetSymbolString("s");
+        string fivestar = Utils.GetSymbolString("S");
+        string starcount = "";
+
+
+       
+        for (int i = 0; i < player.stars; i++)
+        {
+
+            if (player.stars == GameManager.Instance.starRequirement-1)
+            {//ONE STAR LEFT TO END
+                shouldAnimate = true;
+                flushStars();
+                if(GameManager.Instance.starRequirement == 3){
+                    uiStar1.text = singlestar;
+                    uiStar2.text = singlestar;
+                }else if(GameManager.Instance.starRequirement == 5){
+                    uiStar1.text = singlestar;
+                    uiStar2.text = singlestar;
+                    uiStar3.text = singlestar;
+                    uiStar4.text = singlestar;                
+                }else if(GameManager.Instance.starRequirement == 10){
+                    uiStar1.text = fivestar;
+                    uiStar2.text = singlestar;
+                    uiStar3.text = singlestar;
+                    uiStar4.text = singlestar;   
+                    uiStar5.text = singlestar;
+                }
+    
+                StartCoroutine(DelayWinningStarAnim());
+                break;
+            }
+            
+            else if (i == 4)
+            {//FIVE STARS
+               flushStars();
+               starcount = fivestar;
+
+            }
+            else if (i > 4)
+            {//SIX OR MORE STARS
+               flushStars();
+               starcount = fivestar += singlestar;
+            }
+            else
+            {//ONE STAR UNTIL 4 STARS
+                flushStars();
+                starcount += singlestar;
+            }
         }
+        if(player.stars != GameManager.Instance.starRequirement-1){
+            uiStar1.text = starcount;
+            shouldAnimate = false;
+        }
+        
+    }
         if (player.coins != coins) {
             coins = player.coins;
-            uiCoins.text = Utils.GetSymbolString("Cx" + coins + "/" + GameManager.Instance.coinRequirement);
+            uiCoins.text = Utils.GetSymbolString("C" + coins + "/" + GameManager.Instance.coinRequirement);
         }
 //ACCURACY: Player HEADS as life counter instead of numbers
         if (player.lives >= 0) {

@@ -1461,6 +1461,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         groundpound = false;
         inShell = false;
         landing = 0f;
+        powerupCompleted = true;
         if (photonView.IsMine && !GameManager.Instance.music.isPlaying)
             GameManager.Instance.music.Play();
         ResetKnockback();
