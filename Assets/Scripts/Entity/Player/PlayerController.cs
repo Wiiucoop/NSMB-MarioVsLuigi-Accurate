@@ -523,9 +523,10 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                         //hit them. powerdown them
                         if (other.inShell) {
                             //collide with both
-                            otherView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x < body.position.x, 1, true, photonView.ViewID);
-                            photonView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x > body.position.x, 1, true, otherView.ViewID);
+                            otherView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x < body.position.x, 1, false, photonView.ViewID);
+                            photonView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x > body.position.x, 1, false, otherView.ViewID);
                         } else {
+                            otherView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x < body.position.x, 0, false, photonView.ViewID);
                             otherView.RPC(nameof(Powerdown), RpcTarget.All, false);
                         }
                         float dotRight = Vector2.Dot((body.position - other.body.position).normalized, Vector2.right);
@@ -966,7 +967,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             transform.localScale = Vector3.one;
             Instantiate(Resources.Load("Prefabs/Particle/GiantPowerup"), transform.position, Quaternion.identity);
 
-            PlaySoundEverywhere(powerup.soundEffect);
+            PlaySound(powerup.soundEffect);
             soundPlayed = true;
 
         } else if (powerup.prefab == "Star") {
@@ -1013,7 +1014,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             }
             PlaySound(Enums.Sounds.Player_Sound_PowerupReserveStore);
         } else {
-            if (!(state == Enums.PowerupState.Mushroom && newState != Enums.PowerupState.Mushroom) && (storedPowerup == null || Enums.PowerupStatePriority[storedPowerup.state].statePriority <= cp.statePriority)) {
+            if (!(state != newState) && (storedPowerup == null || Enums.PowerupStatePriority[storedPowerup.state].statePriority <= cp.statePriority)) {
                 storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/" + state);
             }
 
@@ -1417,8 +1418,6 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         if(GameManager.Instance.players.Count <= 2)
         {
             gameObject.transform.position = new Vector2(entryPipe.transform.position.x, entryPipe.transform.position.y+1.7f);
-
-        
         }
         else
         {//Particle plays if pipe entry is disabled
