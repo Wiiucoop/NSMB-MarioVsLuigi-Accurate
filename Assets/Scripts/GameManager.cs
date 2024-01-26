@@ -57,7 +57,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public LoopingMusic loopMusic;
     public Enums.MusicState? musicState = null;
 
-    public GameObject localPlayer;
+    public GameObject localPlayer, otherPlayer;
     public bool paused, loaded, started;
     public GameObject pauseUI, pausePanel, pauseButton, hostExitUI, hostExitButton;
     public bool gameover = false, musicEnabled = false;
@@ -525,7 +525,13 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         try {
             ScoreboardUpdater.instance.Populate(players);
-            if (Settings.Instance.scoreboardAlways)
+            //ACCURACY: LOAD PLAYER 2 AND DISABLE SCOREBOARD FOR 1V1
+            if(players.Count == 2){
+                UIUpdater.Instance.loadOtherPlayer(players);
+                ScoreboardUpdater.instance.transform.gameObject.SetActive(false);
+            }
+            
+            if (Settings.Instance.scoreboardAlways && players.Count != 2)
                 ScoreboardUpdater.instance.SetEnabled();
         } catch { }
 
@@ -617,13 +623,16 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         int secondsUntilMenu;
         secondsUntilMenu = draw ? 5 : 4;
 
-        if (draw)
+        if (draw){
             music.PlayOneShot(Enums.Sounds.UI_Match_Draw.GetClip());
-        else if (win)
+            text.GetComponent<Animator>().SetTrigger("startNegative");
+        }else if (win){
             music.PlayOneShot(Enums.Sounds.UI_Match_Win.GetClip());
-        else
+            text.GetComponent<Animator>().SetTrigger("start");
+        }else{
             music.PlayOneShot(Enums.Sounds.UI_Match_Lose.GetClip());
-
+            text.GetComponent<Animator>().SetTrigger("startNegative");
+        }
         //TOOD: make a results screen?
 
         yield return new WaitForSecondsRealtime(secondsUntilMenu);

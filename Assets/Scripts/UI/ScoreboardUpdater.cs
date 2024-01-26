@@ -31,6 +31,8 @@ public class ScoreboardUpdater : MonoBehaviour {
         animator.Play("toggle", 0, 0.99f);
     }
 
+
+
     public void ManualToggle() {
         if (autoToggled && !manuallyToggled) {
             //exception, already open. close.

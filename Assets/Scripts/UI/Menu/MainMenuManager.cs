@@ -805,7 +805,6 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
         if (lives > 5){
             lives = 5;
-            livesEnabled.SetIsOnWithoutNotify(false);
         }
 
         livesField.SetTextWithoutNotify(lives.ToString());
@@ -820,6 +819,11 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
         if (newValue < 1)
             newValue = 5;
+
+        if (newValue > 5){
+            newValue = 5;
+        }
+
         ChangeLives(newValue);
         if (newValue == (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.Lives])
             return;
