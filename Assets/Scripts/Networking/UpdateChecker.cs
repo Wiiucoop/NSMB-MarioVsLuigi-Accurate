@@ -38,6 +38,8 @@ public class UpdateChecker {
             string ver = Application.version;
             if (ver.StartsWith("v"))
                 ver = ver[1..];
+            if (ver.Contains("-"))
+                ver = ver.Split("-")[0];
 
             string[] splitVer = Application.version.Split(".");
 
@@ -45,18 +47,10 @@ public class UpdateChecker {
 
             //check if we're a higher version
             bool upToDate = true;
-            for (int i = 0; i < 4; i++) {
-                int.TryParse(splitTag[i], out int remote);
-                int.TryParse(splitVer[i], out int local);
-
-                if (local > remote)
-                    break;
-                if (local == remote)
-                    continue;
-
+            if ((Application.version != tag) && !Application.isEditor) {
                 upToDate = false;
-                break;
             }
+            
 
             callback(upToDate, tag);
         } catch { }

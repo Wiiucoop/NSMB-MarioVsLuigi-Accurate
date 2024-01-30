@@ -20,6 +20,24 @@ public class EnemySpawnpoint : MonoBehaviour {
         return true;
     }
 
+    public virtual bool AttemptSpawning1v1() {//ACCURACY: DISTANCE BASED RESPAWNING
+        if (currentEntity)
+            return false;
+
+        foreach (var hit in Physics2D.OverlapCircleAll(transform.position, 7.5f)) {
+            if (hit.gameObject.CompareTag("Player"))
+                //cant spawn here
+                return false;
+        }
+        
+        if(prefab == ""){//WORKAROUND FOR PIRANA PLANTS
+            AttemptSpawning();
+            return false;
+        }
+        currentEntity = PhotonNetwork.InstantiateRoomObject(prefab, transform.position, transform.rotation);
+        return true;
+    }
+
     public void OnDrawGizmos() {
         string icon = prefab.Split("/")[^1];
         float offset = prefab switch {

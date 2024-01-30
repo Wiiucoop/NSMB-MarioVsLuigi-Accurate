@@ -46,6 +46,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     public float jumpLandingTimer, landing, koyoteTime, groundpoundCounter, groundpoundStartTimer, pickupTimer, groundpoundDelay, hitInvincibilityCounter, powerupFlash, throwInvincibility, jumpBuffer, giantStartTimer, giantEndTimer, propellerTimer, propellerSpinTimer, fireballTimer;
     public float invincible, giantTimer, floorAngle, knockbackTimer, pipeTimer, slowdownTimer;
 
+    public bool isInvincibleKilling = false;
+
     //MOVEMENT STAGES
     private static readonly int WALK_STAGE = 1, RUN_STAGE = 3, STAR_STAGE = 4;
     private static readonly float[] SPEED_STAGE_MAX = { 0.9375f, 2.8125f, 4.21875f, 5.625f, 8.4375f };
@@ -360,6 +362,12 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             HandleMovement(Time.fixedDeltaTime);
             HandleGiantTiles(true);
             UpdateHitbox();
+            if(invincible > 0){
+                isInvincibleKilling = true;
+                HandleStarman();
+            }else{
+                isInvincibleKilling = false;
+            }
         }
         if (holding && holding.dead)
             holding = null;
@@ -370,6 +378,43 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         previousFramePosition = body.position;
     }
     #endregion
+
+    void HandleStarman() {//ACCURACY: STARMAN COLLISION REWORK
+     
+        GameObject[] otherPlayers = GameObject.FindGameObjectsWithTag("Player");
+        //we are invincible. murder time :)
+        foreach (GameObject otherPlayer in otherPlayers)
+        {
+            // Check if the other player is not the current player
+            if (otherPlayer != gameObject)
+            {
+                // Calculate the distance to the other player
+                float distance = Vector3.Distance(transform.position, otherPlayer.transform.position);
+
+                PlayerController other = otherPlayer.GetComponent<PlayerController>();
+                PhotonView otherView = other.photonView;
+                // Check if the distance is less than or equal to the specified detection distance
+                if (distance <= 0.5f)
+                {
+                    if (other.invincible > 0) {
+                        //oh, we both are. bonk.
+                        photonView.RPC(nameof(Knockback), RpcTarget.All, other.transform.position.x > body.position.x, 1, false, otherView.ViewID);
+                        other.photonView.RPC(nameof(Knockback), RpcTarget.All, other.transform.position.x < body.position.x, 1, false, photonView.ViewID);
+                        return;
+                    }
+                    
+                    if (other.state == Enums.PowerupState.MegaMushroom) {
+                        //wait fuck-
+                        photonView.RPC(nameof(Knockback), RpcTarget.All, other.transform.position.x > body.position.x, 1, false, otherView.ViewID);
+                        return;
+                    }
+      
+                    otherView.RPC(nameof(Powerdown), RpcTarget.All, false);
+                    return;
+                }
+            }
+        }
+    }
 
     #region -- COLLISIONS --
     void HandleGroundCollision() {
@@ -468,33 +513,10 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 PlayerController other = otherObj.GetComponent<PlayerController>();
                 PhotonView otherView = other.photonView;
 
-                if (other.invincible > 0) {
-                    //They are invincible. let them decide if they've hit us.
-                    if (invincible > 0) {
-                        //oh, we both are. bonk.
-                        photonView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x > body.position.x, 1, true, otherView.ViewID);
-                        other.photonView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x < body.position.x, 1, true, photonView.ViewID);
-                    }
-                    return;
-                }
-
-                if (invincible > 0) {
-                    //we are invincible. murder time :)
-                    if (other.state == Enums.PowerupState.MegaMushroom) {
-                        //wait fuck-
-                        photonView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x > body.position.x, 1, true, otherView.ViewID);
-                        return;
-                    }
-
-                    otherView.RPC(nameof(Powerdown), RpcTarget.All, false);
-                    body.velocity = previousFrameVelocity;
-                    return;
-                }
-
                 float dot = Vector2.Dot((body.position - other.body.position).normalized, Vector2.up);
                 bool above = dot > 0.7f;
                 bool otherAbove = dot < -0.7f;
-
+              
                 //mega mushroom cases
                 if (state == Enums.PowerupState.MegaMushroom || other.state == Enums.PowerupState.MegaMushroom) {
                     if (state == Enums.PowerupState.MegaMushroom && other.state == Enums.PowerupState.MegaMushroom) {
@@ -557,7 +579,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                         if (groundpounded) {
                             otherView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x < body.position.x, 3, false, photonView.ViewID);
                             groundpound = true;
-                            bounce = true;
+                            bounce = false;
                         } else {
                             photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Enemy_Generic_Stomp);
                         }
@@ -580,6 +602,12 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
                     otherView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x < body.position.x, 1, true, photonView.ViewID);
                     photonView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x > body.position.x, 1, true, otherView.ViewID);
+                }
+                //ACCURACY: MiniMushroom should ALWAYS get knockback when colliding with another player
+                if((state == Enums.PowerupState.MiniMushroom) && !above && !otherAbove){
+                    photonView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x > body.position.x, 1, false, otherView.ViewID);
+                }else if((other.state == Enums.PowerupState.MiniMushroom) && !otherAbove && !above){
+                    otherView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x < body.position.x, 1, false, photonView.ViewID);
                 }
             }
             break;
@@ -1414,10 +1442,10 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     [PunRPC]
     public void Respawn() {
 
-        //Player gets teleported on top of their respective pipes
+        //ACCURACY: Player gets teleported on top of their respective pipes
         if(GameManager.Instance.players.Count <= 2)
         {
-            gameObject.transform.position = new Vector2(entryPipe.transform.position.x, entryPipe.transform.position.y+1.7f);
+            gameObject.transform.position = new Vector2(entryPipe.transform.position.x, entryPipe.transform.position.y+1.2f);
         }
         else
         {//Particle plays if pipe entry is disabled
@@ -1436,7 +1464,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         wallSlideTimer = 0;
         wallJumpTimer = 0;
         flying = false;
-
+       
         propeller = false;
         propellerSpinTimer = 0;
         usedPropellerThisJump = false;
@@ -1466,7 +1494,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         ResetKnockback();
 
 
-        //Sound played right after player spawns on top of the PIPE
+        //ACCURACY: Sound played right after player spawns on top of the PIPE
         photonView.RPC("PlaySound", RpcTarget.All, Enums.Sounds.Player_Sound_Powerdown);
 
 
@@ -1482,13 +1510,15 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     }
     #endregion
 
-    //Handles pipe blinking and destroying
+    //ACCURACY: Handles pipe blinking and destroying
     private System.Collections.IEnumerator DestroyPipe()
     {
         Renderer blinker = entryPipe.GetComponent<Renderer>();
         Color newColor = blinker.material.color;
         float pipeTimer = 0.8f;
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(0.05f);
+        hitInvincibilityCounter = 0; //ACCURACY: REMOVES SPAWN INVINCIBILITY
+        yield return new WaitForSeconds(2.95f);
 
         while (pipeTimer > 0) {
             pipeTimer -= 0.02f;
@@ -1553,7 +1583,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     private System.Collections.IEnumerator blockSquish()
     {
         yield return new WaitForSeconds(0.1f); 
-        if(hitRoof && !(state == Enums.PowerupState.Mushroom) && !(state == Enums.PowerupState.MiniMushroom)){
+        if(SceneManager.GetActiveScene().buildIndex == 4 && (hitRoof && !(state == Enums.PowerupState.Mushroom) && !(state == Enums.PowerupState.MiniMushroom))){
             photonView.RPC(nameof(Powerdown), RpcTarget.All, true);
         }
         
@@ -1975,7 +2005,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
     void HandleLayerState() {
         bool hitsNothing = animator.GetBool("pipe") || dead || stuckInBlock || giantStartTimer > 0 || (giantEndTimer > 0 && stationaryGiantEnd);
-        bool shouldntCollide = (hitInvincibilityCounter > 0 && invincible <= 0) || (knockback && !fireballKnockback);
+        bool shouldntCollide = (hitInvincibilityCounter > 0) || isInvincibleKilling || (knockback && !fireballKnockback);
 
         int layer = Layers.LayerDefault;
         if (hitsNothing) {
@@ -2248,10 +2278,10 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 inShell = false;
                 return;
             }
-
+            //ACCURACY: MAKE MAX JUMP HEIGHT LOWER
             float vel = state switch {
                 Enums.PowerupState.MegaMushroom => megaJumpVelocity,
-                _ => jumpVelocity + Mathf.Abs(body.velocity.x) / RunningMaxSpeed * 1.05f,
+                _ => jumpVelocity + Mathf.Abs(body.velocity.x) / 6.62109375f,
             };
 
 
@@ -3075,7 +3105,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         if (left ^ right)
             throwLeft = left;
 
-        crouch &= holding.canPlace;
+        //ACCURACY: REMOVE ABILITY TO PLACE HELD ITEMS ON GROUND
+        crouch = false;
 
         holdingOld = holding;
         throwInvincibility = 0.15f;
@@ -3089,7 +3120,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         if (photonView.IsMine)
             holding.photonView.RPC(nameof(HoldableEntity.Throw), RpcTarget.All, throwLeft, crouch, vec);
 
-        if (!crouch && !knockback) {
+        if (!knockback) {
             PlaySound(Enums.Sounds.Player_Voice_WallJump, 2);
             throwInvincibility = 0.5f;
             animator.SetTrigger("throw");

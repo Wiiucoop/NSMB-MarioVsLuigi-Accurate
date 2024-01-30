@@ -187,10 +187,16 @@ public abstract class KillableEntity : MonoBehaviourPun, IFreezableEntity, ICust
         if (groundpound)
             Instantiate(Resources.Load("Prefabs/Particle/EnemySpecialKill"), body.position + Vector2.up * 0.5f, Quaternion.identity);
 
-        if (PhotonNetwork.IsMasterClient && !groundpound)
-            PhotonNetwork.InstantiateRoomObject("Prefabs/LooseCoin", body.position + Vector2.up * 0.5f, Quaternion.identity);
+        
 
         body.velocity = new(2f * (right ? 1 : -1), 2.5f);
+    }
+
+    [PunRPC]
+    public virtual void FireKill() {
+        if (PhotonNetwork.IsMasterClient)
+            PhotonNetwork.InstantiateRoomObject("Prefabs/LooseCoin", body.position + Vector2.up * 0.5f, Quaternion.identity);
+        SpecialKill(false, false, 0);
     }
 
     [PunRPC]

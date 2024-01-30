@@ -30,10 +30,11 @@ public class PlayerAnimationController : MonoBehaviourPun {
                 }else{
                     _glowColor = Color.green;
                 }
+            }else{
+                _glowColor = Utils.GetPlayerColor(photonView.Owner);
             }
 
-            if (_glowColor == null)
-                _glowColor = Utils.GetPlayerColor(photonView.Owner);
+            
 
             return _glowColor ?? Color.white;
         }
