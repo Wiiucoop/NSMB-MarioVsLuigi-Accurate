@@ -427,7 +427,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             GlobalController.Instance.disconnectCause = null;
         }
 
-        Camera.main.transform.position = levelCameraPositions[Random.Range(0, maps.Count)].transform.position;
+        Camera.main.transform.position = levelCameraPositions[Random.Range(0, 4)].transform.position;
         levelDropdown.AddOptions(maps);
         LoadSettings(!PhotonNetwork.InRoom);
 
@@ -1276,7 +1276,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         textComp.color = color;
     }
     public void OpenLinks() {
-        Application.OpenURL("https://github.com/ipodtouch0218/NSMB-MarioVsLuigi/blob/master/LINKS.md");
+        Application.OpenURL("https://github.com/Wiiucoop/NSMB-MarioVsLuigi-Accurate/blob/Accuracy+/LINKS.md");
     }
     public void Quit() {
         if (quit)
@@ -1357,7 +1357,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void OpenDownloadsPage() {
-        Application.OpenURL("https://github.com/ipodtouch0218/NSMB-MarioVsLuigi/releases/latest");
+        Application.OpenURL("https://github.com/Wiiucoop/NSMB-MarioVsLuigi-Accurate/releases/latest");
         OpenMainMenu();
     }
 

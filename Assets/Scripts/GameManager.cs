@@ -188,8 +188,13 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             if (!PhotonNetwork.IsMasterClient)
                 return;
 
-            foreach (EnemySpawnpoint point in enemySpawnpoints)
+
+            //ACCURACY: Change enemy spawns in a 1v1 match PART 2
+            if(players.Count > 2){
+                foreach (EnemySpawnpoint point in enemySpawnpoints)
                 point.AttemptSpawning();
+            }
+
 
             break;
         }
@@ -568,7 +573,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             SceneManager.UnloadSceneAsync("Loading");
 
 
-        //Music alternating made like the original
+        //ACCURACY: Music alternating made like the original
         //it starts playing SNOW and alternates with OVERWORLD theme each game
         if (SceneManager.GetActiveScene().buildIndex >= 2 && SceneManager.GetActiveScene().buildIndex <= 6 ) {
             if (GlobalController.Instance.musicOrdering % 2 == 0)
@@ -712,6 +717,12 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         if (musicEnabled)
             HandleMusic();
+
+        //ACCURACY: Change enemy spawns in a 1v1 match  PART 1
+        if(players.Count <= 2){
+            foreach (EnemySpawnpoint point in enemySpawnpoints)
+            point.AttemptSpawning1v1();
+        }
     }
 
     public void CreateNametag(PlayerController controller) {

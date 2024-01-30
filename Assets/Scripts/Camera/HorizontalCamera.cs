@@ -9,7 +9,7 @@ public class HorizontalCamera : MonoBehaviour {
     private Camera ourCamera;
     
     public bool renderToTextureIfAvailable = true;
-    private static readonly float orthoSize = 3.5f;
+    private static readonly float orthoSize = 3.3f;
 
     void Start() {
         ourCamera = GetComponent<Camera>();
