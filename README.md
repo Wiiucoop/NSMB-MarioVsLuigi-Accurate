@@ -1,17 +1,14 @@
 # NSMB-MarioVsLuigi
 A unity-standalone 2-10 player remake of the Mario vs. Luigi gamemode from the New Super Mario Bros DS download game. 
 
-Includes the 5 default levels (Grassland, Bricks, Castle, Pipes, and Ice), along with a handful of custom levels to battle on! 
-All power-ups are included and remain faithful to their original counterparts, along with the new addition of the Propeller Suit & Ice Flower!
+This mod aims to bring back most features and gameplay elements to make it as close to the DS game as possible.
 
-## Discord
-[**Join the discord**](https://discord.gg/dgKVaUKpj5) to keep up to date with the development of the game, make feature suggestions, report bugs (if you're too lazy to use issues...), get technical support, look for people to play with, and just talk about the game!
+## Gameplay:
+[![IMAGE](https://github.com/Wiiucoop/NSMB-MarioVsLuigi-Accurate/blob/Accuracy%2B/iconmvl.png)](https://youtu.be/r9g68CtLYDM)
 
 ## Download
 
-[Play now in browser on itch.io!](https://ipodtouch0218.itch.io/nsmb-mariovsluigi)
-
-Windows, Linux, and Mac Builds: https://github.com/ipodtouch0218/NSMB-MarioVsLuigi/releases/latest
+Windows: https://github.com/ipodtouch0218/NSMB-MarioVsLuigi/releases/latest
 
 ## Default Controls
 | Action | Keyboard | Gamepad *(unstable)* |
