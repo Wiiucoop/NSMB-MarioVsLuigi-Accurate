@@ -47,7 +47,7 @@ public class UpdateChecker {
 
             //check if we're a higher version
             bool upToDate = true;
-            if ((Application.version != tag) && !Application.isEditor) {
+            if ((Application.version != tag) && !Application.isEditor && Application.platform != RuntimePlatform.WebGLPlayer) {
                 upToDate = false;
             }
             

@@ -59,7 +59,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     public GameObject localPlayer, otherPlayer;
     public bool paused, loaded, started;
-    public GameObject pauseUI, pausePanel, pauseButton, hostExitUI, hostExitButton;
+    public GameObject pauseUI, pausePanel, pauseButton, hostExitUI, hostExitButton, mobileUI;
     public bool gameover = false, musicEnabled = false;
     public readonly HashSet<Player> loadedPlayers = new();
     public int starRequirement, timedGameDuration = -1, coinRequirement;
@@ -454,6 +454,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         SceneManager.SetActiveScene(gameObject.scene);
 
+        //ACCURACY: ENABLE CONTROLS IF MOBILE PLAYER IS DETECTED
+        mobileUI.SetActive(Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer);
+
         PhotonNetwork.IsMessageQueueRunning = true;
 
         if (!GlobalController.Instance.joinedAsSpectator) {
@@ -610,11 +613,23 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
 
     private IEnumerator EndGame(Player winner) {
+        string winnerName = "Mario";
+        if(winner != null){
+            winnerName = winner.GetUniqueNickname();
+        }
+        
+        if(players.Count <= 2 ){//ACCURACY: SET WIN TEXT TO BE THEIR CHARACTER MODEL IN 1V1 MATCHES
+            if(Utils.GetCharacterData(winner).uistring.Equals("<sprite=3>")){
+                    winnerName = "Mario";
+            }else{
+                    winnerName = "Luigi";
+            }
+        }
         PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = false });
         gameover = true;
         music.Stop();
         GameObject text = GameObject.FindWithTag("wintext");
-        text.GetComponent<TMP_Text>().text = winner != null ? $"{ winner.GetUniqueNickname() } Wins!" : "It's a draw...";
+        text.GetComponent<TMP_Text>().text = winner != null ? $"{ winnerName } Wins!" : "It's a draw...";
 
         yield return new WaitForSecondsRealtime(1);
         text.GetComponent<Animator>().SetTrigger("start");
@@ -770,12 +785,12 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         }
         //TIMED CHECKS
         if (timeUp) {
-            Utils.GetCustomProperty(Enums.NetRoomProperties.DrawTime, out bool draw);
+            
             //time up! check who has most stars, if a tie keep playing, if draw is on end game in a draw
-            if (draw)
+         //   if (draw)
                 // it's a draw! Thanks for playing the demo!
-                PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.EndGame, null, NetworkUtils.EventAll, SendOptions.SendReliable);
-            else if (winningPlayers.Count == 1)
+             //   PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.EndGame, null, NetworkUtils.EventAll, SendOptions.SendReliable);
+            if (winningPlayers.Count == 1)
                 PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.EndGame, winningPlayers[0].photonView.Owner, NetworkUtils.EventAll, SendOptions.SendReliable);
 
             return;
@@ -796,6 +811,13 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         musicState = state;
     }
 
+    private IEnumerator DelayedLastLifeSpedup()//ACCURACY: Delay to start speedup when one of the players get to its last life
+    {
+        yield return new WaitForSeconds(2f);
+        loopMusic.FastMusic = true;
+        yield break;
+    }
+
     private void HandleMusic() {
         bool invincible = false;
         bool speedup = false;
@@ -807,7 +829,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false)
                 speedup = true;
             if (player.lives == 1 && players.Count <= 2)
-                speedup = true;
+                StartCoroutine(DelayedLastLifeSpedup());
 
             if (!player.photonView.IsMine)
                 continue;
