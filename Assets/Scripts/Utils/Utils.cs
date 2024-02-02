@@ -414,8 +414,6 @@ namespace NSMB.Utils {
 
             float totalChance = 0;
             foreach (Powerup powerup in powerups) {
-                if (powerup.name == "MegaMushroom" && gm.musicState == Enums.MusicState.MegaMushroom)
-                    continue;
                 if ((powerup.big && !big) || (powerup.vertical && !vertical) || (powerup.custom && !custom) || (powerup.lives && !lives))
                     continue;
 

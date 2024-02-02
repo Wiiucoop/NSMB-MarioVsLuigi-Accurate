@@ -175,6 +175,8 @@ public static class Enums {
     }
     public static class NetRoomProperties {
         public static string Level { get; } = "L";
+
+        public static string isRandom { get; } = "Lr";
         public static string StarRequirement { get; } = "S";
         public static string CoinRequirement { get; } = "Co";
         public static string Lives { get; } = "Li";

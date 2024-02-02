@@ -785,7 +785,10 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         PhotonNetwork.LeaveRoom();
     }
     public void StartGame() {
-
+        if(drawTimeupToggle.isOn){//ACCURACY: DRAWTIMEUPTOGGLE IS THE RANDOM MAP THING 
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(0, 5) });
+        }
+        
         //set started game
         PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = true });
 
@@ -941,7 +944,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
         livesField.interactable = PhotonNetwork.IsMasterClient && livesEnabled.isOn;
         timeField.interactable = PhotonNetwork.IsMasterClient && timeEnabled.isOn;
-        drawTimeupToggle.interactable = PhotonNetwork.IsMasterClient && timeEnabled.isOn;
+        drawTimeupToggle.interactable = PhotonNetwork.IsMasterClient;
 
         Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool debug);
         privateToggleRoom.interactable = PhotonNetwork.IsMasterClient && !debug;
@@ -1142,13 +1145,13 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
                 "ban" => "/ban <player name> - Ban a player from rejoining the room",
                 "host" => "/host <player name> - Make a player the host for the room",
                 "mute" => "/mute <playername> - Prevents a player from talking in chat",
-                //"debug" => "/debug - Enables debug & in-development features",
+                "debug" => "/debug - Enables debug & in-development features",
                 _ => "Available commands: /kick, /host, /mute, /ban",
             };
             LocalChatMessage(msg, Color.red);
             return;
         }
-        /*
+        
         case "debug": {
             Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool debugEnabled);
             if (PhotonNetwork.CurrentRoom.IsVisible) {
@@ -1166,7 +1169,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             });
             return;
         }
-        */
+        
         case "mute": {
             if (args.Length < 2) {
                 LocalChatMessage("Usage: /mute <player name>", Color.red);

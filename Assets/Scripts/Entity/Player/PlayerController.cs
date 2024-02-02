@@ -1452,12 +1452,10 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
 
-
         gameObject.SetActive(true);
         dead = false;
         spawned = true;
         state = Enums.PowerupState.Small;
-        previousState = Enums.PowerupState.Small;
         body.velocity = Vector2.zero;
         wallSlideLeft = false;
         wallSlideRight = false;
@@ -1488,7 +1486,9 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         groundpound = false;
         inShell = false;
         landing = 0f;
-        powerupCompleted = true;
+        previousState = Enums.PowerupState.MiniMushroom; //ACCURACY: FIX POWERUP NOT ANIMATING WHEN SPAWNING
+        powerupCompleted = true;    //ACCURACY: FIX POWERUP NOT ANIMATING WHEN SPAWNING
+        
         if (photonView.IsMine && !GameManager.Instance.music.isPlaying)
             GameManager.Instance.music.Play();
         ResetKnockback();
@@ -1516,9 +1516,9 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         Renderer blinker = entryPipe.GetComponent<Renderer>();
         Color newColor = blinker.material.color;
         float pipeTimer = 0.8f;
-        yield return new WaitForSeconds(0.05f);
-        hitInvincibilityCounter = 0; //ACCURACY: REMOVES SPAWN INVINCIBILITY
-        yield return new WaitForSeconds(2.95f);
+        yield return new WaitForSeconds(0.5f);
+        hitInvincibilityCounter = 0; //ACCURACY: REDUCES SPAWN INVINCIBILITY
+        yield return new WaitForSeconds(2.5f);
 
         while (pipeTimer > 0) {
             pipeTimer -= 0.02f;
@@ -1578,7 +1578,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         hitInvincibilityCounter = state != Enums.PowerupState.MegaMushroom ? 2f : 0f;
     }
 
-//blockSquish is that block at the start of FORTRESS LEVEL where if you hit someone from below, it will get hit by the ceiling.
+//blockSquish is that BRICK block at the start of FORTRESS LEVEL where if you hit someone from below, it will get hit by the ceiling.
 //strangely in the original game, you dont lose a powerup if you are BIG or MINI. But you do with all other powerups.
     private System.Collections.IEnumerator blockSquish()
     {

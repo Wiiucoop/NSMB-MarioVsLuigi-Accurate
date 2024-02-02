@@ -123,7 +123,7 @@ public class UIUpdater : MonoBehaviour {
 
 private System.Collections.IEnumerator LastLifeAnimation()
 {
-    
+    yield return new WaitForSeconds(4.5f);
     while(player.lives == 1){
         yield return new WaitForSeconds(0.2f);
         livesParent.SetActive(false);
@@ -136,6 +136,7 @@ private System.Collections.IEnumerator LastLifeAnimation()
 private System.Collections.IEnumerator p2LastLifeAnimation()
 {
     isP2LifeAnimationRunning = true;
+    yield return new WaitForSeconds(4.5f);
     while(other.lives == 1){
         yield return new WaitForSeconds(0.2f);
         p2LivesParent.SetActive(false);

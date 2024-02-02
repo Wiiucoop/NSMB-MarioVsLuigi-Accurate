@@ -6,7 +6,10 @@ public class EnemySpawnpoint : MonoBehaviour {
     public string prefab;
     public GameObject currentEntity;
 
+    public bool isSpawning = false;
+
     public virtual bool AttemptSpawning() {
+      
         if (currentEntity)
             return false;
 
@@ -17,6 +20,7 @@ public class EnemySpawnpoint : MonoBehaviour {
         }
 
         currentEntity = PhotonNetwork.InstantiateRoomObject(prefab, transform.position, transform.rotation);
+        
         return true;
     }
 
@@ -29,13 +33,28 @@ public class EnemySpawnpoint : MonoBehaviour {
                 //cant spawn here
                 return false;
         }
-        
-        if(prefab == ""){//WORKAROUND FOR PIRANA PLANTS
-            AttemptSpawning();
+        if(prefab == "" && !isSpawning){//WORKAROUND FOR PIRANA PLANTS PART 1
+            StartCoroutine(piranaplantWorkaround());
+            return true;
+        }else if(prefab == "" && isSpawning){
             return false;
         }
+        
         currentEntity = PhotonNetwork.InstantiateRoomObject(prefab, transform.position, transform.rotation);
         return true;
+    }
+
+    private System.Collections.IEnumerator piranaplantWorkaround() //WORKAROUND FOR PIRANA PLANTS PART 2
+    {
+
+        if(!isSpawning){
+            isSpawning = true;
+            yield return new WaitForSeconds(3f);
+            isSpawning = false;
+            AttemptSpawning();
+        }
+        yield return false;
+        
     }
 
     public void OnDrawGizmos() {
