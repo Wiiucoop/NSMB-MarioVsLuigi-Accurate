@@ -33,7 +33,7 @@ public class EnemySpawnpoint : MonoBehaviour {
                 //cant spawn here
                 return false;
         }
-        if(prefab == "" && !isSpawning){//WORKAROUND FOR PIRANA PLANTS PART 1
+        if(prefab == "" && !isSpawning && GameManager.Instance.getPiranaplantCanspawn()){//WORKAROUND FOR PIRANA PLANTS PART 1
             StartCoroutine(piranaplantWorkaround());
             return true;
         }else if(prefab == "" && isSpawning){

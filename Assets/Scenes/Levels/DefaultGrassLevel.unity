@@ -309,7 +309,6 @@ Transform:
   - {fileID: 1922393262}
   - {fileID: 992935485}
   - {fileID: 1693744773}
-  - {fileID: 1512896785}
   - {fileID: 1901234081}
   - {fileID: 199968020}
   - {fileID: 2067183186}
@@ -329,7 +328,7 @@ GameObject:
   m_Component:
   - component: {fileID: 199968020}
   m_Layer: 0
-  m_Name: StarSpawn (9)
+  m_Name: StarSpawn (8)
   m_TagString: StarSpawn
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -396,6 +395,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab: Prefabs/Enemy/Goomba
   currentEntity: {fileID: 0}
+  isSpawning: 0
 --- !u!1001 &237660768
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4315,6 +4315,21 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1138891193421021209, guid: 43d56bd18d06e9b4abe323618a20a228,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1138891193421021209, guid: 43d56bd18d06e9b4abe323618a20a228,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1138891193421021209, guid: 43d56bd18d06e9b4abe323618a20a228,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2197002919343075617, guid: 43d56bd18d06e9b4abe323618a20a228,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -4363,6 +4378,26 @@ PrefabInstance:
     - target: {fileID: 4103624147498544815, guid: 43d56bd18d06e9b4abe323618a20a228,
         type: 3}
       propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4215826960962307919, guid: 43d56bd18d06e9b4abe323618a20a228,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4215826960962307919, guid: 43d56bd18d06e9b4abe323618a20a228,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4215826960962307919, guid: 43d56bd18d06e9b4abe323618a20a228,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4215826960962307919, guid: 43d56bd18d06e9b4abe323618a20a228,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4517828002499443612, guid: 43d56bd18d06e9b4abe323618a20a228,
@@ -4915,37 +4950,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1512896784
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1512896785}
-  m_Layer: 0
-  m_Name: StarSpawn (7)
-  m_TagString: StarSpawn
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
-  m_IsActive: 1
---- !u!4 &1512896785
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1512896784}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.5, y: 1.5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 195012562}
-  m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1542081885
 GameObject:
   m_ObjectHideFlags: 0
@@ -5342,6 +5346,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab: Prefabs/Enemy/Goomba
   currentEntity: {fileID: 0}
+  isSpawning: 0
 --- !u!1 &1831778352
 GameObject:
   m_ObjectHideFlags: 0
@@ -5436,7 +5441,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1901234081}
   m_Layer: 0
-  m_Name: StarSpawn (8)
+  m_Name: StarSpawn (7)
   m_TagString: StarSpawn
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5854,6 +5859,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab: Prefabs/Enemy/Goomba
   currentEntity: {fileID: 0}
+  isSpawning: 0
 --- !u!1 &2067183185
 GameObject:
   m_ObjectHideFlags: 0
@@ -5900,6 +5906,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab: Prefabs/Enemy/Koopa
   currentEntity: {fileID: 0}
+  isSpawning: 0
 --- !u!1001 &4425110964215584584
 PrefabInstance:
   m_ObjectHideFlags: 0

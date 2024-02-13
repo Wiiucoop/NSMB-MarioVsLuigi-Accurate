@@ -26,6 +26,11 @@ public class BlockBump : MonoBehaviour {
             coin.GetComponentInChildren<Animator>().SetBool("down", fromAbove);
         }
 
+        if (resultPrefab == "BetaCoin") {
+            GameObject coin = (GameObject) Instantiate(Resources.Load("Prefabs/Particle/BetaCoinFromBlock"), transform.position + new Vector3(0,(fromAbove ? -0.25f : 0.5f)), Quaternion.identity);
+            coin.GetComponentInChildren<Animator>().SetBool("down", fromAbove);
+        }
+
         BoxCollider2D hitbox = GetComponentInChildren<BoxCollider2D>();
         hitbox.size = sprite.bounds.size;
         hitbox.offset = (hitbox.size - Vector2.one) * new Vector2(1/2f, -1/2f);
@@ -46,7 +51,7 @@ public class BlockBump : MonoBehaviour {
             tm.SetTile(loc, normalTile);
         }
 
-        if (!PhotonNetwork.IsMasterClient || resultPrefab == null || resultPrefab == "" || resultPrefab == "Coin")
+        if (!PhotonNetwork.IsMasterClient || resultPrefab == null || resultPrefab == "" || resultPrefab == "Coin" || resultPrefab == "BetaCoin")
             return;
 
         Vector3 pos = transform.position + Vector3.up * (fromAbove ? -0.7f : 0.25f);

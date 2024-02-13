@@ -32,7 +32,7 @@ public class Settings : Singleton<Settings> {
 
     public string nickname;
     public int character, skin;
-    public bool ndsResolution = false, fireballFromSprint = true, vsync = false, fourByThreeRatio = false;
+    public bool ndsResolution = false, n3dsResolution = false, fireballFromSprint = true, vsync = false, fourByThreeRatio = false;
     public bool scoreboardAlways = false, filter = true;
 
     public void Awake() {
@@ -53,6 +53,7 @@ public class Settings : Singleton<Settings> {
         VolumeMusic = PlayerPrefs.GetFloat("volumeMusic", 0.25f);
         VolumeMaster = PlayerPrefs.GetFloat("volumeMaster", 1);
         ndsResolution = PlayerPrefs.GetInt("NDSResolution", 0) == 1;
+        n3dsResolution = PlayerPrefs.GetInt("N3DSResolution", 0) == 1;
         fireballFromSprint = PlayerPrefs.GetInt("FireballFromSprint", 1) == 1;
         vsync = PlayerPrefs.GetInt("VSync", 0) == 1;
         fourByThreeRatio = PlayerPrefs.GetInt("NDS4by3", 0) == 1;
@@ -67,6 +68,7 @@ public class Settings : Singleton<Settings> {
         PlayerPrefs.SetFloat("volumeMusic", VolumeMusic);
         PlayerPrefs.SetFloat("volumeMaster", VolumeMaster);
         PlayerPrefs.SetInt("NDSResolution", ndsResolution ? 1 : 0);
+        PlayerPrefs.SetInt("N3DSResolution", n3dsResolution ? 1 : 0);
         PlayerPrefs.SetInt("FireballFromSprint", fireballFromSprint ? 1 : 0);
         PlayerPrefs.SetInt("VSync", vsync ? 1 : 0);
         PlayerPrefs.SetInt("NDS4by3", fourByThreeRatio ? 1 : 0);

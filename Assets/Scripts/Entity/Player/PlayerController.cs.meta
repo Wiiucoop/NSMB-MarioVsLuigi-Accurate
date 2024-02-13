@@ -3,7 +3,21 @@ guid: 984b6c8bdb2dc4a419d0cd6be4254d4c
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - cameraController: {instanceID: 0}
+  - fadeOut: {instanceID: 0}
+  - sfx: {instanceID: 0}
+  - sfxBrick: {instanceID: 0}
+  - newMotion: {fileID: -4408943822905645113, guid: 024ceb223bceebd488dbc425555f4df0,
+      type: 3}
+  - body: {instanceID: 0}
+  - storedPowerup: {instanceID: 0}
+  - holding: {instanceID: 0}
+  - holdingOld: {instanceID: 0}
+  - frozenObject: {instanceID: 0}
+  - onSpinner: {instanceID: 0}
+  - pipeEntering: {instanceID: 0}
+  - character: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

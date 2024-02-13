@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-
+using DG.Tweening;
 using Photon.Pun;
 using NSMB.Utils;
 
@@ -30,6 +30,10 @@ public abstract class KillableEntity : MonoBehaviourPun, IFreezableEntity, ICust
     protected Animator animator;
     protected SpriteRenderer sRenderer;
     protected AudioSource audioSource;
+
+    public float offsetRotation;
+    public bool tweenableRotation, facingLeft;
+    protected bool isRotating;
     protected PhysicsEntity physics;
 
     private byte previousFlags;
@@ -92,6 +96,35 @@ public abstract class KillableEntity : MonoBehaviourPun, IFreezableEntity, ICust
     #endregion
 
     #region Helper Methods
+
+    public bool FacingLeftTween
+        {
+            get => facingLeft;
+            set
+            {
+                facingLeft = value;
+                
+                var newRotation = value ? -offsetRotation + 360 : offsetRotation;
+
+                if (tweenableRotation)
+                {
+                    isRotating = true;
+                    DOTween.To(() => transform.rotation.eulerAngles.y, newValue =>
+                    {
+                        var currentRotation = transform.rotation.eulerAngles;
+                        currentRotation.y = newValue;
+                        transform.rotation = Quaternion.Euler(currentRotation);
+                    }, newRotation, 0.15f).SetEase(Ease.Linear).onComplete += () => isRotating = false;
+                }
+                else
+                {
+                    var currentRotation = transform.rotation.eulerAngles;
+                    currentRotation.y = newRotation;
+                    transform.rotation = Quaternion.Euler(currentRotation);
+                }
+            }
+        }
+
     public virtual void InteractWithPlayer(PlayerController player) {
         if (player.Frozen)
             return;

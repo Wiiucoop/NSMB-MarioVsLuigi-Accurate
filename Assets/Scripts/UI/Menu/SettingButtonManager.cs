@@ -22,6 +22,12 @@ public class SettingButtonManager : MonoBehaviour {
     }
     public void OnNdsResolutionToggle(Toggle toggle) {
         MainMenuManager.Instance.aspectToggle.interactable = Settings.ndsResolution = toggle.isOn;
+        MainMenuManager.Instance.n3dsResolutionToggle.interactable = Settings.ndsResolution = toggle.isOn;
+        Settings.SaveSettingsToPreferences();
+    }
+
+    public void OnN3dsResolutionToggle(Toggle toggle) {
+        Settings.n3dsResolution = toggle.isOn;
         Settings.SaveSettingsToPreferences();
     }
 

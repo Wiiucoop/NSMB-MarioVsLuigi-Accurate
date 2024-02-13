@@ -403,7 +403,7 @@ namespace NSMB.Utils {
                 powerups = Resources.LoadAll<Powerup>("Scriptables/Powerups");
 
             GetCustomProperty(Enums.NetRoomProperties.StarRequirement, out int starsToWin);
-            GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool custom);
+            GetCustomProperty(Enums.NetRoomProperties.Debug, out bool custom);
             GetCustomProperty(Enums.NetRoomProperties.Lives, out int livesOn);
             bool lives = false;
             if (livesOn > 0)

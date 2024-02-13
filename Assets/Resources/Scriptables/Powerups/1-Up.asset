@@ -15,10 +15,11 @@ MonoBehaviour:
   state: 0
   prefab: 1-Up
   soundEffect: 78
-  spawnChance: 0
-  losingSpawnBonus: 0
+  spawnChance: 3
+  losingSpawnBonus: 3
   big: 0
   vertical: 0
   custom: 1
-  lives: 1
-  reserveSprite: {fileID: 0}
+  lives: 0
+  reserveSprite: {fileID: -7415331047110381915, guid: 794bc215dd02bf34ab2cfae7702bfdfd,
+    type: 3}

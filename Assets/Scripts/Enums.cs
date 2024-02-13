@@ -45,7 +45,7 @@ public static class Enums {
     //Sound effects
     public enum Sounds : byte {
 
-        //CURRENT MAX: 94
+        //CURRENT MAX: 100
 
         //Enemy
         [SoundData("enemy/freeze")]                             Enemy_Generic_Freeze = 0,
@@ -84,6 +84,7 @@ public static class Enums {
         [SoundData("player/slide_end")]                         Player_Sound_SlideEnd = 92,
         [SoundData("player/walljump")]                          Player_Sound_WallJump = 29,
         [SoundData("player/wallslide")]                         Player_Sound_WallSlide = 30,
+        [SoundData("player/betaJump")]                         Player_Sound_BetaJump = 95,
 
         [SoundData("player/walk/grass")]                        Player_Walk_Grass = 31,
         [SoundData("player/walk/snow")]                         Player_Walk_Snow = 32,
@@ -96,6 +97,9 @@ public static class Enums {
         [SoundData("character/{char}/spinner_launch")]          Player_Voice_SpinnerLaunch = 37,
         [SoundData("character/{char}/triplejump")]              Player_Voice_TripleJump = 38,
         [SoundData("character/{char}/walljump")]                Player_Voice_WallJump = 39,
+        [SoundData("character/{char}/betadoublejump")]          Player_Voice_BetaDoubleJump = 96,
+        [SoundData("character/{char}/betatriplejump")]          Player_Voice_BetaTripleJump = 97,
+        [SoundData("character/{char}/betakick")]                Player_Voice_BetaKick = 98,
         [SoundData("character/{char}/mega_mushroom_collect")]   Player_Sound_MegaMushroom_Collect = 40, //HARDCODED: DO NOT CHANGE WITHOUT CHANGING POWERUPS SCRIPTABLES
 
         //Powerup
@@ -119,6 +123,8 @@ public static class Enums {
         [SoundData("powerup/propellermushroom_kick")]           Powerup_PropellerMushroom_Kick = 57,
         [SoundData("powerup/propellermushroom_spin")]           Powerup_PropellerMushroom_Spin = 58,
         [SoundData("powerup/propellermushroom_start")]          Powerup_PropellerMushroom_Start = 59,
+        [SoundData("powerup/thunder_struck")]                   Powerup_Thunder_Struck = 99,
+        [SoundData("powerup/thunder_ambient")]                  Powerup_Thunder_Ambient = 100,
 
         //UI Sounds / Songs / Jingles
         [SoundData("ui/hurry_up")]                              UI_HurryUp = 60,
@@ -181,11 +187,11 @@ public static class Enums {
         public static string CoinRequirement { get; } = "Co";
         public static string Lives { get; } = "Li";
         public static string Time { get; } = "T";
-        public static string DrawTime { get; } = "Dt";
-        public static string NewPowerups { get; } = "C";
+        public static string DrawTime { get; } = "Dt";//DRAW TIME IS THE RANDOM MAP TOGGLE
+        public static string NewPowerups { get; } = "C";//NEW POWERUPS IS THE E3 BETA ANIMATION
         public static string GameStarted { get; } = "G";
         public static string HostName { get; } = "H";
-        public static string Debug { get; } = "D";
+        public static string Debug { get; } = "D";//CUSTOM MAPS AND CUSTOM POWERUPS TOGGLE
         public static string Mutes { get; } = "M";
         public static string Bans { get; } = "B";
     }

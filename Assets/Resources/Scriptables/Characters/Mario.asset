@@ -23,3 +23,5 @@ MonoBehaviour:
     type: 3}
   smallOverrides: {fileID: 22100000, guid: 347b7f77a47c4db4b85584fbfdecf63b, type: 2}
   largeOverrides: {fileID: 9100000, guid: fa2b2fc953f5f444291d26193e0ac7fb, type: 2}
+  betaLargeOverrides: {fileID: 22100000, guid: a8c3618f647f5fb43bbfc88a4563fd55, type: 2}
+  betaSmallOverrides: {fileID: 22100000, guid: 648b18246bfe246409e09108d180a612, type: 2}

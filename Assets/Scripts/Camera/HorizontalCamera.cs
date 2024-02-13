@@ -9,7 +9,7 @@ public class HorizontalCamera : MonoBehaviour {
     private Camera ourCamera;
     
     public bool renderToTextureIfAvailable = true;
-    private static readonly float orthoSize = 3.3f;
+    private static float orthoSize = 3.3f;
 
     void Start() {
         ourCamera = GetComponent<Camera>();
@@ -22,6 +22,14 @@ public class HorizontalCamera : MonoBehaviour {
         ourCamera.targetTexture = renderToTextureIfAvailable && Settings.Instance.ndsResolution && SceneManager.GetActiveScene().buildIndex != 0 
             ? GlobalController.Instance.ndsTexture 
             : null;
+    }
+
+    public static void setZoom(float size) {
+        orthoSize = size;
+    }
+
+    public static float getZoom() {
+        return orthoSize;
     }
 
     private void AdjustCamera() {

@@ -41,9 +41,15 @@ public class CoinTile : BreakableBrickTile {
         }
 
         Bump(interacter, direction, worldLocation);
-
-        object[] parametersBump = new object[]{tileLocation.x, tileLocation.y, direction == InteractionDirection.Down, resultTile, "Coin"};
-        GameManager.Instance.SendAndExecuteEvent(Enums.NetEventIds.BumpTile, parametersBump, ExitGames.Client.Photon.SendOptions.SendReliable);
+        Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnims);
+        if(!betaAnims){
+            object[] parametersBump = new object[]{tileLocation.x, tileLocation.y, direction == InteractionDirection.Down, resultTile, "Coin"};
+            GameManager.Instance.SendAndExecuteEvent(Enums.NetEventIds.BumpTile, parametersBump, ExitGames.Client.Photon.SendOptions.SendReliable);
+        }else{
+            object[] parametersBump = new object[]{tileLocation.x, tileLocation.y, direction == InteractionDirection.Down, resultTile, "BetaCoin"};
+            GameManager.Instance.SendAndExecuteEvent(Enums.NetEventIds.BumpTile, parametersBump, ExitGames.Client.Photon.SendOptions.SendReliable);
+        }    
+        
         return false;
     }
 }

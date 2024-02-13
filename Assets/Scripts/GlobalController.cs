@@ -26,6 +26,8 @@ public class GlobalController : Singleton<GlobalController>, IInRoomCallbacks, I
     public bool joinedAsSpectator = false, checkedForVersion = false;
     public DisconnectCause? disconnectCause = null;
 
+    int targetHeight = 224;
+
     private int windowWidth, windowHeight;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -121,7 +123,7 @@ public class GlobalController : Singleton<GlobalController>, IInRoomCallbacks, I
 
         if (settings.ndsResolution && SceneManager.GetActiveScene().buildIndex != 0) {
             float aspect = (float) currentWidth / currentHeight;
-            int targetHeight = 224;
+            targetHeight = (int) ((settings.n3dsResolution ? 272 : 224));
             int targetWidth = (int) (targetHeight * (settings.fourByThreeRatio ? (4/3f) : aspect));
             if (ndsTexture == null || ndsTexture.width != targetWidth || ndsTexture.height != targetHeight) {
                 if (ndsTexture != null)

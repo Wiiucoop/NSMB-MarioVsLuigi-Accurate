@@ -21,6 +21,8 @@ public class PlayerAnimationController : MonoBehaviourPun {
     private List<Renderer> renderers = new();
     private MaterialPropertyBlock materialBlock;
 
+    public bool betaAnims = false;
+
     public Color GlowColor {
         get {
             if(GameManager.Instance.players.Count <= 2){
@@ -54,7 +56,8 @@ public class PlayerAnimationController : MonoBehaviourPun {
         body = GetComponent<Rigidbody2D>();
         mainHitbox = GetComponent<BoxCollider2D>();
         drillParticleAudio = drillParticle.GetComponent<AudioSource>();
-
+        Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnimsToggle); //ACCURACY: ENABLE E3 BETA ANIMATIONS
+        betaAnims = betaAnimsToggle;
         DisableAllModels();
 
         if (photonView) {
@@ -305,8 +308,12 @@ public class PlayerAnimationController : MonoBehaviourPun {
         largeShellExclude.SetActive(!animator.GetCurrentAnimatorStateInfo(0).IsName("in-shell"));
         propellerHelmet.SetActive(controller.state == Enums.PowerupState.PropellerMushroom);
         animator.avatar = large ? largeAvatar : smallAvatar;
-        animator.runtimeAnimatorController = large ? controller.character.largeOverrides : controller.character.smallOverrides;
-
+        
+        if(betaAnims){
+            animator.runtimeAnimatorController = large ? controller.character.betaLargeOverrides : controller.character.betaSmallOverrides;
+        }else{
+            animator.runtimeAnimatorController = large ? controller.character.largeOverrides : controller.character.smallOverrides;
+        }
         HandleDeathAnimation();
         HandlePipeAnimation();
 

@@ -24,6 +24,11 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
     // == MONOBEHAVIOURS ==
 
+    public bool betaAnims = false;
+
+    private bool canKickAttack = true;
+    public static GameObject InstantiatedKickObject;
+    private bool hasTornado = false;
     public int playerId = -1;
     public bool dead = false, spawned = false;
     public Enums.PowerupState state = Enums.PowerupState.Small, previousState, befstate, afstate;
@@ -272,7 +277,9 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         trackIcon = UIUpdater.Instance.CreatePlayerIcon(this);
         transform.position = body.position = GameManager.Instance.spawnpoint;
         cameraController.Recenter();
-
+        Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnimsToggle); //ACCURACY: ENABLE E3 BETA ANIMATIONS
+        betaAnims = betaAnimsToggle;
+        IsTagDefined("tornado");
         LoadFromGameState();
     }
 
@@ -413,6 +420,51 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                     return;
                 }
             }
+        }
+    }
+
+    private void IsTagDefined(string tagName)
+    {
+        GameObject [] tag = GameObject.FindGameObjectsWithTag(tagName);
+
+        if (tag.Length > 0)
+        {
+            hasTornado = true;
+        }
+        return;
+    }
+
+        void HandleTornado() {//ACCURACY: TORNADO COLLISION
+        if(!hasTornado)
+            return;
+        
+        GameObject[] tornados = GameObject.FindGameObjectsWithTag("tornado");
+        if(tornados == null)
+            return;
+        
+        foreach (GameObject tornado in tornados)
+        {
+           
+            float distance = Vector3.Distance(transform.position, tornado.transform.position);
+           // Debug.Log("Meu: "+distance);
+                
+            // Check if the distance is less than or equal to the specified detection distance
+            if (distance <= 4.9f)
+            {
+                //default velocity = 12f
+                body.velocity = new Vector2(body.velocity.x, 5f);
+                flying = true;
+                onGround = false;
+                body.position += Vector2.up * 0.075f;
+                doGroundSnap = false;
+                previousOnGround = false;
+                crouching = false;
+                inShell = false;
+                drill = false;
+                bounce = false;
+                knockback = false;
+                return;
+            }       
         }
     }
 
@@ -592,6 +644,9 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                             otherView.RPC(nameof(Powerdown), RpcTarget.All, false);
                         } else {
                             otherView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x < body.position.x, groundpounded ? 3 : 1, false, photonView.ViewID);
+                            if(betaAnims && !groundpound && !drill && singlejump){
+                                photonView.RPC("betaJumpSpinAnim", RpcTarget.All);
+                            }
                         }
                     }
                     body.velocity = new Vector2(previousFrameVelocity.x, body.velocity.y);
@@ -790,8 +845,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         if (Frozen)
             return;
 
-        if (running && (state == Enums.PowerupState.FireFlower || state == Enums.PowerupState.IceFlower) && GlobalController.Instance.settings.fireballFromSprint)
-            ActivatePowerupAction();
+        if (running && (state == Enums.PowerupState.FireFlower || state == Enums.PowerupState.IceFlower || betaAnims && state == Enums.PowerupState.MegaMushroom) && GlobalController.Instance.settings.fireballFromSprint)
+            ActivatePowerupAction();//ACCURACY: E3 BETA 2005 MEGA MUSHROOM KICK ANIM
     }
 
     public void OnPowerupAction(InputAction.CallbackContext context) {
@@ -856,8 +911,100 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             photonView.RPC(nameof(StartPropeller), RpcTarget.All);
             break;
         }
+        case Enums.PowerupState.Mushroom:
+        case Enums.PowerupState.MegaMushroom: {//ACCURACY: E3 BETA 2005 MEGA MUSHROOM KICK ANIM
+            if (groundpound || (flying && drill) || propeller || crouching || sliding || wallJumpTimer > 0)
+                return;
+
+            if(canKickAttack && betaAnims){
+                photonView.RPC(nameof(betaKickAnim), RpcTarget.All);
+                Vector2 pos = body.position + new Vector2(facingRight ^ animator.GetCurrentAnimatorStateInfo(0).IsName("turnaround") ? 0.5f : -0.5f, 0.3f);
+                InstantiatedKickObject = PhotonNetwork.Instantiate($"Prefabs/BetaMelee", pos, Quaternion.identity, 0, new object[] { !facingRight ^ animator.GetCurrentAnimatorStateInfo(0).IsName("turnaround"), body.velocity.x });
+               // Renderer kickRenderer = InstantiatedKickObject.GetComponent<Renderer>();
+              //  kickRenderer.enabled = false;
+                StartCoroutine(betaKickAttack());
+            }
+            
+            break;
+        }
         }
     }
+
+    private System.Collections.IEnumerator betaKickAttack()
+    {
+        
+        body.gravityScale = slowriseGravity * 1f;
+        body.velocity = new Vector2(body.velocity.x/2, body.velocity.y/2);
+        //body.position += Vector2.up * 0.4f;
+        bounce = true;
+        canKickAttack = false;
+        yield return new WaitForSeconds(0.05f);
+        if(InstantiatedKickObject != null){
+            PhotonNetwork.Destroy(InstantiatedKickObject);
+        }
+        yield return new WaitForSeconds(0.95f);
+        canKickAttack = true;
+
+      
+    }
+
+    [PunRPC]
+    private void betaKickAnim()
+    {
+        // Trigger the animation on all clients
+        if(betaAnims){
+            animator.Play("e3-kick");
+            photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_BetaKick);
+        }
+        
+    }
+
+    //ACCURACY: E3 BETA ANIMATOINS
+    [PunRPC]
+    private void betaJumpSpinAnim()
+    {
+        // Trigger the animation on all clients
+        animator.Play("e3-jumpspin");
+    }
+
+    [PunRPC]
+    private void betaDoubleJumpAnim()
+    {
+        // Trigger the animation on all clients
+        animator.Play("e3-doublejump");
+    }
+
+    [PunRPC]
+    private void betaTripleJumpAnim()
+    {
+        // Trigger the animation on all clients
+        animator.Play("e3-triplejump");
+    }
+
+
+
+
+    [PunRPC]
+    private void betaWalljump()
+    {
+        // Randomly choose between "e3-walljump1" and "e3-walljump2"
+        int randomIndex = Random.Range(0, 2);
+
+        // Use a switch statement or if-else to choose the animation based on the random index
+        switch (randomIndex)
+        {
+            case 0:
+                animator.Play("e3-walljump");
+                break;
+            case 1:
+                animator.Play("e3-kick");//Wall jump variation 2
+                break;
+            default:
+                Debug.LogError("Invalid random index");
+                break;
+        }
+    }
+
 
     [PunRPC]
     protected void StartPropeller() {
@@ -946,6 +1093,9 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
         Powerup powerup = powerupObj.powerupScriptable;
         Enums.PowerupState newState = powerup.state;
+        if(newState == Enums.PowerupState.None){//ACCURACY: Fix the "none" powerup
+            newState = state;
+        }
         Enums.PriorityPair pp = Enums.PowerupStatePriority[powerup.state];
         Enums.PriorityPair cp = Enums.PowerupStatePriority[state];
         bool reserve = cp.statePriority > pp.itemPriority || state == newState;
@@ -963,7 +1113,9 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 //todo: add invincibility frames
                 
              //   Debug.Log("PODERZAO");
-                StartCoroutine(powerupAnim());
+                if(powerup.state != Enums.PowerupState.MegaMushroom){
+                    StartCoroutine(powerupAnim());
+                }
             }
 
         }else{
@@ -1017,11 +1169,55 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             Destroy(view.gameObject);
 
             return;
-        } else if (powerup.prefab == "1-Up") {
-            lives++;
-            UpdateGameState();
-            PlaySound(powerup.soundEffect);
-            Instantiate(Resources.Load("Prefabs/Particle/1Up"), transform.position, Quaternion.identity);
+        } else if (powerup.prefab == "1-Up") {//ACCURACY: Lightning CUSTOM POWERUP 1up
+            
+            
+            //PlaySound(powerup.soundEffect);
+            
+            GameObject[] otherPlayers = GameObject.FindGameObjectsWithTag("Player");
+            
+            foreach (GameObject otherPlayer in otherPlayers)
+            {
+                PlayerController other = otherPlayer.GetComponent<PlayerController>();
+                PhotonView otherView = other.photonView;
+                // Check if the other player is not the current player
+                if (otherPlayer != gameObject)
+                {
+                    Instantiate(Resources.Load("Prefabs/Particle/Thunder_3"), new Vector2(other.transform.position.x, other.transform.position.y+2f), Quaternion.identity);
+                    if(other.state == Enums.PowerupState.MegaMushroom){//CHECK FOR MEGAMUSHROOM
+                        giantTimer = 0;
+                        other.EndMega();
+                        PlaySound(Enums.Sounds.Powerup_Thunder_Struck);
+                    }else if(other.state != Enums.PowerupState.MiniMushroom){
+                        if(other.invincible <= 0){//CHECK FOR STARMAN
+                            if(other.inShell || other.state == Enums.PowerupState.BlueShell && other.crouching == true){//CHECK IF IS INSIDE SHELL
+                                otherView.RPC(nameof(Powerdown), RpcTarget.All, true);
+                            }else{//IF NOT inShell and NOT STARMAN, MAKE THEM MINIS
+                                otherView.RPC(nameof(Knockback), RpcTarget.All, other.transform.position.x < body.position.x, 1, true, photonView.ViewID);
+                                other.state = Enums.PowerupState.MiniMushroom;
+                            }
+                            PlaySound(Enums.Sounds.Powerup_Thunder_Struck);
+                            
+                        }else{
+                            PlaySound(Enums.Sounds.Powerup_Thunder_Ambient);
+                        }
+                        
+                    }else{//IF ALREADY MINI, THEN KILL IT
+                        if(other.invincible <= 0){
+                            otherView.RPC(nameof(Powerdown), RpcTarget.All, true);
+                            PlaySound(Enums.Sounds.Powerup_Thunder_Struck);
+                        }else{
+                            PlaySound(Enums.Sounds.Powerup_Thunder_Ambient);
+                        }
+                    }
+                    
+                    
+                }else{
+                  //  Debug.Log("FAMOSO P1");
+                    PlaySound(Enums.Sounds.Powerup_Thunder_Ambient);
+                }
+            }
+            StartCoroutine(bgFlash());
 
             if (view.IsMine)
                 PhotonNetwork.Destroy(view);
@@ -1345,8 +1541,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         if (dead)
             return;
 
-        //if (info.Sender != photonView.Owner)
-        //    return;
+        Destroy(entryPipe); //ACCURACY: FORCE DESTROY PIPE IF DEAD, prevents invisible pipes bug
 
         animator.Play("deadstart");
         if (--lives == 0) {
@@ -1434,14 +1629,37 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             GameObject particle = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/Respawn"), body.position, Quaternion.identity);
             particle.GetComponent<RespawnParticle>().player = this;
         }
-        
         gameObject.SetActive(false);
+    }
+
+    public static System.Collections.IEnumerator ZoomOutAnim()//ACCURACY: ZOOMOUT ANIMATION
+    {
+        float elapsedTime = 0f;
+        float finalZoomSize = HorizontalCamera.getZoom();
+        float startZoomSize = 1f;
+
+        while (elapsedTime < 1f)
+        {
+            // Interpolate the camera's orthographic size towards the targetZoomSize
+            float newZoom = Mathf.Lerp(startZoomSize, finalZoomSize, elapsedTime);
+            HorizontalCamera.setZoom(newZoom);
+
+            // Increment elapsed time based on delta time
+            elapsedTime += Time.deltaTime * 1.1f;
+            
+
+            // Yield until next frame
+            yield return null;
+        }
+
+        // Ensure exact target size
+        HorizontalCamera.setZoom(finalZoomSize);
     }
 
 
     [PunRPC]
     public void Respawn() {
-
+        
         //ACCURACY: Player gets teleported on top of their respective pipes
         if(GameManager.Instance.players.Count <= 2)
         {
@@ -1451,7 +1669,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-
+        storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/1-Up");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;
@@ -1467,7 +1685,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         propellerSpinTimer = 0;
         usedPropellerThisJump = false;
         propellerTimer = 0;
-
+        canKickAttack = true;
         crouching = false;
         onGround = false;
         sliding = false;
@@ -1533,10 +1751,27 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         Destroy(entryPipe); //Destroys the EntryPipe object
     }
 
+    //ACCURACY: Beta Lightning Thunder Background animation
+    private System.Collections.IEnumerator bgFlash()
+    {
+        GameObject bg = GameObject.FindGameObjectWithTag("Backgrounds");
+        bg.SetActive(false);   
+        float flashTimer = 0.3f;
+
+        while (flashTimer > 0) {
+            flashTimer -= 0.02f;
+            yield return new WaitForSeconds(0.02f);
+            bg.SetActive(false);   
+            
+            yield return new WaitForSeconds(0.02f);
+            bg.SetActive(true);   
+           // Debug.Log(flashTimer);
+        }
+    }
+
 //powerupAnimation
     private System.Collections.IEnumerator powerupAnim()
     {
-        
         if(powerupCompleted){
 
             powerupCompleted = false;
@@ -1600,6 +1835,9 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         GameManager.Instance.music.Pause();
         GameManager.Instance.music.time = 0f;
         yield return new WaitForSeconds(0.2f); 
+        GameManager.Instance.music.Pause();
+        GameManager.Instance.music.time = 0f;
+        yield return new WaitForSeconds(1.8f); 
         GameManager.Instance.music.Pause();
         GameManager.Instance.music.time = 0f;
     }
@@ -1791,7 +2029,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             if (attacker)
                 SpawnParticle("Prefabs/Particle/PlayerBounce", attacker.transform.position);
 
-            if (fireballKnockback)
+            if (fireballKnockback)//REMOVER   ----   VERIFICAR E ATUALIZAR FUTURAMENTE
                 PlaySound(Enums.Sounds.Player_Sound_Collision_Fireball, 0, 3);
             else
                 PlaySound(Enums.Sounds.Player_Sound_Collision, 0, 3);
@@ -2178,7 +2416,12 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 photonView.RPC(nameof(SpawnParticle), RpcTarget.All, "Prefabs/Particle/WalljumpParticle", body.position + offset, wallSlideLeft ? Vector3.zero : Vector3.up * 180);
 
                 wallJumpTimer = 16 / 60f;
-                animator.SetTrigger("walljump");
+                
+                if(betaAnims){//Accuracy: E3 BETA ANIMATION
+                    photonView.RPC("betaWalljump", RpcTarget.All);
+                }else{
+                    animator.SetTrigger("walljump");
+                }
                 wallSlideTimer = 0;
             }
         } else {
@@ -2253,7 +2496,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
             koyoteTime = 1;
             jumpBuffer = 0;
-            skidding = false;
+            
             turnaround = false;
             sliding = false;
             wallSlideLeft = false;
@@ -2264,6 +2507,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             drill = false;
             flying &= bounce;
             propeller &= bounce;
+            float speed = Mathf.Abs(body.velocity.x);
 
             if (!bounce && onSpinner && !holding) {
                 photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_SpinnerLaunch);
@@ -2290,20 +2534,37 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 singlejump = false;
                 doublejump = true;
                 triplejump = false;
-                photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_DoubleJump, (byte) Random.Range(1, 3));
+                if(betaAnims){//Accuracy: E3 BETA ANIMATION
+                    photonView.RPC("betaDoubleJumpAnim", RpcTarget.All);
+                    photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_BetaDoubleJump);
+                }else{
+                    photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_DoubleJump, (byte) Random.Range(1, 3));
+                }
             } else if (canSpecialJump && doublejump) {
                 //Triple Jump
                 singlejump = false;
                 doublejump = false;
                 triplejump = true;
                 jumpBoost = 0.5f;
-                photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_TripleJump);
+                if(betaAnims){
+                    photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_BetaTripleJump);
+                }else{
+                    photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_TripleJump);
+                }
+                if(betaAnims){//Accuracy: E3 BETA ANIMATION
+                    photonView.RPC("betaTripleJumpAnim", RpcTarget.All);
+                }
             } else {
                 //Normal jump
                 singlejump = true;
                 doublejump = false;
                 triplejump = false;
+                if(betaAnims && skidding && speed < 4f){//Accuracy: E3 BETA ANIMATION SIDEFLIP
+                    photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_WallJump, (byte) 2);
+                    photonView.RPC("betaTripleJumpAnim", RpcTarget.All);
+                }
             }
+            skidding = false;
             body.velocity = new Vector2(body.velocity.x, vel + jumpBoost);
             onGround = false;
             doGroundSnap = false;
@@ -2319,7 +2580,12 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                     Enums.PowerupState.MegaMushroom => Enums.Sounds.Powerup_MegaMushroom_Jump,
                     _ => Enums.Sounds.Player_Sound_Jump,
                 };
+                if(betaAnims && state != Enums.PowerupState.MiniMushroom && state != Enums.PowerupState.MegaMushroom){
+                    sound = Enums.Sounds.Player_Sound_BetaJump;//Accuracy: E3 BETA JUMP SFX
+                }
                 photonView.RPC(nameof(PlaySound), RpcTarget.All, sound);
+                
+                
             }
             bounce = false;
         }
@@ -2387,7 +2653,6 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
         if ((left ^ right) && (!crouching || (crouching && !onGround && state != Enums.PowerupState.BlueShell)) && !knockback && !sliding) {
             //we can walk here
-
             float speed = Mathf.Abs(body.velocity.x);
             bool reverse = body.velocity.x != 0 && ((left ? 1 : -1) == sign);
 
@@ -2763,7 +3028,6 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 if (animator.GetCurrentAnimatorClipInfo(0).Length <= 0 || animator.GetCurrentAnimatorClipInfo(0)[0].clip.name != "mega-scale")
                     animator.Play("mega-scale");
 
-
                 Vector2 checkSize = WorldHitboxSize * new Vector2(0.75f, 1.1f);
                 Vector2 normalizedVelocity = body.velocity;
                 if (!groundpound)
@@ -2814,6 +3078,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         }
 
         if (state == Enums.PowerupState.MegaMushroom) {
+            GameManager.Instance.setPiranaplantCanspawn(false);//ACCURACY: PREVENT PIRANA PLANT SPAWNS IF SOMEONE IS IN MEGA
             HandleGiantTiles(true);
             if (onGround && singlejump) {
                 photonView.RPC(nameof(SpawnParticle), RpcTarget.All, "Prefabs/Particle/GroundpoundDust", body.position);
@@ -2836,8 +3101,10 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         }
 
         if (knockback) {
-            if (bounce && photonView.IsMine)
+            if (bounce && photonView.IsMine){
                 photonView.RPC(nameof(ResetKnockback), RpcTarget.All);
+
+            }
 
             wallSlideLeft = false;
             wallSlideRight = false;
@@ -2960,7 +3227,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
         //Crouching
         HandleCrouching(crouch);
-
+        HandleTornado();//ACCURACY: TORNADO
         HandleWallslide(left, right, jump);
 
         HandleSlopes();

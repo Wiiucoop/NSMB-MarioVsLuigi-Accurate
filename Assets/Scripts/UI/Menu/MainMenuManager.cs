@@ -30,7 +30,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     public TMP_Dropdown levelDropdown, characterDropdown;
     public RoomIcon selectedRoomIcon, privateJoinRoom;
     public Button joinRoomBtn, createRoomBtn, startGameBtn;
-    public Toggle ndsResolutionToggle, fullscreenToggle, livesEnabled, powerupsEnabled, timeEnabled, drawTimeupToggle, fireballToggle, vsyncToggle, privateToggle, privateToggleRoom, aspectToggle, spectateToggle, scoreboardToggle, filterToggle;
+    public Toggle ndsResolutionToggle, n3dsResolutionToggle, fullscreenToggle, livesEnabled, powerupsEnabled, timeEnabled, drawTimeupToggle, fireballToggle, vsyncToggle, privateToggle, privateToggleRoom, aspectToggle, spectateToggle, scoreboardToggle, filterToggle;
     public GameObject playersContent, playersPrefab, chatContent, chatPrefab;
     public TMP_InputField nicknameField, starsText, coinsText, livesField, timeField, lobbyJoinField, chatTextField;
     public Slider musicSlider, sfxSlider, masterSlider, lobbyPlayersSlider, changePlayersSlider;
@@ -220,25 +220,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void ChangeDebugState(bool enabled) {
-        int index = levelDropdown.value;
-        levelDropdown.SetValueWithoutNotify(0);
-        levelDropdown.ClearOptions();
-        levelDropdown.AddOptions(maps);
-        levelDropdown.SetValueWithoutNotify(Mathf.Clamp(index, 0, maps.Count - 1));
 
-        if (enabled) {
-            levelDropdown.AddOptions(debugMaps);
-        } else if (PhotonNetwork.IsMasterClient) {
-            Utils.GetCustomProperty(Enums.NetRoomProperties.Level, out int level);
-            if (level >= maps.Count) {
-                Hashtable props = new() {
-                    [Enums.NetRoomProperties.Level] = maps.Count - 1,
-                };
-
-                PhotonNetwork.CurrentRoom.SetCustomProperties(props);
-            }
-        }
-        UpdateSettingEnableStates();
     }
 
     private void AttemptToUpdateProperty<T>(Hashtable updatedProperties, string key, System.Action<T> updateAction) {
@@ -516,6 +498,8 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         sfxSlider.value = Settings.Instance.VolumeSFX;
         masterSlider.value = Settings.Instance.VolumeMaster;
 
+        n3dsResolutionToggle.interactable = ndsResolutionToggle.isOn = Settings.Instance.ndsResolution;
+        n3dsResolutionToggle.isOn = Settings.Instance.n3dsResolution;
         aspectToggle.interactable = ndsResolutionToggle.isOn = Settings.Instance.ndsResolution;
         aspectToggle.isOn = Settings.Instance.fourByThreeRatio;
 #if !UNITY_ANDROID
@@ -790,7 +774,15 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
     public void StartGame() {
         if(drawTimeupToggle.isOn){//ACCURACY: DRAWTIMEUPTOGGLE IS THE RANDOM MAP THING 
-            PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(0, 5) });
+            if(powerupsEnabled.isOn){//ACCURACY: powerupsEnabled IS THE BETA EXPERIENCE TOGGLE 
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(5, 10) });
+            }else{
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(0, 5) });
+            }
+            
+        }else if(powerupsEnabled.isOn){
+            Utils.GetCustomProperty(Enums.NetRoomProperties.Level, out int level);
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = level+5 });
         }
         
         //set started game
@@ -800,8 +792,28 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         RaiseEventOptions options = new() { Receivers = ReceiverGroup.All };
         PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
     }
-    public void ChangeNewPowerups(bool value) {
+    public void ChangeNewPowerups(bool value) {//ACCURACY: ChangeNewPowerups IS THE E3 BETA EXPERIENCE TOGGLE 
         powerupsEnabled.SetIsOnWithoutNotify(value);
+        int index = levelDropdown.value;
+        levelDropdown.SetValueWithoutNotify(0);
+        levelDropdown.ClearOptions();
+        levelDropdown.AddOptions(maps);
+        levelDropdown.SetValueWithoutNotify(Mathf.Clamp(index, 0, maps.Count - 1));
+
+        if (value) {
+            levelDropdown.ClearOptions();
+            levelDropdown.AddOptions(debugMaps);
+        } else if (PhotonNetwork.IsMasterClient) {
+            Utils.GetCustomProperty(Enums.NetRoomProperties.Level, out int level);
+          //  if (level >= maps.Count) {
+          //      Hashtable props = new() {
+           //         [Enums.NetRoomProperties.Level] = maps.Count - 1,
+           //     };
+
+              //  PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+          //  }
+        }
+        UpdateSettingEnableStates();
     }
 
     public void ChangeLives(int lives) {
@@ -856,7 +868,11 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     public void ChangeLevel(int index) {
         levelDropdown.SetValueWithoutNotify(index);
         LocalChatMessage("Map set to: " + levelDropdown.options[index].text, Color.red);
-        Camera.main.transform.position = levelCameraPositions[index].transform.position;
+        if(powerupsEnabled.isOn){//ACCURACY: E3 BETA EXPERIENCE MAP DISPLAY ON LOBBY
+            Camera.main.transform.position = levelCameraPositions[index+5].transform.position;
+        }else{
+            Camera.main.transform.position = levelCameraPositions[index].transform.position;
+        }
     }
     public void SetLevelIndex() {
         if (!PhotonNetwork.IsMasterClient)
@@ -869,7 +885,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         //ChangeLevel(newLevelIndex);
 
         Hashtable table = new() {
-            [Enums.NetRoomProperties.Level] = levelDropdown.value
+            [Enums.NetRoomProperties.Level] = newLevelIndex
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(table);
     }
@@ -1150,7 +1166,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
                 "host" => "/host <player name> - Make a player the host for the room",
                 "mute" => "/mute <playername> - Prevents a player from talking in chat",
                 "debug" => "/debug - Enables debug & in-development features",
-                _ => "Available commands: /kick, /host, /mute, /ban",
+                _ => "Available commands: /kick, /host, /mute, /ban, /debug",
             };
             LocalChatMessage(msg, Color.red);
             return;
@@ -1158,10 +1174,6 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         
         case "debug": {
             Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool debugEnabled);
-            if (PhotonNetwork.CurrentRoom.IsVisible) {
-                LocalChatMessage("Error: You can only enable debug / in development features in private lobbies.", Color.red);
-                return;
-            }
 
             if (debugEnabled) {
                 LocalChatMessage("Debug features have been disabled.", Color.red);

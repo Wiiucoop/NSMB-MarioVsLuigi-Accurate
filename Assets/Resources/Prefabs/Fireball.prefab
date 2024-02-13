@@ -58,6 +58,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   left: 0
   isIceball: 0
+  isMeleeAttack: 0
   speed: 6.25
   bounceHeight: 6.75
   terminalVelocity: 6.25

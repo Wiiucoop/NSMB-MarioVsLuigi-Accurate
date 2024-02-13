@@ -92,7 +92,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: walk_green
-  m_Speed: 0.3
+  m_Speed: 0.17
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 8460407067352497477}

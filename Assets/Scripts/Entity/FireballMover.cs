@@ -3,7 +3,7 @@ using Photon.Pun;
 
 public class FireballMover : MonoBehaviourPun {
 
-    public bool left, isIceball;
+    public bool left, isIceball, isMeleeAttack;
 
     [SerializeField] private float speed = 3f, bounceHeight = 4.5f, terminalVelocity = 6.25f;
 
@@ -59,7 +59,8 @@ public class FireballMover : MonoBehaviourPun {
     }
 
     public void OnDestroy() {
-        if (!GameManager.Instance.gameover)
+
+        if (!GameManager.Instance.gameover && !isMeleeAttack)
             Instantiate(Resources.Load("Prefabs/Particle/" + (isIceball ? "IceballWall" : "FireballWall")), transform.position, Quaternion.identity);
     }
 
@@ -79,6 +80,14 @@ public class FireballMover : MonoBehaviourPun {
             KillableEntity en = collider.gameObject.GetComponentInParent<KillableEntity>();
             if (en.dead || en.Frozen)
                 return;
+
+            if(isMeleeAttack){//ACCURACY: Melee attack on koopa, thanks to kingkittyturnip
+                if(en is KoopaWalk || en is SpinyWalk || en is ModelKoopaWalk){
+                    en.photonView.RPC("EnterShell", RpcTarget.All);
+                    en.photonView.RPC("Kick", RpcTarget.All, !left, 0f, false);
+                    return;
+                }
+            }    
 
             if (isIceball) {
                 PhotonNetwork.Instantiate("Prefabs/FrozenCube", en.transform.position + new Vector3(0, 0.1f, 0), Quaternion.identity, 0, new object[] { en.photonView.ViewID });

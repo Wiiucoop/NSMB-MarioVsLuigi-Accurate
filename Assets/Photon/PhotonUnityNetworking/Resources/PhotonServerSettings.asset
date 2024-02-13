@@ -93,6 +93,13 @@ MonoBehaviour:
   - CancelCollectCoin
   - pauseForall
   - FireKill
+  - DetonateBig
+  - betaDoubleJumpAnim
+  - betaJumpSpinAnim
+  - betaTripleJumpAnim
+  - betaWalljump
+  - betaKickAnim
+  - betaWalkAnim
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

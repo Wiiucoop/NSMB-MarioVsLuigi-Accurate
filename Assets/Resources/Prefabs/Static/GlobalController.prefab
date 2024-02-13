@@ -281,6 +281,7 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 8
     m_NumAlphaKeys: 2
+  musicOrdering: 0
   ndsCanvas: {fileID: 1955773772637164072}
   fourByThreeImage: {fileID: 0}
   anyAspectImage: {fileID: 0}
