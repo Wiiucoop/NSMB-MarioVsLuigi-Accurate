@@ -18,6 +18,8 @@ public class MovingPowerup : MonoBehaviourPun {
     private BoxCollider2D hitbox;
     private int originalLayer;
 
+    public Sprite BetaMegaMushroom;
+
     public Powerup powerupScriptable;
 
     public bool Collected { get; set; }
@@ -30,7 +32,13 @@ public class MovingPowerup : MonoBehaviourPun {
         hitbox = GetComponent<BoxCollider2D>();
 
         originalLayer = sRenderer.sortingOrder;
+        Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnims);
 
+        string currentPowerup = powerupScriptable+"";
+        if(currentPowerup == "MegaMushroom (Powerup)" && betaAnims){
+            sRenderer.sprite = BetaMegaMushroom;
+            transform.localScale = new Vector2(6f, 6f);
+        }
         if (groundMask == -1) {
             groundMask = LayerMask.GetMask("Ground", "PassthroughInvalid");
             HITS_NOTHING_LAYERID = LayerMask.NameToLayer("HitsNothing");

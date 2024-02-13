@@ -223,6 +223,11 @@ public class ModelKoopaWalk : HoldableEntity
                 koopaModel.transform.eulerAngles.x,
                 koopaModel.transform.eulerAngles.y,
                 wakeupTimer < 3 && wakeupTimer > 0 ? Mathf.Sin(wakeupTimer * 120f) * 15f : 0);
+
+            transform.eulerAngles = new Vector3(
+                transform.eulerAngles.x,
+                transform.eulerAngles.y,
+                wakeupTimer < 3 && wakeupTimer > 0 ? Mathf.Sin(wakeupTimer * 120f) * 15f : 0);
         }
 
         if (shell)
@@ -369,7 +374,8 @@ public class ModelKoopaWalk : HoldableEntity
        // PlayerController controller = new PlayerController();
         //playerFacingRight = controller.facingRight;
         //facingLeft = !fromLeft;
-        FacingLeftTween = !holder.facingRight;
+        FacingLeftTween = !fromLeft;
+
         left = !fromLeft;
         stationary = false;
         currentSpeed = kickSpeed + 1.5f * kickFactor;

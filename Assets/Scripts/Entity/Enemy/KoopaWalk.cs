@@ -344,7 +344,7 @@ public class KoopaWalk : HoldableEntity
     [PunRPC]
     public override void Kick(bool fromLeft, float kickFactor, bool groundpound)
     {
-        FacingLeftTween = !holder.facingRight;
+        FacingLeftTween = !fromLeft;
         facingLeft = !fromLeft;
         stationary = false;
         currentSpeed = kickSpeed + 1.5f * kickFactor;

@@ -1669,7 +1669,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-        storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/1-Up");//REMOVER
+        storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MegaMushroom");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;
