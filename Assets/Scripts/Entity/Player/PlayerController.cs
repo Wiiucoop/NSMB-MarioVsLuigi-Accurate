@@ -1636,7 +1636,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     {
         float elapsedTime = 0f;
         float finalZoomSize = HorizontalCamera.getZoom();
-        float startZoomSize = 1f;
+        float startZoomSize = 0.5f;
 
         while (elapsedTime < 1f)
         {
@@ -1669,7 +1669,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-        storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MegaMushroom");//REMOVER
+        //storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MegaMushroom");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;

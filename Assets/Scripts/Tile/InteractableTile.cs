@@ -39,6 +39,7 @@ public abstract class InteractableTile : AnimatedTile {
                 if (!obj.GetPhotonView())
                     continue;
                 obj.GetPhotonView().RPC(nameof(KoopaWalk.Bump), RpcTarget.All);
+                obj.GetPhotonView().RPC(nameof(ModelKoopaWalk.Bump), RpcTarget.All);
                 continue;
             }
             case "goomba": {

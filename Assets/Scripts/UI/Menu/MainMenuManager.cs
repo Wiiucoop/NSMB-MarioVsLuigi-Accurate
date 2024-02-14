@@ -411,6 +411,10 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
         Camera.main.transform.position = levelCameraPositions[Random.Range(0, 4)].transform.position;
         levelDropdown.AddOptions(maps);
+        if(powerupsEnabled.isOn){//ACCURACY: E3 BETA EXPERIENCE MAP DISPLAY ON LOBBY
+            levelDropdown.ClearOptions();
+            levelDropdown.AddOptions(debugMaps);
+        }
         LoadSettings(!PhotonNetwork.InRoom);
 
         //Photon stuff.

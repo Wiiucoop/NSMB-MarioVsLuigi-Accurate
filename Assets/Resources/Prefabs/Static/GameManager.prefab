@@ -170,7 +170,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 62.65
+  m_fontSize: 76.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2058,7 +2058,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 62.65
+  m_fontSize: 76.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5743,6 +5743,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: faa509be0aa8ac641ad4ddf6c01d26db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  luigiGradient: {fileID: 11400000, guid: 8f9fd9bc9c9bd6a49a6e69191d434a14, type: 2}
   mainMusic: {fileID: 11400000, guid: 488f1c737d498714c951d86c1a790bcc, type: 2}
   invincibleMusic: {fileID: 11400000, guid: fb397722d9ffbb145a088ac9ce60908c, type: 2}
   levelMinTileX: -30

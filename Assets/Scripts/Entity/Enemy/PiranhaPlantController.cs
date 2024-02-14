@@ -33,10 +33,14 @@ public class PiranhaPlantController : KillableEntity
 
         FacingLeftTween = false;
 
-        if (!dead && photonView && photonView.IsMine && (Utils.GetTileAtWorldLocation(transform.position + (Vector3.down * 0.1f)) == null && !upsideDown) || (Utils.GetTileAtWorldLocation(transform.position + (Vector3.up * 0.1f)) == null && upsideDown)) {
+        if ((!dead && photonView && photonView.IsMine &&
+            Utils.GetTileAtWorldLocation(transform.position + (upsideDown ? Vector3.up : Vector3.down * 0.1f)) == null  && !upsideDown))
+        {
             photonView.RPC("Kill", RpcTarget.All);
             return;
         }
+
+
 
         animator.SetBool("dead", dead);
         if (dead || (photonView && !photonView.IsMine))

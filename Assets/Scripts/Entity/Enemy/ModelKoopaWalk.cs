@@ -335,8 +335,11 @@ public class ModelKoopaWalk : HoldableEntity
                 if (killa.dead)
                     break;
                 killa.photonView.RPC(nameof(Kill), RpcTarget.All);
-                if (holder)
+                if (holder){
                     photonView.RPC(nameof(Kill), RpcTarget.All);
+                    PhotonNetwork.Destroy(photonView);
+                }
+                    
 
                 break;
             case "coin":

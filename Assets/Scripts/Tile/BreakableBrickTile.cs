@@ -22,13 +22,17 @@ public class BreakableBrickTile : InteractableTile {
                 doBump = true;
             }
 
-        } else if (interacter is SpinyWalk) {
+        }else if (interacter is SpinyWalk) {
             doBump = true;
             doBreak = breakableByShells;
-        } else if (interacter is KoopaWalk) {
+        }else if (interacter is KoopaWalk) {
             doBump = true;
             doBreak = breakableByShells;
-        } else if (interacter is BobombWalk) {
+        } 
+        else if (interacter is ModelKoopaWalk) {
+            doBump = true;
+            doBreak = breakableByShells;
+        }else if (interacter is BobombWalk) {
             doBump = false;
             doBreak = breakableByBombs;
         }

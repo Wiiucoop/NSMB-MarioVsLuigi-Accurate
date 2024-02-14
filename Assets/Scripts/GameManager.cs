@@ -17,7 +17,8 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IConnectionCallbacks, IMatchmakingCallbacks {
 
-    
+    [SerializeField] private TMP_ColorGradient luigiGradient;
+
     private static GameManager _instance;
     public static GameManager Instance {
         get {
@@ -569,7 +570,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             fader.SetIsMario(isMario);
             fader.FadeOut();
             StartCoroutine(PlayerController.ZoomOutAnim());//ACCURACY: ZOOMOUT ANIMATION
-            if(localPlayer)
+            if(PhotonNetwork.IsMasterClient)
                 sfx.PlayOneShot(Enums.Sounds.UI_StartGame.GetClip());
 
             if (PhotonNetwork.IsMasterClient)
@@ -584,6 +585,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                     startText.GetComponent<TMP_Text>().text = "Mario Start";
                 }else{
                     startText.GetComponent<TMP_Text>().text = "Luigi Start";
+                    startText.GetComponent<TMP_Text>().colorGradientPreset = luigiGradient;
                 }
                 startText.GetComponent<Animator>().SetTrigger("start");
                 StartCoroutine(RemoveStartMessage());
@@ -655,18 +657,19 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         if(winner != null){
             winnerName = winner.GetUniqueNickname();
         }
-        
+        GameObject text = GameObject.FindWithTag("wintext");
         if(players.Count <= 2 ){//ACCURACY: SET WIN TEXT TO BE THEIR CHARACTER MODEL IN 1V1 MATCHES
             if(Utils.GetCharacterData(PhotonNetwork.LocalPlayer).uistring.Equals("<sprite=3>")){//ACCURACY: MAKE WINNE/LOSER BE YOUR PLAYER
                     winnerName = "Mario";
             }else{
                     winnerName = "Luigi";
+                    text.GetComponent<TMP_Text>().colorGradientPreset = luigiGradient;
             }
         }
         PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = false });
         gameover = true;
         music.Stop();
-        GameObject text = GameObject.FindWithTag("wintext");
+        
         text.GetComponent<TMP_Text>().text = winner != null ? $"{ winnerName } Wins!" : "It's a draw...";
         text.GetComponent<Animator>().Play("wintext");
         if(winner != null && !winner.IsLocal){//ACCURACY: SET LOSE TEXT IF YOU LOSE
