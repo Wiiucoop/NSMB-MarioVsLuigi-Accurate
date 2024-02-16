@@ -16,7 +16,7 @@ public class DiscordController : MonoBehaviour {
         return;
 #endif
 
-        discord = new Discord.Discord(962073502469459999, (ulong) CreateFlags.NoRequireDiscord);
+        discord = new Discord.Discord(1040879997503676496, (ulong) CreateFlags.NoRequireDiscord);
         activityManager = discord.GetActivityManager();
         activityManager.OnActivityJoinRequest += AskToJoin;
         activityManager.OnActivityJoin += TryJoinGame;

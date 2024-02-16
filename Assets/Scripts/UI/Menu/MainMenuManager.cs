@@ -331,6 +331,9 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             Utils.GetCustomProperty(Enums.NetRoomProperties.Level, out int level);
             PhotonNetwork.IsMessageQueueRunning = false;
             SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);
+            if(powerupsEnabled.isOn){//ACCURACY: SET BETA LEVELS INDEX BEFORE LOADING
+                level+=5;
+            }
             SceneManager.LoadSceneAsync(level + 2, LoadSceneMode.Additive);
             break;
         }
@@ -784,9 +787,6 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(0, 5) });
             }
             
-        }else if(powerupsEnabled.isOn){
-            Utils.GetCustomProperty(Enums.NetRoomProperties.Level, out int level);
-            PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = level+5 });
         }
         
         //set started game
@@ -809,14 +809,15 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             levelDropdown.AddOptions(debugMaps);
         } else if (PhotonNetwork.IsMasterClient) {
             Utils.GetCustomProperty(Enums.NetRoomProperties.Level, out int level);
-          //  if (level >= maps.Count) {
-          //      Hashtable props = new() {
-           //         [Enums.NetRoomProperties.Level] = maps.Count - 1,
-           //     };
+            if (level >= maps.Count) {
+                Hashtable props = new() {
+                  [Enums.NetRoomProperties.Level] = maps.Count - 1,
+                };
 
-              //  PhotonNetwork.CurrentRoom.SetCustomProperties(props);
-          //  }
+                PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+            }
         }
+        ChangeLevel(0);
         UpdateSettingEnableStates();
     }
 
@@ -871,7 +872,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
     public void ChangeLevel(int index) {
         levelDropdown.SetValueWithoutNotify(index);
-        LocalChatMessage("Map set to: " + levelDropdown.options[index].text, Color.red);
+     //   LocalChatMessage("Map set to: " + levelDropdown.options[index].text, Color.red);
         if(powerupsEnabled.isOn){//ACCURACY: E3 BETA EXPERIENCE MAP DISPLAY ON LOBBY
             Camera.main.transform.position = levelCameraPositions[index+5].transform.position;
         }else{
@@ -1153,7 +1154,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
                 LocalChatMessage("Usage: /host <player name>", Color.red);
                 return;
             }
-            string strTarget = args[1].ToLower();
+            string strTarget = args[1].ToLower(); 
             Player target = PhotonNetwork.CurrentRoom.Players.Values.FirstOrDefault(pl => pl.GetUniqueNickname().ToLower() == strTarget);
             if (target == null) {
                 LocalChatMessage($"Error: Unknown player {args[1]}", Color.red);
@@ -1176,7 +1177,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             return;
         }
         
-        case "debug": {
+    /*    case "debug": {
             Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool debugEnabled);
 
             if (debugEnabled) {
@@ -1188,7 +1189,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
                 [Enums.NetRoomProperties.Debug] = !debugEnabled
             });
             return;
-        }
+        }*/
         
         case "mute": {
             if (args.Length < 2) {

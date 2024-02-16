@@ -657,24 +657,26 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         if(winner != null){
             winnerName = winner.GetUniqueNickname();
         }
-        GameObject text = GameObject.FindWithTag("wintext");
+
         if(players.Count <= 2 ){//ACCURACY: SET WIN TEXT TO BE THEIR CHARACTER MODEL IN 1V1 MATCHES
             if(Utils.GetCharacterData(PhotonNetwork.LocalPlayer).uistring.Equals("<sprite=3>")){//ACCURACY: MAKE WINNE/LOSER BE YOUR PLAYER
                     winnerName = "Mario";
             }else{
                     winnerName = "Luigi";
-                    text.GetComponent<TMP_Text>().colorGradientPreset = luigiGradient;
             }
         }
         PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = false });
         gameover = true;
         music.Stop();
-        
-        text.GetComponent<TMP_Text>().text = winner != null ? $"{ winnerName } Wins!" : "It's a draw...";
+        GameObject text = GameObject.FindWithTag("wintext");
+        text.GetComponent<TMP_Text>().text = winner != null ? $"{ winnerName } Wins!" : "Match Cancelled..";
         text.GetComponent<Animator>().Play("wintext");
         if(winner != null && !winner.IsLocal){//ACCURACY: SET LOSE TEXT IF YOU LOSE
             text.GetComponent<TMP_Text>().text = $"{ winnerName } Loses!";
             text.GetComponent<Animator>().Play("wintextnegative");
+        }
+        if(winner != null && winner.IsLocal && winnerName == "Luigi"){
+            text.GetComponent<TMP_Text>().colorGradientPreset = luigiGradient;
         }
         yield return new WaitForSecondsRealtime(1);
         

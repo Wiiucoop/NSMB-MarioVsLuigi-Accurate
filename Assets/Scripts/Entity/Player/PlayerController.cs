@@ -922,6 +922,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 InstantiatedKickObject = PhotonNetwork.Instantiate($"Prefabs/BetaMelee", pos, Quaternion.identity, 0, new object[] { !facingRight ^ animator.GetCurrentAnimatorStateInfo(0).IsName("turnaround"), body.velocity.x });
                // Renderer kickRenderer = InstantiatedKickObject.GetComponent<Renderer>();
               //  kickRenderer.enabled = false;
+
                 StartCoroutine(betaKickAttack());
             }
             
@@ -932,7 +933,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
     private System.Collections.IEnumerator betaKickAttack()
     {
-        
+
         body.gravityScale = slowriseGravity * 1f;
         body.velocity = new Vector2(body.velocity.x/2, body.velocity.y/2);
         //body.position += Vector2.up * 0.4f;
