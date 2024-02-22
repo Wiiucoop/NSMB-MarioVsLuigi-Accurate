@@ -17,7 +17,7 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IConnectionCallbacks, IMatchmakingCallbacks {
 
-    [SerializeField] private TMP_ColorGradient luigiGradient;
+    [SerializeField] private TMP_ColorGradient luigiGradient, marioGradient;
 
     private static GameManager _instance;
     public static GameManager Instance {
@@ -671,9 +671,13 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         GameObject text = GameObject.FindWithTag("wintext");
         text.GetComponent<TMP_Text>().text = winner != null ? $"{ winnerName } Wins!" : "Match Cancelled..";
         text.GetComponent<Animator>().Play("wintext");
+        text.GetComponent<TMP_Text>().colorGradientPreset = marioGradient;
         if(winner != null && !winner.IsLocal){//ACCURACY: SET LOSE TEXT IF YOU LOSE
             text.GetComponent<TMP_Text>().text = $"{ winnerName } Loses!";
             text.GetComponent<Animator>().Play("wintextnegative");
+            if(winnerName == "Luigi"){
+                text.GetComponent<TMP_Text>().colorGradientPreset = luigiGradient;
+            }
         }
         if(winner != null && winner.IsLocal && winnerName == "Luigi"){
             text.GetComponent<TMP_Text>().colorGradientPreset = luigiGradient;

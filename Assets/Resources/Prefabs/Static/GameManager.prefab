@@ -5744,6 +5744,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   luigiGradient: {fileID: 11400000, guid: 8f9fd9bc9c9bd6a49a6e69191d434a14, type: 2}
+  marioGradient: {fileID: 11400000, guid: c358a25c74070be4f84c4b36df6b6c8b, type: 2}
   mainMusic: {fileID: 11400000, guid: 488f1c737d498714c951d86c1a790bcc, type: 2}
   invincibleMusic: {fileID: 11400000, guid: fb397722d9ffbb145a088ac9ce60908c, type: 2}
   levelMinTileX: -30

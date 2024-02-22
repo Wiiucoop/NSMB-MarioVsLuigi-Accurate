@@ -934,13 +934,18 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     private System.Collections.IEnumerator betaKickAttack()
     {
 
-        body.gravityScale = slowriseGravity * 1f;
-        body.velocity = new Vector2(body.velocity.x/2, body.velocity.y/2);
+        //////body.gravityScale = slowriseGravity * 1f;
+        //////body.velocity = new Vector2(body.velocity.x/2, body.velocity.y/2);
         //body.position += Vector2.up * 0.4f;
-        bounce = true;
+        //////bounce = true;
+        body.velocity = new Vector2(body.velocity.x/2, 7);
         canKickAttack = false;
         yield return new WaitForSeconds(0.05f);
         if(InstantiatedKickObject != null){
+            if(jumpHeld){
+                body.velocity = new Vector2(body.velocity.x, 3.5f);
+            }
+            
             PhotonNetwork.Destroy(InstantiatedKickObject);
         }
         yield return new WaitForSeconds(0.95f);

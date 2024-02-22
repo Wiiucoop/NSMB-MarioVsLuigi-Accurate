@@ -781,12 +781,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
     public void StartGame() {
         if(drawTimeupToggle.isOn){//ACCURACY: DRAWTIMEUPTOGGLE IS THE RANDOM MAP THING 
-            if(powerupsEnabled.isOn){//ACCURACY: powerupsEnabled IS THE BETA EXPERIENCE TOGGLE 
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(5, 10) });
-            }else{
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(0, 5) });
-            }
-            
         }
         
         //set started game

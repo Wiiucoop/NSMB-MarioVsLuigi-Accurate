@@ -27,20 +27,23 @@ EditorBuildSettings:
     path: Assets/Scenes/Levels/DefaultSnow.unity
     guid: 42e7b04a277dea44eab7edc32729f7a5
   - enabled: 1
-    path: Assets/Scenes/Levels/CustomJungle.unity
-    guid: de8e2edb54b6b5e489c97578fa670804
-  - enabled: 1
-    path: Assets/Scenes/Levels/CustomSky.unity
-    guid: addb28d9cb6d8a6498a3b328a6e57f33
-  - enabled: 1
-    path: Assets/Scenes/Levels/CustomVolcano.unity
-    guid: 48dfbffbd41b62a41a8135ce450497f5
+    path: Assets/Scenes/Levels/BetaPlains.unity
+    guid: 8a64fa204a299d643bbe0ac09263141c
   - enabled: 1
     path: Assets/Scenes/Levels/BetaCave.unity
     guid: db54685ed67964a40bdb41bc9d32d347
   - enabled: 1
+    path: Assets/Scenes/Levels/CustomVolcano.unity
+    guid: 48dfbffbd41b62a41a8135ce450497f5
+  - enabled: 1
+    path: Assets/Scenes/Levels/BetaCity.unity
+    guid: addb28d9cb6d8a6498a3b328a6e57f33
+  - enabled: 1
     path: Assets/Scenes/Levels/BetaDesert.unity
     guid: 273d695013bd5384386a53212fd07abb
+  - enabled: 0
+    path: Assets/Scenes/Levels/CustomJungle.unity
+    guid: de8e2edb54b6b5e489c97578fa670804
   - enabled: 0
     path: Assets/Scenes/Levels/CustomDesert.unity
     guid: 0a445e83695e8424e9e56da3e5b773e4
