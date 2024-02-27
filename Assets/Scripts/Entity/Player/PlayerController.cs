@@ -913,7 +913,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         }
         case Enums.PowerupState.Mushroom:
         case Enums.PowerupState.MegaMushroom: {//ACCURACY: E3 BETA 2005 MEGA MUSHROOM KICK ANIM
-            if (groundpound || (flying && drill) || propeller || crouching || sliding || wallJumpTimer > 0)
+            if (wallSlideLeft || wallSlideRight || groundpound || triplejump || flying || drill || crouching || sliding)
                 return;
 
             if(canKickAttack && betaAnims){
@@ -933,7 +933,6 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
     private System.Collections.IEnumerator betaKickAttack()
     {
-
         //////body.gravityScale = slowriseGravity * 1f;
         //////body.velocity = new Vector2(body.velocity.x/2, body.velocity.y/2);
         //body.position += Vector2.up * 0.4f;
@@ -1675,7 +1674,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-        //storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MegaMushroom");//REMOVER
+        storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/BlueShell");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;

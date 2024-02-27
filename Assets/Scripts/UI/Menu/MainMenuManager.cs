@@ -812,7 +812,8 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
                 PhotonNetwork.CurrentRoom.SetCustomProperties(props);
             }
         }
-        ChangeLevel(0);
+        Utils.GetCustomProperty(Enums.NetRoomProperties.Level, out int levelprev);
+        ChangeLevel(levelprev);
         UpdateSettingEnableStates();
     }
 

@@ -23,7 +23,7 @@ public class UIUpdater : MonoBehaviour {
     private GameObject starsParent, coinsParent, livesParent, p2LivesParent, timerParent;
     private readonly List<Image> backgrounds = new();
     private bool uiHidden;
-
+    private string pingIcon;
     private bool is1v1 = false;
     private bool shouldAnimate = false;
     private bool shouldP2Animate = false;
@@ -36,6 +36,7 @@ public class UIUpdater : MonoBehaviour {
     public void Start() {
         Instance = this;
         pingSample = PhotonNetwork.GetPing();
+        pingIcon = "<sprite=49>"; 
 
        // starsParent = uiStars.transform.parent.gameObject;
         coinsParent = uiCoins.transform.parent.gameObject;
@@ -79,7 +80,17 @@ public class UIUpdater : MonoBehaviour {
         if (pingSample == float.NaN)
             pingSample = 0;
 
-        uiDebug.text = "<mark=#000000b0 padding=\"20, 20, 20, 20\"><font=\"defaultFont\">Ping: " + (int) pingSample + "ms</font>";
+        if(pingSample <= 70){
+            pingIcon = "<sprite=49>"; 
+        }else if(pingSample > 70 && pingSample <= 120){
+            pingIcon = "<sprite=50>"; 
+        }else if(pingSample > 120 && pingSample <= 170){
+            pingIcon = "<sprite=51>"; 
+        }else{
+            pingIcon = "<sprite=52>"; 
+        }
+
+        uiDebug.text = "<mark=#000000b0 padding=\"20, 20, 20, 20\"><font=\"defaultFont\">"+pingIcon+" " + (int) pingSample + "ms</font>";
 
        // other = GameManager.Instance..GetComponent<PlayerController>();
 

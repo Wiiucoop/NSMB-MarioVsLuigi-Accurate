@@ -38,6 +38,8 @@ public class EnemySpawnpoint : MonoBehaviour {
             return true;
         }else if(prefab == "" && isSpawning){
             return false;
+        }else if(prefab == ""){
+            return false;
         }
         
         currentEntity = PhotonNetwork.InstantiateRoomObject(prefab, transform.position, transform.rotation);
