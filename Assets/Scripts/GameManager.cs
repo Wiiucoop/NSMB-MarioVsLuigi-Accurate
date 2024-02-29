@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using TMPro;
-
+using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
@@ -20,6 +20,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     [SerializeField] private TMP_ColorGradient luigiGradient, marioGradient;
 
     private static GameManager _instance;
+
+    public Slider masterSlider;
+
     public static GameManager Instance {
         get {
             if (_instance)
@@ -406,6 +409,12 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         }
     }
 
+    public void SetVolume() {//accuracy: VOLUME BUTTON INGAME
+        
+        Settings.Instance.VolumeMaster = masterSlider.value;
+        Settings.Instance.SaveSettingsToPreferences();
+    }
+
     // CONNECTION CALLBACKS
     public void OnConnected() { }
     public void OnDisconnected(DisconnectCause cause) {
@@ -570,8 +579,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             fader.SetIsMario(isMario);
             fader.FadeOut();
             StartCoroutine(PlayerController.ZoomOutAnim());//ACCURACY: ZOOMOUT ANIMATION
-            if(PhotonNetwork.IsMasterClient)
-                sfx.PlayOneShot(Enums.Sounds.UI_StartGame.GetClip());
+           // if(PhotonNetwork.IsMasterClient)
+            //    sfx.PlayOneShot(Enums.Sounds.UI_StartGame.GetClip());
 
             if (PhotonNetwork.IsMasterClient)
                 foreach (EnemySpawnpoint point in FindObjectsOfType<EnemySpawnpoint>())
@@ -673,7 +682,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         text.GetComponent<Animator>().Play("wintext");
         text.GetComponent<TMP_Text>().colorGradientPreset = marioGradient;
         if(winner != null && !winner.IsLocal){//ACCURACY: SET LOSE TEXT IF YOU LOSE
-            text.GetComponent<TMP_Text>().text = $"{ winnerName } Loses!";
+            if(players.Count <= 2){
+                text.GetComponent<TMP_Text>().text = $"{ winnerName } Loses!";
+            }
             text.GetComponent<Animator>().Play("wintextnegative");
             if(winnerName == "Luigi"){
                 text.GetComponent<TMP_Text>().colorGradientPreset = luigiGradient;
@@ -923,6 +934,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         sfx.PlayOneShot(Enums.Sounds.UI_Pause.GetClip());
         pauseUI.SetActive(paused);
         pausePanel.SetActive(true);
+        masterSlider.value = Settings.Instance.VolumeMaster;
         hostExitUI.SetActive(false);
         EventSystem.current.SetSelectedGameObject(pauseButton);
     }

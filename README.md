@@ -1,16 +1,18 @@
-# NSMB-MarioVsLuigi
+# NSMB-MarioVsLuigi-Accurate + Beta
 A unity-standalone 2-10 player remake of the Mario vs. Luigi gamemode from the New Super Mario Bros DS download game. 
 
 This mod aims to bring back most features and gameplay elements to make it as close to the DS game as possible.
 
+It also includes 5 levels featured in the E3 2005 Demo of New Super Mario Bros.
+
 ## Gameplay:
-[![IMAGE](https://i.ibb.co/rkLgBWK/MVL-BACK.png)](https://youtu.be/r9g68CtLYDM)
+[![IMAGE](https://i.ibb.co/rkLgBWK/MVL-BACK.png)](https://youtu.be/XA5z6xu41SU)
 
 ## Download
 
 [Play now in browser on itch.io!](https://wiiucoop.itch.io/mariovsluigi-accurate)
 
-Windows/Android: https://github.com/ipodtouch0218/NSMB-MarioVsLuigi/releases/latest
+Windows/Android: github.com/Wiiucoop/NSMB-MarioVsLuigi-Accurate/releases/latest
 
 ## Default Controls
 | Action | Keyboard | Gamepad *(unstable)* |
@@ -18,7 +20,7 @@ Windows/Android: https://github.com/ipodtouch0218/NSMB-MarioVsLuigi/releases/lat
 | Movement | WASD / Arrow Keys | Left Analog / DPad |
 | Jump | Space / Z | A / B Buttons |
 | Sprint | Shift / X (hold) | X / Y Buttons (hold) |
-| Powerup Action | E / C | RB / RT |
+| Powerup / Kicking | E / C | RB / RT |
 | Reserve Item | Q / V | LB / LT |
 | Show Scoreboard | Tab | Select |
 | Pause | Escape | Start Button |
@@ -31,8 +33,8 @@ Windows/Android: https://github.com/ipodtouch0218/NSMB-MarioVsLuigi/releases/lat
 2. Download and install [git](https://git-scm.com/downloads). Do NOT use the .zip download, as it will cause errors within Unity.
 3. Open Command Prompt (Windows) or Terminal (MacOS / Linux)
 4. Navigate to the folder you want the source code to be in using `cd <path>`. For example, `cd %USERPROFILE%\Documents` will save it in My Documents.
-5. Clone the repository by running `git clone https://github.com/ipodtouch0218/NSMB-MarioVsLuigi.git` in the Command Prompt / Terminal
-  - Optionally, [fork the repository](https://github.com/ipodtouch0218/NSMB-MarioVsLuigi/fork)
+5. Clone the repository by running `git clone https://github.com/Wiiucoop/NSMB-MarioVsLuigi-Accurate.git` in the Command Prompt / Terminal
+  - Optionally, [fork the repository](https://github.com/Wiiucoop/NSMB-MarioVsLuigi-Accurate/fork)
 6. Open the project in Unity Hub (gray "Open" button in top right)
 7. Change the Unity Editor to use your computer's platform in File > Build Settings
 8. Create a build using "Build and Run" inside File > Build Settings, or Ctrl+B
@@ -40,6 +42,20 @@ Windows/Android: https://github.com/ipodtouch0218/NSMB-MarioVsLuigi/releases/lat
 </details>
 <details>
   <summary><h2>Credits</h2></summary>
+
+
+### MOD created by:
+* [HD Erick (bestluigiplayerYT)](https://github.com/Wiiucoop)
+
+### Mod Contributors:
+* Vic (3D models and UI changes)
+* itsumi_mario (misc SFX and tester)
+* KingKittyTurnip (Level Creator)
+* Foxyyy (Level Creator)
+* BluCorDev (Level Creator)
+* FrostyCake (Level Creator)
+* MiiBumm (New BlueShell model)
+* Mark19 (Android support)
 
 ### Original Content:
 * New Super Mario Bros.

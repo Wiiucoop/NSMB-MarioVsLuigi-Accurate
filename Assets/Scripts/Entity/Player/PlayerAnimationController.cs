@@ -94,6 +94,10 @@ public class PlayerAnimationController : MonoBehaviourPun {
         if (!gameover && !controller.Frozen) {
             if (controller.knockback) {
                 targetEuler = new Vector3(0, controller.facingRight ? 110 : 250, 0);
+                if(controller.invertRotation){
+                    targetEuler = new Vector3(0, controller.facingRight ? 250 : 110, 0);
+                }
+                
                 instant = true;
             } else if (controller.dead) {
                 if (animator.GetBool("firedeath") && deathTimer > deathUpTime) {
@@ -102,10 +106,15 @@ public class PlayerAnimationController : MonoBehaviourPun {
                     targetEuler = new Vector3(0, 180, 0);
                 }
                 instant = true;
-            } else if (animator.GetBool("pipe")) {
-                targetEuler = new Vector3(0, 180, 0);
+            } else if ((controller.state == Enums.PowerupState.BlueShell || controller.state == Enums.PowerupState.MegaMushroom) && !controller.inShell && controller.facingRight && !controller.crouching && !controller.onSpinner && !controller.sliding && !controller.flying) {
+                targetEuler = new Vector3(0, 90, 0);
                 instant = true;
-            } else if (animator.GetBool("inShell") && (!controller.onSpinner || Mathf.Abs(body.velocity.x) > 0.3f)) {
+            }
+            else if ((controller.state == Enums.PowerupState.BlueShell || controller.state == Enums.PowerupState.MegaMushroom) && !controller.inShell && !controller.facingRight && !controller.crouching && !controller.onSpinner && !controller.sliding && !controller.flying) {
+                targetEuler = new Vector3(0, -90, 0);
+                instant = true;
+            }
+             else if (animator.GetBool("inShell") && (!controller.onSpinner || Mathf.Abs(body.velocity.x) > 0.3f)) {
                 targetEuler += Mathf.Abs(body.velocity.x) / controller.RunningMaxSpeed * Time.deltaTime * new Vector3(0, 1800 * (controller.facingRight ? -1 : 1));
                 instant = true;
             } else if (wasTurnaround || controller.skidding || controller.turnaround || animator.GetCurrentAnimatorStateInfo(0).IsName("turnaround")) {

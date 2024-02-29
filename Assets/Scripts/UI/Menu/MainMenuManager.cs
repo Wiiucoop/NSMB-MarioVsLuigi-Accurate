@@ -412,7 +412,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             GlobalController.Instance.disconnectCause = null;
         }
 
-        Camera.main.transform.position = levelCameraPositions[Random.Range(0, 4)].transform.position;
+        Camera.main.transform.position = levelCameraPositions[0].transform.position;
         levelDropdown.AddOptions(maps);
         if(powerupsEnabled.isOn){//ACCURACY: E3 BETA EXPERIENCE MAP DISPLAY ON LOBBY
             levelDropdown.ClearOptions();
@@ -428,7 +428,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
             //version separation
             Match match = Regex.Match(Application.version, "^\\w*\\.\\w*\\.\\w*");
-            PhotonNetwork.NetworkingClient.AppVersion = match.Groups[0].Value + "-accurate" ;
+            PhotonNetwork.NetworkingClient.AppVersion = match.Groups[0].Value + "-accurate2" ;
 
             string id = PlayerPrefs.GetString("id", null);
             string token = PlayerPrefs.GetString("token", null);
@@ -478,7 +478,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         GlobalController.Instance.DiscordController.UpdateActivity();
         EventSystem.current.SetSelectedGameObject(title);
 
-#if PLATFORM_WEBGL
+#if PLATFORM_WEBGL || PLATFORM_ANDROID
         fullscreenToggle.interactable = false;
 #else
         if (!GlobalController.Instance.checkedForVersion) {

@@ -227,8 +227,17 @@ public abstract class KillableEntity : MonoBehaviourPun, IFreezableEntity, ICust
 
     [PunRPC]
     public virtual void FireKill() {
-        if (PhotonNetwork.IsMasterClient)
-            PhotonNetwork.InstantiateRoomObject("Prefabs/LooseCoin", body.position + Vector2.up * 0.5f, Quaternion.identity);
+        if (PhotonNetwork.IsMasterClient){
+            Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnims); //ACCURACY: Beta Loosecoin if in beta mode
+
+            if(!betaAnims){
+                PhotonNetwork.InstantiateRoomObject("Prefabs/LooseCoin", body.position + Vector2.up * 0.5f, Quaternion.identity);
+            }else{
+                PhotonNetwork.InstantiateRoomObject("Prefabs/BetaLooseCoin", body.position + Vector2.up * 0.5f, Quaternion.identity);
+            }
+
+        }
+            
         SpecialKill(false, false, 0);
     }
 

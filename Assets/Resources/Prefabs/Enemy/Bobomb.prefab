@@ -45,7 +45,7 @@ Transform:
   - {fileID: 3286581578154145921}
   - {fileID: 6814588170113215590}
   m_Father: {fileID: 0}
-  m_RootOrder: -2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 120, z: 0}
 --- !u!114 &3286581577125373967
 MonoBehaviour:
@@ -82,6 +82,7 @@ MonoBehaviour:
   lit: 0
   detonated: 0
   hasBigExplosion: 0
+  enemyRenderer: {fileID: 7692719260813536735}
 --- !u!212 &3286581577125373961
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -584,6 +585,12 @@ PrefabInstance:
 --- !u!4 &6814588170113215590 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 47620f8f758b6abe5ad332dde97950aa,
+    type: 3}
+  m_PrefabInstance: {fileID: 6420161268951288717}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &7692719260813536735 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3736573445715568210, guid: 47620f8f758b6abe5ad332dde97950aa,
     type: 3}
   m_PrefabInstance: {fileID: 6420161268951288717}
   m_PrefabAsset: {fileID: 0}

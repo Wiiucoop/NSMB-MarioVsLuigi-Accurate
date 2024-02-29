@@ -26,6 +26,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
     public bool betaAnims = false;
 
+    public bool invertRotation = false;
+
     private bool canKickAttack = true;
     public static GameObject InstantiatedKickObject;
     private bool hasTornado = false;
@@ -47,7 +49,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
     public PlayerAnimationController AnimationController { get; private set; }
 
-    public bool onGround, previousOnGround, crushGround, doGroundSnap, jumping, properJump, hitRoof, skidding, turnaround, facingRight = true, singlejump, doublejump, triplejump, bounce, crouching, groundpound, groundpoundLastFrame, sliding, knockback, hitBlock, running, functionallyRunning, jumpHeld, flying, drill, inShell, hitLeft, hitRight, stuckInBlock, alreadyStuckInBlock, propeller, usedPropellerThisJump, stationaryGiantEnd, fireballKnockback, startedSliding, canShootProjectile;
+    public bool onGround, previousOnGround, crushGround, doGroundSnap, jumping, properJump, hitRoof, skidding, turnaround, facingRight = true, singlejump, doublejump, triplejump, bounce, crouching, groundpound, groundpoundLastFrame, sliding, knockback, hitBlock, running, functionallyRunning, jumpHeld, flying, drill, inShell, hitLeft, hitRight, stuckInBlock, alreadyStuckInBlock, propeller, usedPropellerThisJump, stationaryGiantEnd, fireballKnockback, bumpingKnockback, startedSliding, canShootProjectile;
     public float jumpLandingTimer, landing, koyoteTime, groundpoundCounter, groundpoundStartTimer, pickupTimer, groundpoundDelay, hitInvincibilityCounter, powerupFlash, throwInvincibility, jumpBuffer, giantStartTimer, giantEndTimer, propellerTimer, propellerSpinTimer, fireballTimer;
     public float invincible, giantTimer, floorAngle, knockbackTimer, pipeTimer, slowdownTimer;
 
@@ -652,11 +654,18 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                     body.velocity = new Vector2(previousFrameVelocity.x, body.velocity.y);
 
                     return;
-                } else if (!knockback && !other.knockback && !otherAbove && onGround && other.onGround && (Mathf.Abs(previousFrameVelocity.x) > WalkingMaxSpeed || Mathf.Abs(other.previousFrameVelocity.x) > WalkingMaxSpeed)) {
+                } else if ( !otherAbove && onGround && other.onGround && (Mathf.Abs(previousFrameVelocity.x) > 1.7f || Mathf.Abs(other.previousFrameVelocity.x) > 1.7f)) {
                     //bump
+                    if(running || other.running){
+                        
+                        
+                        otherView.RPC(nameof(PlayerBump), RpcTarget.All, otherObj.transform.position.x < body.position.x, 1, true, photonView.ViewID);
+                        photonView.RPC(nameof(PlayerBump), RpcTarget.All, otherObj.transform.position.x > body.position.x, 1, true, otherView.ViewID);
 
-                    otherView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x < body.position.x, 1, true, photonView.ViewID);
-                    photonView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x > body.position.x, 1, true, otherView.ViewID);
+                    
+                        
+                    }
+                    
                 }
                 //ACCURACY: MiniMushroom should ALWAYS get knockback when colliding with another player
                 if((state == Enums.PowerupState.MiniMushroom) && !above && !otherAbove){
@@ -743,7 +752,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 return;
             }
 
-            if (!fireball.isIceball) {
+            if (!fireball.isIceball) {//accuracy: Differentiate between fire AIR knockback and grounded
                 if(onGround){
                     photonView.RPC(nameof(Knockback), RpcTarget.All, fireball.left, 1, true, fireball.photonView.ViewID);
                 }else{
@@ -872,7 +881,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
             int count = 0;
             foreach (FireballMover existingFire in FindObjectsOfType<FireballMover>()) {
-                if (existingFire.photonView.IsMine && ++count >= 6)
+                if (existingFire.photonView.IsMine && ++count >= 2)//Accuracy: limit max fireball per player to 2
                     return;
             }
 
@@ -947,6 +956,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             
             PhotonNetwork.Destroy(InstantiatedKickObject);
         }
+        photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_BetaKick);
         yield return new WaitForSeconds(0.95f);
         canKickAttack = true;
 
@@ -959,7 +969,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         // Trigger the animation on all clients
         if(betaAnims){
             animator.Play("e3-kick");
-            photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_BetaKick);
+            
         }
         
     }
@@ -1674,7 +1684,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-        storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/BlueShell");//REMOVER
+       // storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/BlueShell");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;
@@ -1685,7 +1695,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         wallSlideTimer = 0;
         wallJumpTimer = 0;
         flying = false;
-       
+        invertRotation = false;
+        bumpingKnockback = false;
         propeller = false;
         propellerSpinTimer = 0;
         usedPropellerThisJump = false;
@@ -1718,7 +1729,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
 
         //ACCURACY: Sound played right after player spawns on top of the PIPE
-        photonView.RPC("PlaySound", RpcTarget.All, Enums.Sounds.Player_Sound_Powerdown);
+      //  photonView.RPC("PlaySound", RpcTarget.All, Enums.Sounds.Player_Sound_Powerdown);
+        sfx.PlayOneShot(Enums.Sounds.Player_Sound_Powerdown.GetClip());
 
 
         StartCoroutine(DestroyPipe());
@@ -1761,17 +1773,9 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     {
         GameObject bg = GameObject.FindGameObjectWithTag("Backgrounds");
         bg.SetActive(false);   
-        float flashTimer = 0.3f;
-
-        while (flashTimer > 0) {
-            flashTimer -= 0.02f;
-            yield return new WaitForSeconds(0.02f);
-            bg.SetActive(false);   
-            
-            yield return new WaitForSeconds(0.02f);
-            bg.SetActive(true);   
-           // Debug.Log(flashTimer);
-        }
+ 
+        yield return new WaitForSeconds(0.3f);
+        bg.SetActive(true);  
     }
 
 //powerupAnimation
@@ -2021,6 +2025,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             return;
         }
 
+        invertRotation = false;
+
         if (knockback || fireballKnockback)
             starsToDrop = Mathf.Min(1, starsToDrop);
 
@@ -2036,15 +2042,26 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
             if (fireballKnockback)//REMOVER   ----   VERIFICAR E ATUALIZAR FUTURAMENTE
                 PlaySound(Enums.Sounds.Player_Sound_Collision_Fireball, 0, 3);
-            else
+            else{
                 PlaySound(Enums.Sounds.Player_Sound_Collision, 0, 3);
+            
+            }
+                
         }
         animator.SetBool("fireballKnockback", fireball);
         animator.SetBool("knockforwards", facingRight != fromRight);
+        if(state == Enums.PowerupState.MiniMushroom){//Accuracy: Never do the sitting pose if Minimushroom
+            animator.SetBool("knockforwards", true);
+        }
+
+
 
         float megaVelo = (state == Enums.PowerupState.MegaMushroom ? 3 : 1);
         if(fireballKnockback){//Reduces fireball knockback distance
             body.velocity = new Vector2((fromRight ? -1 : 1), 0);
+
+            
+            
 
         }else{
         body.velocity = new Vector2(
@@ -2056,8 +2073,16 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
             fireball ? 0 : 4.5f
         );
+        body.velocity = body.velocity/1.35f;
+        if((facingRight == fromRight) && state != Enums.PowerupState.MiniMushroom){//accuracy: sitting pose knockback FRICTION CHANGE
+            body.velocity = body.velocity/1.5f;
+            if(onGround){
+                invertRotation = true;
+            }
         }
-            
+
+        }
+        
             
        
         //Accuracy: Mechanic that damages the player on FORTRESS in that first brick block.
@@ -2066,6 +2091,74 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             StartCoroutine(blockSquish());
         }
 
+        
+        onGround = false;
+        doGroundSnap = false;
+        inShell = false;
+        groundpound = false;
+        flying = false;
+        propeller = false;
+        propellerTimer = 0;
+        propellerSpinTimer = 0;
+        sliding = false;
+        drill = false;
+        body.gravityScale = normalGravity;
+        wallSlideLeft = wallSlideRight = false;
+
+        SpawnStars(starsToDrop, false);
+        HandleLayerState();
+    }
+
+    [PunRPC]
+    public void PlayerBump(bool fromRight, int starsToDrop, bool fireball, int attackerView) {
+        if (fireball && bumpingKnockback)
+            return;
+     
+
+        if (!GameManager.Instance.started || hitInvincibilityCounter > 0 || pipeEntering || Frozen || dead || giantStartTimer > 0 || giantEndTimer > 0)
+            return;
+
+        if (state == Enums.PowerupState.MiniMushroom && starsToDrop > 1) {
+            SpawnStars(2, false);
+            Powerdown(false);
+            return;
+        }
+
+        
+
+        if (knockback || bumpingKnockback)
+            starsToDrop = Mathf.Min(1, starsToDrop);
+
+        knockback = true;
+       
+        knockbackTimer = 0.5f;
+        bumpingKnockback = true;
+        initialKnockbackFacingRight = facingRight;
+
+        PhotonView attacker = PhotonNetwork.GetPhotonView(attackerView);
+        
+        if (attackerView >= 0) {
+            if (attacker)
+                SpawnParticle("Prefabs/Particle/PlayerBounce", attacker.transform.position);
+
+            if (bumpingKnockback)//REMOVER   ----   VERIFICAR E ATUALIZAR FUTURAMENTE
+                PlaySound(Enums.Sounds.Player_Sound_Collision_Fireball, 0, 3);
+            else{
+                PlaySound(Enums.Sounds.Player_Sound_Collision, 0, 3);
+            
+            }
+                
+        }
+        animator.SetBool("fireballKnockback", fireball);
+        animator.SetBool("knockforwards", facingRight != fromRight);
+
+
+
+        float megaVelo = (state == Enums.PowerupState.MegaMushroom ? 3 : 1);
+       //BUMPING knockback distance
+            body.velocity = new Vector2((fromRight ? -3.5f : 3.5f), 0);
+
+        
         onGround = false;
         doGroundSnap = false;
         inShell = false;
@@ -2093,7 +2186,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     [PunRPC]
     protected void ResetKnockback() {
 
-        if(!fireballKnockback){
+        if(!fireballKnockback || !bumpingKnockback){
             hitInvincibilityCounter = state != Enums.PowerupState.MegaMushroom ? 2f : 0f;
             bounce = false;
             knockback = false;
@@ -2248,13 +2341,14 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
     void HandleLayerState() {
         bool hitsNothing = animator.GetBool("pipe") || dead || stuckInBlock || giantStartTimer > 0 || (giantEndTimer > 0 && stationaryGiantEnd);
-        bool shouldntCollide = (hitInvincibilityCounter > 0) || isInvincibleKilling || (knockback && !fireballKnockback);
+        bool shouldntCollide = (hitInvincibilityCounter > 0) || isInvincibleKilling;
 
         int layer = Layers.LayerDefault;
         if (hitsNothing) {
             layer = Layers.LayerHitsNothing;
         } else if (shouldntCollide) {
             layer = Layers.LayerPassthrough;
+            bumpingKnockback = false;
         }
 
         gameObject.layer = layer;
@@ -3440,6 +3534,10 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             //check if high enough above ground
             if (Physics2D.BoxCast(body.position, MainHitbox.size * Vector2.right * transform.localScale, 0, Vector2.down, 0.15f * (state == Enums.PowerupState.MegaMushroom ? 2.5f : 1), Layers.MaskAnyGround))
                 return;
+
+            if(inShell){//accuracy: attempt at fixing accidental blue shell groundpound
+                return;
+            }
 
             wallSlideLeft = false;
             wallSlideRight = false;

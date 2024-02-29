@@ -3014,7 +3014,7 @@ Tilemap:
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
       m_AllTileFlags: 1
-  - first: {x: -24, y: -3, z: 0}
+  - first: {x: -24, y: -2, z: 0}
     second:
       serializedVersion: 2
       m_TileIndex: 22
@@ -3112,7 +3112,7 @@ Tilemap:
       m_AnimationSpeed: 8
       m_AnimationTimeOffset: 0
       m_IsLooping: 1
-  - first: {x: -24, y: -3, z: 0}
+  - first: {x: -24, y: -2, z: 0}
     second:
       m_AnimatedSprites:
       - {fileID: -8917260427315313510, guid: 0e3761f8685469b4fa6913ce081817ee, type: 3}
@@ -3489,13 +3489,13 @@ CompositeCollider2D:
       - X: 90000000
         Y: 0
     - - X: -115000000
-        Y: -10000000
+        Y: -5000000
+      - X: -120000000
+        Y: -5000000
       - X: -120000000
         Y: -10000000
-      - X: -120000000
-        Y: -15000000
       - X: -115000000
-        Y: -15000000
+        Y: -10000000
     - - X: -200000000
         Y: -25000000
       - X: -205000000
@@ -3574,10 +3574,10 @@ CompositeCollider2D:
       - {x: 8, y: 0.5}
       - {x: 8, y: 0}
       - {x: 9, y: 0}
-    - - {x: -11.5, y: -1}
+    - - {x: -11.5, y: -0.5}
+      - {x: -12, y: -0.5}
       - {x: -12, y: -1}
-      - {x: -12, y: -1.5}
-      - {x: -11.5, y: -1.5}
+      - {x: -11.5, y: -1}
     - - {x: -20, y: -2.5}
       - {x: -20.5, y: -2.5}
       - {x: -20.5, y: -3}
@@ -4107,7 +4107,7 @@ PrefabInstance:
     - target: {fileID: 5500062339093502114, guid: 43d56bd18d06e9b4abe323618a20a228,
         type: 3}
       propertyPath: levelDesigner
-      value: Frostycake
+      value: FrostyCake
       objectReference: {fileID: 0}
     - target: {fileID: 5500062339093502114, guid: 43d56bd18d06e9b4abe323618a20a228,
         type: 3}
@@ -4142,7 +4142,7 @@ PrefabInstance:
     - target: {fileID: 5500062339093502114, guid: 43d56bd18d06e9b4abe323618a20a228,
         type: 3}
       propertyPath: richPresenceId
-      value: 
+      value: '[E3] Plains'
       objectReference: {fileID: 0}
     - target: {fileID: 5500062339093502114, guid: 43d56bd18d06e9b4abe323618a20a228,
         type: 3}
@@ -4158,6 +4158,11 @@ PrefabInstance:
         type: 3}
       propertyPath: playersToVisualize
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500062339093502114, guid: 43d56bd18d06e9b4abe323618a20a228,
+        type: 3}
+      propertyPath: spawnVerticalPowerups
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5500062339093502118, guid: 43d56bd18d06e9b4abe323618a20a228,
         type: 3}

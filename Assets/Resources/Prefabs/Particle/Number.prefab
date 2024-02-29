@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 234383116846618720}
   - component: {fileID: 1320995819476395061}
   - component: {fileID: 7954267178204046563}
+  - component: {fileID: 4782125406295601565}
   m_Layer: 0
   m_Name: Graphic
   m_TagString: Untagged
@@ -239,5 +240,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 1320995819476395061}
-  color: {r: 0, g: 0, b: 0, a: 0}
-  mr: {fileID: 0}
+  legacyAnimation: {fileID: 0}
+  colorOffset: {x: 0, y: 0, z: 0}
+  overlay: {r: 0, g: 0, b: 0, a: 0}
+  colorDefault: {r: 0.98, g: 0.32, b: 0, a: 1}
+--- !u!111 &4782125406295601565
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8928184148700358795}
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: 892dca9435b97694bb5e97af5d9297c7, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 892dca9435b97694bb5e97af5d9297c7, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0

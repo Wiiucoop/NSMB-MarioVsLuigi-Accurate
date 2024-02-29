@@ -1211,7 +1211,7 @@ ModelImporter:
       name: mario_model_mg|big_goal_mario_model_mg
       takeName: mario_model_mg|big_goal_mario_model_mg
       internalID: 0
-      firstFrame: 0
+      firstFrame: 21
       lastFrame: 62
       wrapMode: 0
       orientationOffsetY: 0

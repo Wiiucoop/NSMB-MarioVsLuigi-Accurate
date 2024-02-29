@@ -101,6 +101,8 @@ public class BulletBillMover : KillableEntity
             return;
         }
 
+        if ((player.crouching || player.groundpound) && player.state == Enums.PowerupState.BlueShell)
+               return;
         player.photonView.RPC(nameof(PlayerController.Powerdown), RpcTarget.All, false);
         // left = damageDirection.x < 0;
     }
