@@ -23,6 +23,7 @@ public class GlobalController : Singleton<GlobalController>, IInRoomCallbacks, I
     public DiscordController DiscordController { get; private set; }
     public string controlsJson = null;
 
+    private bool isLocalGame = false;
     public bool joinedAsSpectator = false, checkedForVersion = false;
     public DisconnectCause? disconnectCause = null;
 
@@ -54,10 +55,15 @@ public class GlobalController : Singleton<GlobalController>, IInRoomCallbacks, I
         PhotonNetwork.SerializationRate = 30;
         PhotonNetwork.SendRate = 30;
         PhotonNetwork.MaxResendsBeforeDisconnect = 15;
+        isLocalGame = GameManager.Instance.isLocalGame;
 
         InputSystem.controls.UI.DebugInfo.performed += (context) => {
             graphy.SetActive(!graphy.activeSelf);
         };
+
+        
+
+      //  Debug.Log(InputSystem.onActionChange()+" HAGAS");
 
 #if PLATFORM_STANDALONE_WIN && !UNITY_EDITOR
         try {
@@ -121,7 +127,7 @@ public class GlobalController : Singleton<GlobalController>, IInRoomCallbacks, I
         int currentWidth = Screen.width;
         int currentHeight = Screen.height;
 
-        if (settings.ndsResolution && SceneManager.GetActiveScene().buildIndex != 0) {
+        if (!isLocalGame && settings.ndsResolution && SceneManager.GetActiveScene().buildIndex != 0) {
             float aspect = (float) currentWidth / currentHeight;
             targetHeight = (int) ((settings.n3dsResolution ? 272 : 224));
             int targetWidth = (int) (targetHeight * (settings.fourByThreeRatio ? (4/3f) : aspect));

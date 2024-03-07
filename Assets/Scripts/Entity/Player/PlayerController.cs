@@ -20,7 +20,11 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     private short previousFlags;
     private byte previousFlags2;
     private double lastSendTimestamp;
+
+    private bool wallJumpFacingLock = false;
     public bool powerupCompleted = true;
+
+    public static bool isLocalGame = false;
 
     // == MONOBEHAVIOURS ==
 
@@ -31,6 +35,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     private bool canKickAttack = true;
     public static GameObject InstantiatedKickObject;
     private bool hasTornado = false;
+
+    private float tornadoTimer;
     public int playerId = -1;
     public bool dead = false, spawned = false;
     public Enums.PowerupState state = Enums.PowerupState.Small, previousState, befstate, afstate;
@@ -234,6 +240,10 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         //hitboxManager = GetComponent<WrappingHitbox>();
         AnimationController = GetComponent<PlayerAnimationController>();
         fadeOut = GameObject.FindGameObjectWithTag("FadeUI").GetComponent<FadeOutManager>();
+        isLocalGame = GameManager.Instance.isLocalGame;
+        if(isLocalGame){
+            fadeOut = null;
+        }
 
         body.position = transform.position = GameManager.Instance.GetSpawnpoint(playerId);
 
@@ -256,8 +266,9 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         playerId = count;
         Utils.GetCustomProperty(Enums.NetRoomProperties.Lives, out lives);
 
-        if (photonView.IsMine)
-        {
+        if (photonView.IsMine && !isLocalGame)
+        { 
+         //   Debug.Log("NAO LOCAL");
             InputSystem.controls.Player.Movement.performed += OnMovement;
             InputSystem.controls.Player.Movement.canceled += OnMovement;
             InputSystem.controls.Player.Jump.performed += OnJump;
@@ -265,6 +276,22 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             InputSystem.controls.Player.Sprint.canceled += OnSprint;
             InputSystem.controls.Player.PowerupAction.performed += OnPowerupAction;
             InputSystem.controls.Player.ReserveItem.performed += OnReserveItem;
+        }else if(isLocalGame && gameObject.name.Equals("PlayerMario(Clone)")){
+            InputSystem.controls.LocalPlayer1.Movement.performed += OnMovement;
+            InputSystem.controls.LocalPlayer1.Movement.canceled += OnMovement;
+            InputSystem.controls.LocalPlayer1.Jump.performed += OnJump;
+            InputSystem.controls.LocalPlayer1.Sprint.started += OnSprint;
+            InputSystem.controls.LocalPlayer1.Sprint.canceled += OnSprint;
+            InputSystem.controls.LocalPlayer1.PowerupAction.performed += OnPowerupAction;
+            InputSystem.controls.LocalPlayer1.ReserveItem.performed += OnReserveItem;
+        }else if(isLocalGame){
+            InputSystem.controls.LocalPlayer2.Movement.performed += OnMovement;
+            InputSystem.controls.LocalPlayer2.Movement.canceled += OnMovement;
+            InputSystem.controls.LocalPlayer2.Jump.performed += OnJump;
+            InputSystem.controls.LocalPlayer2.Sprint.started += OnSprint;
+            InputSystem.controls.LocalPlayer2.Sprint.canceled += OnSprint;
+            InputSystem.controls.LocalPlayer2.PowerupAction.performed += OnPowerupAction;
+            InputSystem.controls.LocalPlayer2.ReserveItem.performed += OnReserveItem;
         }
 
         GameManager.Instance.players.Add(this);
@@ -289,13 +316,32 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         if (!photonView.IsMine)
             return;
 
-        InputSystem.controls.Player.Movement.performed -= OnMovement;
-        InputSystem.controls.Player.Movement.canceled -= OnMovement;
-        InputSystem.controls.Player.Jump.performed -= OnJump;
-        InputSystem.controls.Player.Sprint.started -= OnSprint;
-        InputSystem.controls.Player.Sprint.canceled -= OnSprint;
-        InputSystem.controls.Player.PowerupAction.performed -= OnPowerupAction;
-        InputSystem.controls.Player.ReserveItem.performed -= OnReserveItem;
+        if(!isLocalGame){//ACCURACY: SEPARATE CONTROLS IN LOCAL MODE
+            InputSystem.controls.Player.Movement.performed -= OnMovement;
+            InputSystem.controls.Player.Movement.canceled -= OnMovement;
+            InputSystem.controls.Player.Jump.performed -= OnJump;
+            InputSystem.controls.Player.Sprint.started -= OnSprint;
+            InputSystem.controls.Player.Sprint.canceled -= OnSprint;
+            InputSystem.controls.Player.PowerupAction.performed -= OnPowerupAction;
+            InputSystem.controls.Player.ReserveItem.performed -= OnReserveItem;
+        }else if(isLocalGame && gameObject.name.Equals("PlayerMario(Clone)")){
+            HorizontalCamera.setZoom(HorizontalCamera.getZoom()-1f);//ACCURACY: FIX CAMERA ZOOM FOR LOCALMODE
+            InputSystem.controls.LocalPlayer1.Movement.performed -= OnMovement;
+            InputSystem.controls.LocalPlayer1.Movement.canceled -= OnMovement;
+            InputSystem.controls.LocalPlayer1.Jump.performed -= OnJump;
+            InputSystem.controls.LocalPlayer1.Sprint.started -= OnSprint;
+            InputSystem.controls.LocalPlayer1.Sprint.canceled -= OnSprint;
+            InputSystem.controls.LocalPlayer1.PowerupAction.performed -= OnPowerupAction;
+            InputSystem.controls.LocalPlayer1.ReserveItem.performed -= OnReserveItem;
+        }else if(isLocalGame){
+            InputSystem.controls.LocalPlayer2.Movement.performed -= OnMovement;
+            InputSystem.controls.LocalPlayer2.Movement.canceled -= OnMovement;
+            InputSystem.controls.LocalPlayer2.Jump.performed -= OnJump;
+            InputSystem.controls.LocalPlayer2.Sprint.started -= OnSprint;
+            InputSystem.controls.LocalPlayer2.Sprint.canceled -= OnSprint;
+            InputSystem.controls.LocalPlayer2.PowerupAction.performed -= OnPowerupAction;
+            InputSystem.controls.LocalPlayer2.ReserveItem.performed -= OnReserveItem;
+        }
     }
 
     public void OnGameStart() {
@@ -436,7 +482,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         return;
     }
 
-        void HandleTornado() {//ACCURACY: TORNADO COLLISION
+void HandleTornado() {   //ACCURACY add tornado
         if(!hasTornado)
             return;
         
@@ -446,15 +492,20 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         
         foreach (GameObject tornado in tornados)
         {
-           
+
             float distance = Vector3.Distance(transform.position, tornado.transform.position);
            // Debug.Log("Meu: "+distance);
-                
+
             // Check if the distance is less than or equal to the specified detection distance
-            if (distance <= 4.9f)
+            if (tornadoTimer >= 4.75f)
+                   tornadoTimer = 0f;
+            if ((distance <= 4.9f && (body.position.y - tornado.transform.position.y) < 0.5f) || (tornadoTimer < 4.75f && tornadoTimer != 0f))
             {
+                   if (tornadoTimer == 0f)
+                     tornadoTimer = body.position.y - (tornado.transform.position.y - 2.3f);
+                   Utils.TickTimer(ref tornadoTimer, -99, -Time.fixedDeltaTime * 3);
                 //default velocity = 12f
-                body.velocity = new Vector2(body.velocity.x, 5f);
+                body.velocity = new Vector2(0f, 6f);
                 flying = true;
                 onGround = false;
                 body.position += Vector2.up * 0.075f;
@@ -465,6 +516,11 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 drill = false;
                 bounce = false;
                 knockback = false;
+                   if (tornadoTimer >= 4.75f) {
+                     tornadoTimer = 4.75f;
+                     photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_SpinnerLaunch);
+                   }
+                transform.position = body.position = new Vector2((tornado.transform.position.x + (1 + (tornadoTimer / 2.3f)) * Mathf.Sin(tornadoTimer / 0.5f)), ((tornado.transform.position.y - 2.5f) + tornadoTimer));
                 return;
             }       
         }
@@ -543,7 +599,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
     private ContactPoint2D[] contacts = new ContactPoint2D[0];
     public void OnCollisionStay2D(Collision2D collision) {
-        if (!photonView.IsMine || (knockback && !fireballKnockback) || Frozen)
+        if (!photonView.IsMine || Frozen)
             return;
 
         GameObject obj = collision.gameObject;
@@ -627,6 +683,10 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                     //hit them from above
                     bounce = !groundpound && !drill;
                     bool groundpounded = groundpound || drill;
+                    if(knockback){
+                        ResetKnockback();
+                        bounce = true;
+                    }
 
                     if (state == Enums.PowerupState.MiniMushroom && other.state != Enums.PowerupState.MiniMushroom) {
                         //we are mini, they arent. special rules.
@@ -731,7 +791,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         switch (obj.tag) {
         case "Fireball": {
             FireballMover fireball = obj.GetComponentInParent<FireballMover>();
-            if (fireball.photonView.IsMine || hitInvincibilityCounter > 0)
+            //Accuracy: Make fireball hit the other player in LocalGame
+            if ((fireball.photonView.IsMine && !isLocalGame) || hitInvincibilityCounter > 0)
                 return;
 
             fireball.photonView.RPC(nameof(KillableEntity.Kill), RpcTarget.All);
@@ -837,7 +898,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     }
 
     public void OnJump(InputAction.CallbackContext context) {
-        if (!photonView.IsMine)
+        if (!photonView.IsMine )
             return;
 
         jumpHeld = context.ReadValue<float>() >= 0.5f;
@@ -854,7 +915,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         if (Frozen)
             return;
 
-        if (running && (state == Enums.PowerupState.FireFlower || state == Enums.PowerupState.IceFlower || betaAnims && state == Enums.PowerupState.MegaMushroom) && GlobalController.Instance.settings.fireballFromSprint)
+        if (running && (state == Enums.PowerupState.FireFlower || state == Enums.PowerupState.IceFlower || betaAnims && state == Enums.PowerupState.MegaMushroom) && (GlobalController.Instance.settings.fireballFromSprint && (Application.platform != RuntimePlatform.Android && Application.platform != RuntimePlatform.IPhonePlayer)))
             ActivatePowerupAction();//ACCURACY: E3 BETA 2005 MEGA MUSHROOM KICK ANIM
     }
 
@@ -881,12 +942,18 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
             int count = 0;
             foreach (FireballMover existingFire in FindObjectsOfType<FireballMover>()) {
-                if (existingFire.photonView.IsMine && ++count >= 2)//Accuracy: limit max fireball per player to 2
+                if (existingFire.photonView.IsMine && ++count >= 2 && !isLocalGame){//Accuracy: limit max fireball per player to 2
                     return;
+                }
             }
 
             if (count <= 1) {
-                fireballTimer = 1.25f;
+                if(!isLocalGame){
+                    fireballTimer = 1.25f;
+                }else{
+                    fireballTimer = 0.75f;
+                }
+                
                 canShootProjectile = count == 0;
             } else if (fireballTimer <= 0) {
                 fireballTimer = 1.25f;
@@ -1015,7 +1082,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 animator.Play("e3-kick");//Wall jump variation 2
                 break;
             default:
-                Debug.LogError("Invalid random index");
+                Debug.LogError("Invalid random betaWALLJUMP anim index");
                 break;
         }
     }
@@ -1206,7 +1273,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                     }else if(other.state != Enums.PowerupState.MiniMushroom){
                         if(other.invincible <= 0){//CHECK FOR STARMAN
                             if(other.inShell || other.state == Enums.PowerupState.BlueShell && other.crouching == true){//CHECK IF IS INSIDE SHELL
-                                otherView.RPC(nameof(Powerdown), RpcTarget.All, true);
+                                other.state = Enums.PowerupState.Mushroom;
                             }else{//IF NOT inShell and NOT STARMAN, MAKE THEM MINIS
                                 otherView.RPC(nameof(Knockback), RpcTarget.All, other.transform.position.x < body.position.x, 1, true, photonView.ViewID);
                                 other.state = Enums.PowerupState.MiniMushroom;
@@ -1651,9 +1718,17 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     {
         float elapsedTime = 0f;
         float finalZoomSize = HorizontalCamera.getZoom();
+        float finalLocalZoomSize = finalZoomSize+1f;
+        float finaltime = 1f;
+
+        if(isLocalGame){
+            finaltime = 1.7f;
+        }
+        
+        
         float startZoomSize = 0.5f;
 
-        while (elapsedTime < 1f)
+        while (elapsedTime < finaltime)
         {
             // Interpolate the camera's orthographic size towards the targetZoomSize
             float newZoom = Mathf.Lerp(startZoomSize, finalZoomSize, elapsedTime);
@@ -1668,7 +1743,12 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         }
 
         // Ensure exact target size
-        HorizontalCamera.setZoom(finalZoomSize);
+        if(isLocalGame){
+            HorizontalCamera.setZoom(finalLocalZoomSize);
+        }else{
+            HorizontalCamera.setZoom(finalZoomSize);
+        }
+
     }
 
 
@@ -2025,6 +2105,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             return;
         }
 
+        
         invertRotation = false;
 
         if (knockback || fireballKnockback)
@@ -2071,14 +2152,13 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             megaVelo *
             (fireball ? 0.5f : 1f),
 
-            fireball ? 0 : 4.5f
+            fireball ? 0 : 0f
         );
         body.velocity = body.velocity/1.35f;
         if((facingRight == fromRight) && state != Enums.PowerupState.MiniMushroom){//accuracy: sitting pose knockback FRICTION CHANGE
             body.velocity = body.velocity/1.5f;
-            if(onGround){
-                invertRotation = true;
-            }
+            invertRotation = true;
+            
         }
 
         }
@@ -2114,7 +2194,6 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         if (fireball && bumpingKnockback)
             return;
      
-
         if (!GameManager.Instance.started || hitInvincibilityCounter > 0 || pipeEntering || Frozen || dead || giantStartTimer > 0 || giantEndTimer > 0)
             return;
 
@@ -2133,6 +2212,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
        
         knockbackTimer = 0.5f;
         bumpingKnockback = true;
+        fireballKnockback = true;
         initialKnockbackFacingRight = facingRight;
 
         PhotonView attacker = PhotonNetwork.GetPhotonView(attackerView);
@@ -2186,7 +2266,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     [PunRPC]
     protected void ResetKnockback() {
 
-        if(!fireballKnockback || !bumpingKnockback){
+        if(!fireballKnockback){
             hitInvincibilityCounter = state != Enums.PowerupState.MegaMushroom ? 2f : 0f;
             bounce = false;
             knockback = false;
@@ -2349,6 +2429,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         } else if (shouldntCollide) {
             layer = Layers.LayerPassthrough;
             bumpingKnockback = false;
+            fireballKnockback = false;
         }
 
         gameObject.layer = layer;
@@ -2475,7 +2556,6 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     }
 
     void HandleWallslide(bool holdingLeft, bool holdingRight, bool jump) {
-
         Vector2 currentWallDirection;
         if (holdingLeft) {
             currentWallDirection = Vector2.left;
@@ -2499,7 +2579,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             facingRight = wallSlideLeft;
             if (jump && wallJumpTimer <= 0) {
                 //perform walljump
-
+                koyoteTime = 0.1f;
                 hitRight = false;
                 hitLeft = false;
                 body.velocity = new Vector2(WALLJUMP_HSPEED * (wallSlideLeft ? 1 : -1), WALLJUMP_VSPEED);
@@ -2515,6 +2595,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 photonView.RPC(nameof(SpawnParticle), RpcTarget.All, "Prefabs/Particle/WalljumpParticle", body.position + offset, wallSlideLeft ? Vector3.zero : Vector3.up * 180);
 
                 wallJumpTimer = 16 / 60f;
+                wallJumpFacingLock = true;
                 
                 if(betaAnims){//Accuracy: E3 BETA ANIMATION
                     photonView.RPC("betaWalljump", RpcTarget.All);
@@ -2735,6 +2816,12 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             body.velocity = new(SPEED_STAGE_MAX[RUN_STAGE] * 0.9f * (facingRight ? 1 : -1) * (1f - slowdownTimer), body.velocity.y);
             return;
         }
+
+        if(wallJumpFacingLock && koyoteTime <= 0.5f){//ACCURACY: LOCK WALLJUMP DIRECTION
+            return;
+        }
+        wallJumpFacingLock = false;
+        
 
         bool run = functionallyRunning && (!flying || state == Enums.PowerupState.MegaMushroom);
 
@@ -3008,6 +3095,11 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         if (groundpound && !onGround)
             return;
 
+        if(wallJumpFacingLock && koyoteTime <= 0.5f){//ACCURACY: LOCK WALLJUMP DIRECTION
+            return;
+        }
+        wallJumpFacingLock = false;
+        
         //Facing direction
         bool right = joystick.x > analogDeadzone;
         bool left = joystick.x < -analogDeadzone;
@@ -3289,7 +3381,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
         //Ground
         if (onGround) {
-            
+            wallJumpFacingLock = false;
             if (photonView.IsMine && hitRoof && crushGround && hitInvincibilityCounter <= 2.65 && body.velocity.y <= 0.1 && state != Enums.PowerupState.MegaMushroom) {
                 //Crushed.
                 
@@ -3326,6 +3418,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
         //Crouching
         HandleCrouching(crouch);
+
         HandleTornado();//ACCURACY: TORNADO
         HandleWallslide(left, right, jump);
 

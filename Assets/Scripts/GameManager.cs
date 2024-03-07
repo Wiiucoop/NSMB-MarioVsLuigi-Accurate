@@ -23,6 +23,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     public Slider masterSlider;
 
+    public bool isLocalGame = false;
+
+    private bool localLuigiWins = false;
+
     public static GameManager Instance {
         get {
             if (_instance)
@@ -66,7 +70,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     public GameObject localPlayer, otherPlayer;
     public bool paused, loaded, started;
-    public GameObject pauseUI, pausePanel, pauseButton, hostExitUI, hostExitButton, mobileUI;
+    public GameObject pauseUI, pausePanel, pauseButton, hostExitUI, hostExitButton, mobileUI, LocalReserve, LocalTrack, LocalTrackIcons;
     public bool gameover = false, musicEnabled = false;
     public readonly HashSet<Player> loadedPlayers = new();
     public int starRequirement, timedGameDuration = -1, coinRequirement;
@@ -198,7 +202,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
             setPiranaplantCanspawn(true);
             //ACCURACY: Change enemy spawns in a 1v1 match PART 2
-            if(players.Count > 2){
+            if(players.Count > 2 || isLocalGame){
                 foreach (EnemySpawnpoint point in enemySpawnpoints)
                 point.AttemptSpawning();
             }
@@ -446,6 +450,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     public void Awake() {
         Instance = this;
+        isLocalGame = SceneManager.GetActiveScene().buildIndex >= 12;
     }
 
     public void Start() {
@@ -453,9 +458,18 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         loopMusic = GetComponent<LoopingMusic>();
         coins = GameObject.FindGameObjectsWithTag("coin");
         levelUIColor.a = .7f;
+        startText = GameObject.FindWithTag("starttext");//ACCURACY: MARIO/LUIGI START
+        if(isLocalGame){
+            Settings.Instance.fourByThreeRatio = false;
+            startText.GetComponent<TMP_Text>().text = "Loading...";
+            startText.GetComponent<Animator>().SetTrigger("startNegative");
+        }
+        LocalReserve.SetActive(!isLocalGame);
+        LocalTrack.SetActive(!isLocalGame);
+        LocalTrackIcons.SetActive(!isLocalGame);
 
         InputSystem.controls.LoadBindingOverridesFromJson(GlobalController.Instance.controlsJson);
-
+        
         //Spawning in editor??
         if (!PhotonNetwork.IsConnectedAndReady) {
             PhotonNetwork.OfflineMode = true;
@@ -485,6 +499,11 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         if (!GlobalController.Instance.joinedAsSpectator) {
             localPlayer = PhotonNetwork.Instantiate("Prefabs/" + Utils.GetCharacterData().prefab, spawnpoint, Quaternion.identity, 0);
             localPlayer.GetComponent<Rigidbody2D>().isKinematic = true;
+            if(isLocalGame){
+                otherPlayer = PhotonNetwork.Instantiate("Prefabs/PlayerLuigi", spawnpoint, Quaternion.identity, 0);
+                otherPlayer.GetComponent<Rigidbody2D>().isKinematic = true;
+            }
+            
 
             RaiseEventOptions options = new() { Receivers = ReceiverGroup.Others, CachingOption = EventCaching.AddToRoomCache };
             SendAndExecuteEvent(Enums.NetEventIds.PlayerFinishedLoading, null, SendOptions.SendReliable, options);
@@ -493,7 +512,6 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         }
 
         brickBreak = ((GameObject) Instantiate(Resources.Load("Prefabs/Particle/BrickBreak"))).GetComponent<ParticleSystem>();
-        startText = GameObject.FindWithTag("starttext");//ACCURACY: MARIO/LUIGI START
     }
 
     private void CheckIfAllLoaded() {
@@ -570,6 +588,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                 ScoreboardUpdater.instance.SetEnabled();
         } catch { }
         Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnims); //ACCURACY: ENABLE E3 BETA ANIMATIONS
+        Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool betaCustomMusic); //ACCURACY: ENABLE E3 BETA CUSTOM MUSIC
         
         if (gameStarting) {
             if (!Application.isEditor){
@@ -578,7 +597,14 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             bool isMario = Utils.GetCharacterData(PhotonNetwork.LocalPlayer).uistring.Equals("<sprite=3>");
             fader.SetIsMario(isMario);
             fader.FadeOut();
+            if(isLocalGame){
+                StartCoroutine(RemoveStartMessage(0f));
+            }
             StartCoroutine(PlayerController.ZoomOutAnim());//ACCURACY: ZOOMOUT ANIMATION
+            
+            
+            
+            
            // if(PhotonNetwork.IsMasterClient)
             //    sfx.PlayOneShot(Enums.Sounds.UI_StartGame.GetClip());
 
@@ -586,8 +612,18 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                 foreach (EnemySpawnpoint point in FindObjectsOfType<EnemySpawnpoint>())
                     point.AttemptSpawning();
 
-            if (localPlayer)
+            if (localPlayer){
                 localPlayer.GetComponent<PlayerController>().OnGameStart();
+
+                Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool isLocalVersus); //ACCURACY: ENABLE LOCAL PLAY
+                if(isLocalGame){
+                    otherPlayer.GetComponent<PlayerController>().playerId++;
+                    otherPlayer.GetComponent<PlayerController>().OnGameStart();
+                    
+                }
+                
+            }
+                
 
             if(betaAnims){//ACCURACY: MARIO/LUIGI START TEXT
                 if(isMario){
@@ -597,8 +633,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                     startText.GetComponent<TMP_Text>().colorGradientPreset = luigiGradient;
                 }
                 startText.GetComponent<Animator>().SetTrigger("start");
-                StartCoroutine(RemoveStartMessage());
+                StartCoroutine(RemoveStartMessage(5f));
             }
+            
         }
 
         startServerTime = startTimestamp + 3500;
@@ -623,7 +660,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         //ACCURACY: Music alternating made like the original
         //it starts playing SNOW and alternates with OVERWORLD theme each game
-        if (SceneManager.GetActiveScene().buildIndex >= 2 && SceneManager.GetActiveScene().buildIndex <= 6 ) {
+        if ((SceneManager.GetActiveScene().buildIndex >= 2 && SceneManager.GetActiveScene().buildIndex <= 6) || isLocalGame) {
             if (GlobalController.Instance.musicOrdering % 2 == 0)
             {
                 mainMusic = (MusicData)Resources.Load("Scriptables/Music/MusicLevelSnow");
@@ -634,11 +671,36 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             if (!spectating && !betaAnims) {
                 GlobalController.Instance.musicOrdering++;
             }
-            if(betaAnims){
-                mainMusic = (MusicData)Resources.Load("Scriptables/Music/MusicBetaPlains");
-            }
         
         }
+
+        if(betaAnims && betaCustomMusic){
+                
+                int betaIndex = SceneManager.GetActiveScene().buildIndex;
+                switch (betaIndex)
+                {
+                    case 7://Plain
+                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaSMBDMusic");
+                        break;
+                    case 8://Cave
+                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaGhostNSMB");
+                        break;
+                    case 9://Castle
+                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaTTYDCastle");
+                        break;
+                    case 10://City
+                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaMusicRPG");
+                        break;
+                    case 11://Desert
+                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaDesert");
+                        break;
+                    default:
+                        Debug.LogError("Invalid random betaMusic anim index");
+                        break;
+                }
+            
+
+            }
         if (SpectationManager.Spectating) fader.SetInvisible(true);
             
     }
@@ -667,12 +729,17 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             winnerName = winner.GetUniqueNickname();
         }
 
-        if(players.Count <= 2 ){//ACCURACY: SET WIN TEXT TO BE THEIR CHARACTER MODEL IN 1V1 MATCHES
+        if(players.Count <= 2 && !isLocalGame){//ACCURACY: SET WIN TEXT TO BE THEIR CHARACTER MODEL IN 1V1 MATCHES
             if(Utils.GetCharacterData(PhotonNetwork.LocalPlayer).uistring.Equals("<sprite=3>")){//ACCURACY: MAKE WINNE/LOSER BE YOUR PLAYER
                     winnerName = "Mario";
             }else{
                     winnerName = "Luigi";
             }
+        }
+        if(localLuigiWins){
+            winnerName = "Luigi";
+        }else if(isLocalGame){
+            winnerName = "Mario";
         }
         PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = false });
         gameover = true;
@@ -690,7 +757,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                 text.GetComponent<TMP_Text>().colorGradientPreset = luigiGradient;
             }
         }
-        if(winner != null && winner.IsLocal && winnerName == "Luigi"){
+        if((winner != null && winner.IsLocal && winnerName == "Luigi") || localLuigiWins){
             text.GetComponent<TMP_Text>().colorGradientPreset = luigiGradient;
         }
         yield return new WaitForSecondsRealtime(1);
@@ -720,6 +787,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         yield return new WaitForSecondsRealtime(secondsUntilMenu);
         if (PhotonNetwork.IsMasterClient)
             PhotonNetwork.DestroyAll();
+        if(isLocalGame){
+            PhotonNetwork.LeaveRoom();
+            PhotonNetwork.Disconnect();
+        }
         SceneManager.LoadScene("MainMenu");
     }
 
@@ -738,13 +809,24 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             int index = Random.Range(0, remainingSpawns.Count);
             Vector3 spawnPos = remainingSpawns[index].transform.position;
             //Check for people camping spawn
-            foreach (var hit in Physics2D.OverlapCircleAll(spawnPos, 4)) {
+            if(!isLocalGame){
+                foreach (var hit in Physics2D.OverlapCircleAll(spawnPos, 4)) {
                 if (hit.gameObject.CompareTag("Player")) {
                     //cant spawn here
                     remainingSpawns.RemoveAt(index);
                     yield return new WaitForSeconds(0.2f);
                     goto bigwhile;
                 }
+            }
+            }else{
+                foreach (var hit in Physics2D.OverlapCircleAll(spawnPos, 2)) {
+                if (hit.gameObject.CompareTag("Player")) {
+                    //cant spawn here
+                    remainingSpawns.RemoveAt(index);
+                    yield return new WaitForSeconds(0.2f);
+                    goto bigwhile;
+                }
+            }
             }
 
             PhotonNetwork.InstantiateRoomObject("Prefabs/BigStar", spawnPos, Quaternion.identity);
@@ -796,7 +878,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             HandleMusic();
 
         //ACCURACY: Change enemy spawns in a 1v1 match  PART 1
-        if(players.Count <= 2){
+        if(players.Count <= 2 && !isLocalGame){
             foreach (EnemySpawnpoint point in enemySpawnpoints)
             point.AttemptSpawning1v1();
         }
@@ -830,8 +912,14 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                     winningPlayers.Clear();
                     winningStars = player.stars;
                     winningPlayers.Add(player);
+                    if(winningPlayers[0].gameObject.name.Equals("PlayerLuigi(Clone)")){
+                        localLuigiWins = true;
+                    }
                 } else if (player.stars == winningStars) {
                     winningPlayers.Add(player);
+                    if(winningPlayers[0].gameObject.name.Equals("PlayerLuigi(Clone)")){
+                        localLuigiWins = true;
+                    }
                 }
             }
         }
@@ -842,6 +930,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             return;
         } else if (alivePlayers.Count == 1 && playerCount >= 2) {
             //one player left alive (and not in a solo game). winner!
+            if(isLocalGame && alivePlayers[0].gameObject.name.Equals("PlayerLuigi(Clone)")){
+                localLuigiWins = true;
+            }
             PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.EndGame, alivePlayers[0].photonView.Owner, NetworkUtils.EventAll, SendOptions.SendReliable);
             return;
         }
@@ -880,9 +971,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         yield break;
     }
 
-    private IEnumerator RemoveStartMessage()//ACCURACY: Delay to start speedup when one of the players get to its last life
+    private IEnumerator RemoveStartMessage(float timerText)//ACCURACY: Delay to start speedup when one of the players get to its last life
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(timerText);
         startText.GetComponent<TMP_Text>().text = "";
         startText.GetComponent<Animator>().ResetTrigger("start");
         yield break;
@@ -965,6 +1056,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public void Quit() {
         sfx.PlayOneShot(Enums.Sounds.UI_Decide.GetClip());
         PhotonNetwork.LeaveRoom();
+        if(isLocalGame){
+            PhotonNetwork.Disconnect();
+        }
         SceneManager.LoadScene("MainMenu");
     }
 

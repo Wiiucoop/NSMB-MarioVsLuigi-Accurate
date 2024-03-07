@@ -145,8 +145,7 @@ public class StarBouncer : MonoBehaviourPun {
 
         if (physics.onGround && canBounce) {
             body.velocity = new(body.velocity.x, bounceAmount);
-            if (photonView.IsMine && physics.hitRoof)
-                photonView.RPC("Crushed", RpcTarget.All);
+            
         }
     }
 

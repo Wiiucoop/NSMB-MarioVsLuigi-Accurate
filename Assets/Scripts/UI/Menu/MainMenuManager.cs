@@ -24,7 +24,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     public GameObject lobbiesContent, lobbyPrefab;
     bool quit, validName;
     public GameObject connecting;
-    public GameObject title, bg, mainMenu, optionsMenu, lobbyMenu, createLobbyPrompt, inLobbyMenu, creditsMenu, controlsMenu, privatePrompt, updateBox;
+    public GameObject title, bg, mainMenu, optionsMenu, localPlayMenu, lobbyMenu, createLobbyPrompt, inLobbyMenu, creditsMenu, controlsMenu, privatePrompt, updateBox;
     public GameObject[] levelCameraPositions;
     public GameObject sliderText, lobbyText, currentMaxPlayers, settingsPanel;
     public TMP_Dropdown levelDropdown, characterDropdown;
@@ -34,7 +34,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     public GameObject playersContent, playersPrefab, chatContent, chatPrefab;
     public TMP_InputField nicknameField, starsText, coinsText, livesField, timeField, lobbyJoinField, chatTextField;
     public Slider musicSlider, sfxSlider, masterSlider, lobbyPlayersSlider, changePlayersSlider;
-    public GameObject mainMenuSelected, optionsSelected, lobbySelected, currentLobbySelected, createLobbySelected, creditsSelected, controlsSelected, privateSelected, reconnectSelected, updateBoxSelected;
+    public GameObject mainMenuSelected, optionsSelected, lobbySelected, currentLobbySelected, localPlaySelected, createLobbySelected, creditsSelected, controlsSelected, privateSelected, reconnectSelected, updateBoxSelected;
     public GameObject errorBox, errorButton, rebindPrompt, reconnectBox;
     public TMP_Text errorText, rebindCountdown, rebindText, reconnectText, updateText;
     public TMP_Dropdown region;
@@ -58,6 +58,8 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     private Region[] pingSortedRegions;
 
     private readonly Dictionary<string, RoomIcon> currentRooms = new();
+
+    private bool isOffline = false;
 
     private readonly List<string> allRegions = new();
     private static readonly string roomNameChars = "BCDFGHJKLMNPRQSTVWXYZ";
@@ -241,7 +243,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
         selectedRoom = null;
         selectedRoomIcon = null;
-        if (!PhotonNetwork.IsConnectedAndReady) {
+        if (!PhotonNetwork.IsConnectedAndReady && !isOffline) {
 
             foreach ((string key, RoomIcon value) in currentRooms.ToArray()) {
                 Destroy(value);
@@ -329,9 +331,10 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             Utils.GetCustomProperty(Enums.NetPlayerProperties.Spectator, out bool spectate, PhotonNetwork.LocalPlayer.CustomProperties);
             GlobalController.Instance.joinedAsSpectator = spectate || joinedLate;
             Utils.GetCustomProperty(Enums.NetRoomProperties.Level, out int level);
+            Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betalevels);
             PhotonNetwork.IsMessageQueueRunning = false;
             SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);
-            if(powerupsEnabled.isOn){//ACCURACY: SET BETA LEVELS INDEX BEFORE LOADING
+            if(betalevels){//ACCURACY: SET BETA LEVELS INDEX BEFORE LOADING
                 level+=5;
             }
             SceneManager.LoadSceneAsync(level + 2, LoadSceneMode.Additive);
@@ -423,6 +426,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         //Photon stuff.
         if (!PhotonNetwork.IsConnected) {
             OpenTitleScreen();
+            
             //PhotonNetwork.NetworkingClient.AppId = "ce540834-2db9-40b5-a311-e58be39e726a";
             PhotonNetwork.NetworkingClient.AppId = "40c2f241-79f7-4721-bdac-3c0366d00f58";
 
@@ -432,8 +436,13 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
             string id = PlayerPrefs.GetString("id", null);
             string token = PlayerPrefs.GetString("token", null);
-
+       
             PhotonNetwork.NetworkingClient.ConnectToNameServer();
+
+                 
+            
+          
+            
 
         } else {
             if (PhotonNetwork.InRoom) {
@@ -570,8 +579,9 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             OnEvent(new() { Code = (byte) Enums.NetEventIds.StartGame, SenderKey = 255 });
             return;
         }
-
-        OpenInLobbyMenu();
+        if(!isOffline){
+            OpenInLobbyMenu();
+        }
         characterDropdown.SetValueWithoutNotify(Utils.GetCharacterIndex());
 
         if (PhotonNetwork.IsMasterClient)
@@ -632,11 +642,13 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         creditsMenu.SetActive(false);
         privatePrompt.SetActive(false);
         updateBox.SetActive(false);
-
+        localPlayMenu.SetActive(false);
+        isOffline = false;
         EventSystem.current.SetSelectedGameObject(mainMenuSelected);
 
     }
     public void OpenLobbyMenu() {
+        isOffline = false;
         title.SetActive(false);
         bg.SetActive(true);
         mainMenu.SetActive(false);
@@ -710,6 +722,23 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         privatePrompt.SetActive(false);
 
         EventSystem.current.SetSelectedGameObject(creditsSelected);
+    }
+
+    public void OpenLocalPlay() {//ACCURACY: ADD LOCAL GAME PLAY ROOM
+        title.SetActive(false);
+        bg.SetActive(true);
+        mainMenu.SetActive(false);
+        optionsMenu.SetActive(false);
+        controlsMenu.SetActive(false);
+        lobbyMenu.SetActive(false);
+        createLobbyPrompt.SetActive(false);
+        inLobbyMenu.SetActive(false);
+        creditsMenu.SetActive(false);
+        localPlayMenu.SetActive(true);
+        privatePrompt.SetActive(false);
+        isOffline = true;
+
+        EventSystem.current.SetSelectedGameObject(localPlaySelected);
     }
     public void OpenInLobbyMenu() {
         title.SetActive(false);
@@ -791,6 +820,54 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         RaiseEventOptions options = new() { Receivers = ReceiverGroup.All };
         PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
     }
+
+    public void StartLocalGrass() {
+        
+        PhotonNetwork.Disconnect();
+        PhotonNetwork.OfflineMode = true;
+      //  Debug.Log(isOffline+" ta off?");
+
+      
+    //   SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);
+
+
+       SceneManager.LoadSceneAsync(10 + 2, LoadSceneMode.Single);
+    //   StartGame();
+
+               
+            PhotonNetwork.CreateRoom("Debug", new() {
+                CustomRoomProperties = NetworkUtils.DefaultRoomProperties
+            });
+        //start game with all players
+        
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = true });
+        RaiseEventOptions options = new() { Receivers = ReceiverGroup.All };
+        PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
+    }
+
+    public void StartLocalBricks() {
+        
+        PhotonNetwork.Disconnect();
+        PhotonNetwork.OfflineMode = true;
+      //  Debug.Log(isOffline+" ta off?");
+
+      
+      // SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);
+
+
+       SceneManager.LoadSceneAsync(11 + 2, LoadSceneMode.Single);
+    //   StartGame();
+
+               
+            PhotonNetwork.CreateRoom("Debug", new() {
+                CustomRoomProperties = NetworkUtils.DefaultRoomProperties
+            });
+        //start game with all players
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = true });
+        RaiseEventOptions options = new() { Receivers = ReceiverGroup.All };
+        PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
+    }
+
     public void ChangeNewPowerups(bool value) {//ACCURACY: ChangeNewPowerups IS THE E3 BETA EXPERIENCE TOGGLE 
         powerupsEnabled.SetIsOnWithoutNotify(value);
         int index = levelDropdown.value;
@@ -966,6 +1043,8 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         livesField.interactable = PhotonNetwork.IsMasterClient && livesEnabled.isOn;
         timeField.interactable = PhotonNetwork.IsMasterClient && timeEnabled.isOn;
         drawTimeupToggle.interactable = PhotonNetwork.IsMasterClient;
+
+        levelDropdown.interactable = PhotonNetwork.IsMasterClient && !drawTimeupToggle.isOn;
 
         Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool debug);
         privateToggleRoom.interactable = PhotonNetwork.IsMasterClient && !debug;
@@ -1173,19 +1252,19 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             return;
         }
         
-    /*    case "debug": {
+        case "debug": {
             Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool debugEnabled);
 
             if (debugEnabled) {
-                LocalChatMessage("Debug features have been disabled.", Color.red);
+                LocalChatMessage("Custom MUSIC have been disabled for E3 levels.", Color.red);
             } else {
-                LocalChatMessage("Debug features have been enabled.", Color.red);
+                LocalChatMessage("Custom MUSIC have been enabled for E3  levels.", Color.red);
             }
             PhotonNetwork.CurrentRoom.SetCustomProperties(new() {
                 [Enums.NetRoomProperties.Debug] = !debugEnabled
             });
             return;
-        }*/
+        }
         
         case "mute": {
             if (args.Length < 2) {

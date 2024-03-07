@@ -19,8 +19,12 @@ public class UIUpdater : MonoBehaviour {
     public Image itemReserve, itemColor;
     public float pingSample = 0;
 
+    public bool isLocalGame = false;
+
     private Material timerMaterial;
     private GameObject starsParent, coinsParent, livesParent, p2LivesParent, timerParent;
+
+    public GameObject middleColumnParent;
     private readonly List<Image> backgrounds = new();
     private bool uiHidden;
     private string pingIcon;
@@ -31,7 +35,7 @@ public class UIUpdater : MonoBehaviour {
 
     private bool isP2LifeAnimationRunning = false;
 
-    private int coins = -1, stars = -1, p2stars = -1, lives = -1, timer = -1;
+    private int coins = -1, coins2 = -1, stars = -1, p2stars = -1, lives = -1, timer = -1;
 
     public void Start() {
         Instance = this;
@@ -48,6 +52,13 @@ public class UIUpdater : MonoBehaviour {
         backgrounds.Add(coinsParent.GetComponentInChildren<Image>());
         backgrounds.Add(livesParent.GetComponentInChildren<Image>());
         backgrounds.Add(timerParent.GetComponentInChildren<Image>());
+
+        isLocalGame = GameManager.Instance.isLocalGame;
+
+        if(isLocalGame){
+            middleColumnParent.transform.position += new Vector3(0f, 28f, 0f);
+            uiCountdown.text = Utils.GetSymbolString("C" + "0" + "/" + GameManager.Instance.coinRequirement);
+        }
 
         foreach (Image bg in backgrounds)
             bg.color = GameManager.Instance.levelUIColor;
@@ -340,7 +351,7 @@ private void flushStars(string p1) {
             livesParent.SetActive(false);
         }
 
-        if (GameManager.Instance.timedGameDuration > 0) {
+        if (GameManager.Instance.timedGameDuration > 0 && !isLocalGame) {
             int seconds = Mathf.CeilToInt((GameManager.Instance.endServerTime - PhotonNetwork.ServerTimestamp) / 1000f);
             seconds = Mathf.Clamp(seconds, 0, GameManager.Instance.timedGameDuration);
             if (seconds != timer) {
@@ -359,6 +370,15 @@ private void flushStars(string p1) {
                 byte gb = (byte) (Mathf.PingPong(partialSeconds, 1f) * 255);
                 timerMaterial.SetColor("_Color", new Color32(255, gb, gb, 255));
             }
+        }else if(isLocalGame){
+            timerParent.SetActive(true);
+            if(other == null){
+                return;
+            }
+            if (other.coins != coins2) {
+            coins2 = other.coins;
+            uiCountdown.text = Utils.GetSymbolString("C" + coins2 + "/" + GameManager.Instance.coinRequirement);
+        }
         } else {
             timerParent.SetActive(false);
         }
@@ -477,6 +497,10 @@ private void flushStars(string p1) {
     }
 //ACCURACY: Player HEADS as life counter instead of numbers
         string lifeIcon = Utils.GetCharacterData(other.photonView.Owner).uistring;
+        
+        if(isLocalGame){
+            lifeIcon = "<sprite=4>";
+        }
 
         if (other.lives == 0) {
             p2UiLives.text = "";

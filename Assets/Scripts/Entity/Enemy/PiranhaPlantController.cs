@@ -102,6 +102,9 @@ public class PiranhaPlantController : KillableEntity
     [PunRPC]
     public override void Kill()
     {
+        if(!animator.GetCurrentAnimatorClipInfo(0)[0].clip.name.Equals("pakkun_chomp"))
+            return;
+
         PlaySound(Enums.Sounds.Enemy_PiranhaPlant_Death);
         PlaySound(Frozen ? Enums.Sounds.Enemy_Generic_FreezeShatter : Enums.Sounds.Enemy_Shell_Kick);
 

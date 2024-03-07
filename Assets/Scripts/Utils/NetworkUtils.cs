@@ -26,7 +26,7 @@ namespace NSMB.Utils {
             [Enums.NetRoomProperties.Level] = 0,
             [Enums.NetRoomProperties.StarRequirement] = 10,
             [Enums.NetRoomProperties.CoinRequirement] = 8,
-            [Enums.NetRoomProperties.Lives] = -1,
+            [Enums.NetRoomProperties.Lives] = 3,
             [Enums.NetRoomProperties.Time] = -1,
             [Enums.NetRoomProperties.DrawTime] = false,
             [Enums.NetRoomProperties.NewPowerups] = false,

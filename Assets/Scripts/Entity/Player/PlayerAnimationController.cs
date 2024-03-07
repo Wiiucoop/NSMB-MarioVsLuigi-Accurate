@@ -27,7 +27,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
         get {
             if(GameManager.Instance.players.Count <= 2){
                 //ACCURACY: If mario, set glowcolor to RED, if luigi set to GREEN
-                if(Utils.GetCharacterData(photonView.Owner).uistring.Equals("<sprite=3>")){
+                if(gameObject.name.Equals("PlayerMario(Clone)")){
                     _glowColor = Color.red;
                 }else{
                     _glowColor = Color.green;

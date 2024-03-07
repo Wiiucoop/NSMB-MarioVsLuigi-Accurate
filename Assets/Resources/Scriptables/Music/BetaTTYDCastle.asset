@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e5478bfbe63c3c46b392d3ca752690c, type: 3}
-  m_Name: MusicRPG
+  m_Name: BetaTTYDCastle
   m_EditorClassIdentifier: 
-  clip: {fileID: 8300000, guid: 44e55362cd1f32642b17278157672f9a, type: 3}
-  fastClip: {fileID: 8300000, guid: 9a573d1ddf38ecb4c8815a6a5cbf79e1, type: 3}
-  loopStartSample: 4.941
-  loopEndSample: 58.27
+  clip: {fileID: 8300000, guid: c933929526cc934409107118adceee48, type: 3}
+  fastClip: {fileID: 8300000, guid: 48ef4a65ce50e7f4992b69e6dfdd8c35, type: 3}
+  loopStartSample: 0
+  loopEndSample: 40

@@ -4,11 +4,13 @@ namespace NSMB.Utils {
     public static class Layers {
 
         private static int? _maskAnyGround, _maskOnlyGround;
-        public static int MaskAnyGround { get => LazyLoadMask(ref _maskAnyGround, "Ground", "Semisolids", "IceBlock"); }
+        public static int MaskAnyGround { get => LazyLoadMask(ref _maskAnyGround, "Ground", "Semisolids"); }
         public static int MaskOnlyGround { get => LazyLoadMask(ref _maskOnlyGround, "Ground"); }
 
-        private static int? _layerGround, _layerHitsNothing, _layerDefault, _layerPassthrough, _layerLooseCoin, _layerEntity;
+        private static int? _layerGround, _layerHitsNothing, _layerDefault, _layerPassthrough, _layerLooseCoin, _layerEntity, _layerSpawnPipe;
         public static int LayerGround { get => LazyLoadLayer(ref _layerGround, "Ground"); }
+
+        public static int LayerSpawnPipe { get => LazyLoadLayer(ref _layerSpawnPipe, "IceBlock"); }
         public static int LayerHitsNothing { get => LazyLoadLayer(ref _layerHitsNothing, "HitsNothing"); }
         public static int LayerDefault { get => LazyLoadLayer(ref _layerDefault, "Default"); }
         public static int LayerPassthrough { get => LazyLoadLayer(ref _layerPassthrough, "PlayerPassthrough"); }

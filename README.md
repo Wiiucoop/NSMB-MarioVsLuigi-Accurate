@@ -6,7 +6,7 @@ This mod aims to bring back most features and gameplay elements to make it as cl
 It also includes 5 levels featured in the E3 2005 Demo of New Super Mario Bros.
 
 ## Gameplay:
-[![IMAGE](https://i.ibb.co/rkLgBWK/MVL-BACK.png)](https://youtu.be/XA5z6xu41SU)
+[![IMAGE](https://i.ibb.co/rkLgBWK/MVL-BACK.png)](https://youtu.be/bQQe4fNBJJQ)
 
 ## Download
 
@@ -56,6 +56,7 @@ Windows/Android: github.com/Wiiucoop/NSMB-MarioVsLuigi-Accurate/releases/latest
 * FrostyCake (Level Creator)
 * MiiBumm (New BlueShell model)
 * Mark19 (Android support)
+* Andrat & FD-Samu (Custom Music)
 
 ### Original Content:
 * New Super Mario Bros.
