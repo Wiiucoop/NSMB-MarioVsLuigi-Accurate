@@ -59,7 +59,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
     private readonly Dictionary<string, RoomIcon> currentRooms = new();
 
-    private bool isOffline = false;
+    private bool isOffline = true;
 
     private readonly List<string> allRegions = new();
     private static readonly string roomNameChars = "BCDFGHJKLMNPRQSTVWXYZ";
@@ -428,16 +428,8 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             OpenTitleScreen();
             
             //PhotonNetwork.NetworkingClient.AppId = "ce540834-2db9-40b5-a311-e58be39e726a";
-            PhotonNetwork.NetworkingClient.AppId = "40c2f241-79f7-4721-bdac-3c0366d00f58";
-
-            //version separation
-            Match match = Regex.Match(Application.version, "^\\w*\\.\\w*\\.\\w*");
-            PhotonNetwork.NetworkingClient.AppVersion = match.Groups[0].Value + "-accurate2" ;
-
-            string id = PlayerPrefs.GetString("id", null);
-            string token = PlayerPrefs.GetString("token", null);
-       
-            PhotonNetwork.NetworkingClient.ConnectToNameServer();
+            
+            AttemptConnection();
 
                  
             
@@ -502,6 +494,25 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             GlobalController.Instance.checkedForVersion = true;
         }
 #endif
+    }
+
+    private void AttemptConnection(){
+            if(isOffline){
+               return; 
+            }
+
+
+            PhotonNetwork.NetworkingClient.AppId = "40c2f241-79f7-4721-bdac-3c0366d00f58";
+
+            //version separation
+            Match match = Regex.Match(Application.version, "^\\w*\\.\\w*\\.\\w*");
+            PhotonNetwork.NetworkingClient.AppVersion = match.Groups[0].Value + "-accurate2REMOVER" ;
+
+            string id = PlayerPrefs.GetString("id", null);
+            string token = PlayerPrefs.GetString("token", null);
+       
+            PhotonNetwork.NetworkingClient.ConnectToNameServer();
+
     }
 
     private void LoadSettings(bool nickname) {
@@ -649,6 +660,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
     public void OpenLobbyMenu() {
         isOffline = false;
+        AttemptConnection();
         title.SetActive(false);
         bg.SetActive(true);
         mainMenu.SetActive(false);
@@ -825,47 +837,21 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
-      //  Debug.Log(isOffline+" ta off?");
-
-      
-    //   SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);
-
 
        SceneManager.LoadSceneAsync(10 + 2, LoadSceneMode.Single);
-    //   StartGame();
 
-               
-            PhotonNetwork.CreateRoom("Debug", new() {
-                CustomRoomProperties = NetworkUtils.DefaultRoomProperties
-            });
-        //start game with all players
-        
-        PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = true });
-        RaiseEventOptions options = new() { Receivers = ReceiverGroup.All };
-        PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
     }
 
     public void StartLocalBricks() {
         
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
-      //  Debug.Log(isOffline+" ta off?");
-
-      
-      // SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);
 
 
        SceneManager.LoadSceneAsync(11 + 2, LoadSceneMode.Single);
-    //   StartGame();
 
-               
-            PhotonNetwork.CreateRoom("Debug", new() {
-                CustomRoomProperties = NetworkUtils.DefaultRoomProperties
-            });
-        //start game with all players
-        PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = true });
-        RaiseEventOptions options = new() { Receivers = ReceiverGroup.All };
-        PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
+
+
     }
 
     public void ChangeNewPowerups(bool value) {//ACCURACY: ChangeNewPowerups IS THE E3 BETA EXPERIENCE TOGGLE 

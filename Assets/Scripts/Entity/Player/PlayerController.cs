@@ -517,8 +517,7 @@ void HandleTornado() {   //ACCURACY add tornado
                 bounce = false;
                 knockback = false;
                    if (tornadoTimer >= 4.75f) {
-                     tornadoTimer = 4.75f;
-                     photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_SpinnerLaunch);
+                        tornadoTimer = 4.75f;
                    }
                 transform.position = body.position = new Vector2((tornado.transform.position.x + (1 + (tornadoTimer / 2.3f)) * Mathf.Sin(tornadoTimer / 0.5f)), ((tornado.transform.position.y - 2.5f) + tornadoTimer));
                 return;
@@ -1921,14 +1920,16 @@ void HandleTornado() {   //ACCURACY add tornado
     //This delay has been added so that SPEEDUP doesnt mess with the music stop
     private System.Collections.IEnumerator StopMusicOnDeath()
     {
-        GameManager.Instance.music.Pause();
-        GameManager.Instance.music.time = 0f;
-        yield return new WaitForSeconds(0.2f); 
-        GameManager.Instance.music.Pause();
-        GameManager.Instance.music.time = 0f;
-        yield return new WaitForSeconds(1.8f); 
-        GameManager.Instance.music.Pause();
-        GameManager.Instance.music.time = 0f;
+        if(!isLocalGame){
+            GameManager.Instance.music.Pause();
+            GameManager.Instance.music.time = 0f;
+            yield return new WaitForSeconds(0.2f); 
+            GameManager.Instance.music.Pause();
+            GameManager.Instance.music.time = 0f;
+            yield return new WaitForSeconds(1.8f); 
+            GameManager.Instance.music.Pause();
+            GameManager.Instance.music.time = 0f;
+        }
     }
 
     #region -- SOUNDS / PARTICLES --

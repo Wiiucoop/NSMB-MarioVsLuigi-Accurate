@@ -448,6 +448,17 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         InputSystem.controls.UI.Pause.performed -= OnPause;
     }
 
+    public void LoadLocalLogic(){
+                    PhotonNetwork.CreateRoom("Debug", new() {
+                CustomRoomProperties = NetworkUtils.DefaultRoomProperties
+            });
+        //Accuracy: Start Local Game room
+        
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = true });
+        RaiseEventOptions options = new() { Receivers = ReceiverGroup.All };
+        PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
+    }
+
     public void Awake() {
         Instance = this;
         isLocalGame = SceneManager.GetActiveScene().buildIndex >= 12;
@@ -463,6 +474,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             Settings.Instance.fourByThreeRatio = false;
             startText.GetComponent<TMP_Text>().text = "Loading...";
             startText.GetComponent<Animator>().SetTrigger("startNegative");
+            LoadLocalLogic();
         }
         LocalReserve.SetActive(!isLocalGame);
         LocalTrack.SetActive(!isLocalGame);
