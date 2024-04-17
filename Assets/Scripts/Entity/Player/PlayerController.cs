@@ -30,6 +30,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
     public bool betaAnims = false;
 
+    private float groundpoundSidewaysSpeed;
+
     public bool invertRotation = false;
 
     private bool canKickAttack = true;
@@ -482,7 +484,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         return;
     }
 
-void HandleTornado() {   //ACCURACY add tornado
+void HandleTornado() {   //ACCURACY: add tornado
         if(!hasTornado)
             return;
         
@@ -513,11 +515,13 @@ void HandleTornado() {   //ACCURACY add tornado
                 previousOnGround = false;
                 crouching = false;
                 inShell = false;
+                groundpound = false;//Fix groundpound inside tornado.
                 drill = false;
                 bounce = false;
                 knockback = false;
                    if (tornadoTimer >= 4.75f) {
                         tornadoTimer = 4.75f;
+                        photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.World_Tornado_Launch);//Tornado jump SFX
                    }
                 transform.position = body.position = new Vector2((tornado.transform.position.x + (1 + (tornadoTimer / 2.3f)) * Mathf.Sin(tornadoTimer / 0.5f)), ((tornado.transform.position.y - 2.5f) + tornadoTimer));
                 return;
@@ -557,8 +561,8 @@ void HandleTornado() {   //ACCURACY add tornado
                             //invalid flooring
                             continue;
                     }
-
-                    crushGround |= !go.CompareTag("platform") && !go.CompareTag("frozencube");
+                    //ACCURACY: Avoid getting crushed by Spawn Pipe
+                    crushGround |= !go.CompareTag("platform") && !go.CompareTag("frozencube") && !go.CompareTag("pipeSpawn");
                     down++;
                     tilesStandingOn.Add(vec);
                 } else if (contact.collider.gameObject.layer == Layers.LayerGround) {
@@ -1763,7 +1767,7 @@ void HandleTornado() {   //ACCURACY add tornado
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-       // storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/BlueShell");//REMOVER
+       // storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MegaMushroom");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;
@@ -1786,7 +1790,7 @@ void HandleTornado() {   //ACCURACY add tornado
         sliding = false;
         koyoteTime = 1f;
         jumpBuffer = 0;
-        invincible = 0;
+        invincible = 0f;
         giantStartTimer = 0;
         giantTimer = 0;
         singlejump = false;
@@ -3430,7 +3434,7 @@ void HandleTornado() {   //ACCURACY add tornado
         } else {
             groundpoundStartTimer = 0;
         }
-        HandleGroundpound();
+        HandleGroundpound(left, right);
 
         if (onGround) {
             if (propellerTimer < 0.5f) {
@@ -3649,12 +3653,22 @@ void HandleTornado() {   //ACCURACY add tornado
         }
     }
 
-    void HandleGroundpound() {
+    void HandleGroundpound(bool left, bool right) {
         if (groundpound && groundpoundCounter > 0 && groundpoundCounter <= .1f)
             body.velocity = Vector2.zero;
 
-        if (groundpound && groundpoundCounter > 0 && groundpoundCounter - Time.fixedDeltaTime <= 0)
-            body.velocity = Vector2.down * groundpoundVelocity;
+        if (groundpound && groundpoundCounter > 0 && groundpoundCounter - Time.fixedDeltaTime <= 0){
+            
+            groundpoundSidewaysSpeed = 1f;
+            if(betaAnims){//Accuracy: MOVE WHILE IN GROUNDPOUND STATE IF IN E3 BETA MODE
+                float direction = ((right ? 1 : 0) - (left ? 1 : 0));
+              //  body.velocity += Vector2.right * direction * groundpoundSidewaysSpeed;
+                body.velocity += new Vector2((1 * direction * groundpoundSidewaysSpeed), -1f * drillVelocity);//drillVelocity for slower falling speed during groundpound.
+            }else{
+                body.velocity = Vector2.down * groundpoundVelocity;
+            }
+        }
+            
 
         if (!(photonView.IsMine && onGround && (groundpound || drill) && hitBlock))
             return;

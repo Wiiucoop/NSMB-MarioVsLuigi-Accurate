@@ -849,9 +849,19 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
 
        SceneManager.LoadSceneAsync(11 + 2, LoadSceneMode.Single);
+    }
+
+    public void StartLocalBeta() {
+        
+        PhotonNetwork.Disconnect();
+        PhotonNetwork.OfflineMode = true;
+
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new() {
+            [Enums.NetRoomProperties.NewPowerups] = true,//Attempt at enabling beta
+        });
 
 
-
+       SceneManager.LoadSceneAsync(12 + 2, LoadSceneMode.Single);
     }
 
     public void ChangeNewPowerups(bool value) {//ACCURACY: ChangeNewPowerups IS THE E3 BETA EXPERIENCE TOGGLE 

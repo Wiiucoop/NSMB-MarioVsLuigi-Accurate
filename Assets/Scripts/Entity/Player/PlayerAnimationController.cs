@@ -8,7 +8,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
 
     [SerializeField] private Avatar smallAvatar, largeAvatar;
     [SerializeField] private ParticleSystem dust, sparkles, drillParticle, giantParticle, fireParticle;
-    [SerializeField] private GameObject models, smallModel, largeModel, largeShellExclude, blueShell, propellerHelmet, propeller;
+    [SerializeField] private GameObject models, smallModel, largeModel, largeShellExclude, blueShell, propellerHelmet, hat, hatFall, propeller;
     [SerializeField] private Material glowMaterial;
     [SerializeField] private Color primaryColor = Color.clear, secondaryColor = Color.clear;
     [SerializeField] [ColorUsage(true, false)] private Color? _glowColor = null;
@@ -135,6 +135,14 @@ public class PlayerAnimationController : MonoBehaviourPun {
                 } else {
                     targetEuler = new Vector3(0, controller.facingRight ? 110 : 250, 0);
                 }
+            }
+
+            if(!controller.onGround && controller.body.velocity.y < 0 && betaAnims){//ACCURACY: IS FALLING, ENABLE BETA FALLING
+                hat.SetActive(false);
+                hatFall.SetActive(true);
+            }else{
+                hat.SetActive(true);
+                hatFall.SetActive(false);
             }
             propellerVelocity = Mathf.Clamp(propellerVelocity + (1800 * ((controller.flying || controller.propeller || controller.usedPropellerThisJump) ? -1 : 1) * Time.deltaTime), -2500, -300);
             propeller.transform.Rotate(Vector3.forward, propellerVelocity * Time.deltaTime);
@@ -277,7 +285,27 @@ public class PlayerAnimationController : MonoBehaviourPun {
         if (materialBlock == null)
             materialBlock = new();
 
-        materialBlock.SetFloat("RainbowEnabled", controller.invincible > 0 ? 1.1f : 0f);
+        Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaStarman); //ACCURACY: REMOVE RAINBOW EFFECT FOR E3 BETA MODE
+
+        Vector3 colorMultiply = Vector3.one;
+        if (controller.invincible > 0) {
+            if(!betaStarman){
+                materialBlock.SetFloat("RainbowEnabled", controller.invincible > 0 ? 1.1f : 0f);
+            }else{
+                float v = ((Mathf.Sin(controller.invincible * 20f) + 1f) / 2f * 0.9f) + 0.1f;
+                colorMultiply = new Vector3(v, 1, v);
+                
+            }
+        }else{              
+            if (controller.giantTimer > 0 && controller.giantTimer < 4) {
+                float v = ((Mathf.Sin(controller.giantTimer * 20f) + 1f) / 2f * 0.9f) + 0.1f;
+                colorMultiply = new Vector3(v, 1, v);
+                
+            }
+        }
+        materialBlock.SetVector("MultiplyColor", colorMultiply);
+        
+
         int ps = controller.state switch {
             Enums.PowerupState.FireFlower => 1,
             Enums.PowerupState.PropellerMushroom => 2,
@@ -294,12 +322,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
         materialBlock.SetVector("OverallsColor", primaryColor);
         materialBlock.SetVector("ShirtColor", secondaryColor);
 
-        Vector3 giantMultiply = Vector3.one;
-        if (controller.giantTimer > 0 && controller.giantTimer < 4) {
-            float v = ((Mathf.Sin(controller.giantTimer * 20f) + 1f) / 2f * 0.9f) + 0.1f;
-            giantMultiply = new Vector3(v, 1, v);
-        }
-        materialBlock.SetVector("MultiplyColor", giantMultiply);
+
 
         foreach (Renderer r in renderers)
             r.SetPropertyBlock(materialBlock);

@@ -112,9 +112,17 @@ public class PiranhaPlantController : KillableEntity
         hitbox.enabled = false;
         Instantiate(Resources.Load("Prefabs/Particle/Puff"),
             transform.position + new Vector3(0, upsideDown ? -0.5f : 0.5f, 0), Quaternion.identity);
-        if (photonView.IsMine)
-            PhotonNetwork.Instantiate("Prefabs/LooseCoin",
+        if (photonView.IsMine){
+            Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnims); //ACCURACY: ENABLE E3 BETA COIN DROPS
+            if(betaAnims){
+                PhotonNetwork.Instantiate("Prefabs/BetaLooseCoin",
                 transform.position + new Vector3(0, upsideDown ? -1f : 1f, 0), Quaternion.identity);
+            }else{
+                PhotonNetwork.Instantiate("Prefabs/LooseCoin",
+                transform.position + new Vector3(0, upsideDown ? -1f : 1f, 0), Quaternion.identity);
+            }
+        }
+            
     }
 
     [PunRPC]
