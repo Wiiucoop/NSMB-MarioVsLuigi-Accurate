@@ -21,6 +21,14 @@ public class UIUpdater : MonoBehaviour {
 
     public bool isLocalGame = false;
 
+
+//---Static Variables
+    private static readonly int ParamIn = Animator.StringToHash("in");
+    private static readonly int ParamOut = Animator.StringToHash("out");
+    private static readonly int ParamHasItem = Animator.StringToHash("has-item");
+    [SerializeField] private Animator reserveAnimator;
+    private Powerup previousPowerup;
+
     private Material timerMaterial;
     private GameObject starsParent, coinsParent, livesParent, p2LivesParent, timerParent;
 
@@ -135,12 +143,35 @@ public class UIUpdater : MonoBehaviour {
         timerParent.SetActive(!hidden);
     }
 
-    private void UpdateStoredItemUI() {
-        if (!player)
+     private void UpdateStoredItemUI() {
+        if (!player ) {
             return;
+        }
 
-        itemReserve.sprite = player.storedPowerup != null ? player.storedPowerup.reserveSprite : storedItemNull;
+        Powerup powerup = player.storedPowerup;
+       
+        
+        reserveAnimator.SetBool(ParamHasItem, powerup && powerup.reserveSprite);
+        
+        if (!powerup) {
+            if (previousPowerup != powerup) {
+                reserveAnimator.SetTrigger(ParamOut);
+                previousPowerup = powerup;
+            }
+            return;
+        }
+
+        itemReserve.sprite = powerup.reserveSprite ? powerup.reserveSprite : storedItemNull;
+        if (previousPowerup != powerup) {
+            reserveAnimator.SetTrigger(ParamIn);
+            previousPowerup = powerup;
+        }
     }
+
+    public void OnReserveItemStaticStarted() {
+        itemReserve.sprite = storedItemNull;
+    }
+
 
 
 private System.Collections.IEnumerator LastLifeAnimation()

@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using Photon.Pun;
 using NSMB.Utils;
+using UnityEngine.SceneManagement;
+
 
 public class MovingPowerup : MonoBehaviourPun {
 
@@ -17,6 +19,11 @@ public class MovingPowerup : MonoBehaviourPun {
     private Animator childAnimator;
     private BoxCollider2D hitbox;
     private int originalLayer;
+
+    private bool spawnedFromBlock = false;
+    private bool disableWorkaround = false;
+
+    private Vector2 originalPos, targetPosition;
 
     public Sprite BetaMegaMushroom;
 
@@ -45,6 +52,8 @@ public class MovingPowerup : MonoBehaviourPun {
             ENTITY_LAYERID = LayerMask.NameToLayer("Entity");
         }
 
+
+
         object[] data = photonView.InstantiationData;
         if (data != null) {
             if (data[0] is float ignore) {
@@ -61,7 +70,21 @@ public class MovingPowerup : MonoBehaviourPun {
         } else {
             gameObject.layer = ENTITY_LAYERID;
             Vector2 size = hitbox.size * transform.lossyScale * 0.8f;
+          
             Vector2 origin = body.position + hitbox.offset * transform.lossyScale;
+
+          //  transform.position = new Vector2(transform.position.x,transform.position.y+1f);
+            originalPos = new Vector2(transform.position.x,transform.position.y);
+
+            // Calculate the target position as 1 unit below the original position
+            targetPosition = originalPos - Vector2.up * 0.5f;
+            // Start the coroutine to move the powerup gradually back to its original position
+
+            if(Utils.IsAnyTileSolidBetweenWorldBox(originalPos, size)){//IF HIT FROM ABOVE, IT WILL NOT PLAY THE ANIMATION
+                //originalPos = new Vector2(transform.position.x,transform.position.y+0.6f);
+                StartCoroutine(MovePowerup());
+            }
+            
 
             if (photonView.IsMine && (Utils.IsAnyTileSolidBetweenWorldBox(origin, size) || Physics2D.OverlapBox(origin, size, 0, groundMask))) {
                 photonView.RPC(nameof(DespawnWithPoof), RpcTarget.All);
@@ -69,6 +92,48 @@ public class MovingPowerup : MonoBehaviourPun {
             }
         }
     }
+
+    System.Collections.IEnumerator MovePowerup()
+    {
+        //Debug.Log(physics.onGround+" TA NO CHAO");
+        sRenderer.sortingOrder = -1000;
+        // Define the duration of the movement
+        float duration = 1.0f;
+
+        // Initialize the timer
+        float elapsed = 0f;
+
+        // Move the powerup gradually back to its original position
+        while (elapsed < duration)
+        {
+            // Increment the timer
+            elapsed += Time.deltaTime;
+
+            // Calculate the interpolation factor (0 to 1)
+            float t = Mathf.Clamp01(elapsed / duration);
+
+            // Interpolate between the current position and the original position
+            transform.position = Vector3.Lerp(targetPosition, originalPos, t);
+
+            // Wait for the end of the frame
+            yield return null;
+        }
+
+        // Ensure that the powerup is back at its original position
+        sRenderer.sortingOrder = originalLayer;
+        transform.position = originalPos;
+
+     //   Vector2 size = hitbox.size * transform.lossyScale * 0.1f;
+      
+
+           
+            spawnedFromBlock = true;
+            body.velocity = Vector2.zero;    
+            body.position = originalPos;   
+
+    }
+
+  
 
     public void LateUpdate() {
         ignoreCounter -= Time.deltaTime;
@@ -106,24 +171,35 @@ public class MovingPowerup : MonoBehaviourPun {
         }
 
         body.isKinematic = false;
+        
 
         Vector2 size = hitbox.size * transform.lossyScale * 0.8f;
         Vector2 origin = body.position + hitbox.offset * transform.lossyScale;
 
         if (Utils.IsAnyTileSolidBetweenWorldBox(origin, size) || Physics2D.OverlapBox(origin, size, 0, groundMask)) {
             gameObject.layer = HITS_NOTHING_LAYERID;
+            if (physics.onGround || spawnedFromBlock)
+                    {
+                        photonView.RPC(nameof(DespawnWithPoof), RpcTarget.All);//FIX
+                    }
             return;
         } else {
             gameObject.layer = ENTITY_LAYERID;
             HandleCollision();
         }
 
-        if (physics.onGround && childAnimator) {
-            childAnimator.SetTrigger("trigger");
+        if (physics.onGround ) {
+          //  childAnimator.SetTrigger("trigger");
             hitbox.enabled = false;
             body.isKinematic = true;
             body.gravityScale = 0;
+            
+        }else{
+            hitbox.enabled = true;
+            body.isKinematic = false;
+            body.gravityScale = 2.2f;
         }
+
 
         if (avoidPlayers && physics.onGround && !followMe) {
             Collider2D closest = null;
@@ -174,9 +250,12 @@ public class MovingPowerup : MonoBehaviourPun {
 
     [PunRPC]
     public void DespawnWithPoof() {
-        Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.GetChild(0).position, Quaternion.identity);
-        if (photonView.IsMine)
-            PhotonNetwork.Destroy(gameObject);
-        Destroy(gameObject);
+        if(sRenderer.sortingOrder > 1){
+            Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.GetChild(0).position, Quaternion.identity);
+            if (photonView.IsMine)
+                PhotonNetwork.Destroy(gameObject);
+            Destroy(gameObject);
+        }
+
     }
 }

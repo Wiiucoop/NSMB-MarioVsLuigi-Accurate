@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 7205141821402601888}
   - component: {fileID: -6056214798762579774}
   - component: {fileID: 7601517113751506536}
+  - component: {fileID: 7885862161058564708}
   m_Layer: 9
   m_Name: FireFlower
   m_TagString: Powerup
@@ -364,3 +365,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interpolate: 1
   body: {fileID: 7205141821402601894}
+--- !u!95 &7885862161058564708
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7205141821402601890}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 922cc8db05b83d14abd00eedc91ef837, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0

@@ -3659,7 +3659,7 @@ void HandleTornado() {   //ACCURACY: add tornado
 
         if (groundpound && groundpoundCounter > 0 && groundpoundCounter - Time.fixedDeltaTime <= 0){
             
-            groundpoundSidewaysSpeed = 1f;
+            groundpoundSidewaysSpeed = 2f;
             if(betaAnims){//Accuracy: MOVE WHILE IN GROUNDPOUND STATE IF IN E3 BETA MODE
                 float direction = ((right ? 1 : 0) - (left ? 1 : 0));
               //  body.velocity += Vector2.right * direction * groundpoundSidewaysSpeed;

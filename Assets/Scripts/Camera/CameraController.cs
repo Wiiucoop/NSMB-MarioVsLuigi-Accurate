@@ -15,7 +15,7 @@ public class CameraController : MonoBehaviour {
     private readonly List<SecondaryCameraPositioner> secondaryPositioners = new();
     private PlayerController controller;
     private Vector3 smoothDampVel, playerPos;
-    private Camera targetCamera;
+    public Camera targetCamera;
     private float startingZ, lastFloor;
 
     public void Awake() {

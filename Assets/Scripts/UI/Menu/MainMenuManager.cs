@@ -856,10 +856,6 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
 
-        PhotonNetwork.LocalPlayer.SetCustomProperties(new() {
-            [Enums.NetRoomProperties.NewPowerups] = true,//Attempt at enabling beta
-        });
-
 
        SceneManager.LoadSceneAsync(12 + 2, LoadSceneMode.Single);
     }

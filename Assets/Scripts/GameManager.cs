@@ -21,6 +21,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     private static GameManager _instance;
 
+    private GameObject bg;
+
+    public bool enableBeta = false;
+
     public Slider masterSlider;
 
     public bool isLocalGame = false;
@@ -455,13 +459,18 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         //Accuracy: Start Local Game room
         
         PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = true });
+        if(enableBeta){
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.NewPowerups] = true });
+        }
         RaiseEventOptions options = new() { Receivers = ReceiverGroup.All };
         PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
     }
 
     public void Awake() {
         Instance = this;
-        isLocalGame = SceneManager.GetActiveScene().buildIndex >= 12;
+        isLocalGame = SceneManager.GetActiveScene().buildIndex >= (10 + 2);
+        enableBeta = SceneManager.GetActiveScene().buildIndex >= (12 + 2);
+        bg = GameObject.FindGameObjectWithTag("Backgrounds");
     }
 
     public void Start() {
@@ -473,7 +482,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         if(isLocalGame){
             Settings.Instance.fourByThreeRatio = false;
             startText.GetComponent<TMP_Text>().text = "Loading...";
-            startText.GetComponent<Animator>().SetTrigger("startNegative");
+            startText.GetComponent<Animator>().SetTrigger("startNegative");          
+            bg.SetActive(false);   
             LoadLocalLogic();
         }
         LocalReserve.SetActive(!isLocalGame);
@@ -615,6 +625,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             fader.FadeOut();
             if(isLocalGame){
                 StartCoroutine(RemoveStartMessage(0f));
+                bg.SetActive(true);
             }
             StartCoroutine(PlayerController.ZoomOutAnim());//ACCURACY: ZOOMOUT ANIMATION
             
@@ -641,7 +652,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             }
                 
 
-            if(betaAnims){//ACCURACY: MARIO/LUIGI START TEXT
+            if(betaAnims && !enableBeta){//ACCURACY: MARIO/LUIGI START TEXT
                 if(isMario){
                     startText.GetComponent<TMP_Text>().text = "Mario Start";
                 }else{

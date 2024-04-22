@@ -43,7 +43,7 @@ TextureImporter:
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
-  ignoreMasterTextureLimit: 0
+  ignoreMipmapLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -90,7 +90,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 2
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -158,11 +158,11 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
-    buildTarget: Windows Store Apps
+    buildTarget: Nintendo Switch
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 2
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -173,15 +173,15 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: reserve-ui_0
+      name: reserve-frame
       rect:
         serializedVersion: 2
         x: 0
-        y: 152
-        width: 140
-        height: 140
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -194,15 +194,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: reserve-ui_1
+      name: reserve-bg
       rect:
         serializedVersion: 2
-        x: 149
-        y: 152
-        width: 140
-        height: 140
+        x: 64
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -215,15 +215,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: reserve-ui_2
+      name: reserve-empty
       rect:
         serializedVersion: 2
-        x: 297
-        y: 152
-        width: 140
-        height: 140
+        x: 128
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -236,15 +236,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: reserve-ui_3
+      name: reserve-mushroom
       rect:
         serializedVersion: 2
         x: 0
-        y: 3
-        width: 140
-        height: 140
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -257,15 +257,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: reserve-ui_4
+      name: reserve-fireflower
       rect:
         serializedVersion: 2
-        x: 149
-        y: 3
-        width: 140
-        height: 140
+        x: 64
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -278,15 +278,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: reserve-ui_5
+      name: reserve-blueshell
       rect:
         serializedVersion: 2
-        x: 297
-        y: 3
-        width: 140
-        height: 140
+        x: 128
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -299,15 +299,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: reserve-ui_6
+      name: reserve-mini
       rect:
         serializedVersion: 2
-        x: 441
-        y: 152
-        width: 139
-        height: 140
+        x: 192
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -320,15 +320,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: reserve-ui_7
+      name: reserve-mega
       rect:
         serializedVersion: 2
-        x: 440
-        y: 3
-        width: 140
-        height: 140
+        x: 0
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -341,13 +341,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: reserve-ui_8
+      name: reserve-propeller
       rect:
         serializedVersion: 2
-        x: 0
-        y: 301
-        width: 140
-        height: 140
+        x: 64
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -357,6 +357,48 @@ TextureImporter:
       bones: []
       spriteID: 7d9d02a1ee756cf4f804e5c7d321cc19
       internalID: -14430133
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reserve-ice
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f26706382e69e6cff98e82f982c68ae0
+      internalID: 697740482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: reserve-ui_10
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd2b9fe876cf8a60db08c1edafe78939
+      internalID: 1954154672
       vertices: []
       indices: 
       edges: []
@@ -372,16 +414,18 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      reserve-ui_4: 2690215448161037315
-      reserve-ui_3: 5709720548119103520
-      reserve-ui_6: -1858463510
-      reserve-ui_1: -6080119536613256813
-      reserve-ui_0: 7194109699264141795
-      reserve-ui_7: -1604689058
-      reserve-ui_5: 2664608197882872095
-      reserve-ui_8: -14430133
-      reserve-ui_2: -4773353537684922170
-  spritePackingTag: 
+      reserve-mega: -1604689058
+      reserve-propeller: -14430133
+      reserve-bg: -6080119536613256813
+      reserve-mini: -1858463510
+      reserve-ui_10: 1954154672
+      reserve-empty: -4773353537684922170
+      reserve-frame: 7194109699264141795
+      reserve-ice: 697740482
+      reserve-fireflower: 2690215448161037315
+      reserve-blueshell: 2664608197882872095
+      reserve-mushroom: 5709720548119103520
+  mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
   assetBundleName: 
