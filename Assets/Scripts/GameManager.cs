@@ -44,11 +44,14 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         private set => _instance = value;
     }
 
-    public MusicData mainMusic, invincibleMusic;
+    public bool UsesMidi;
+    public MusicData mainMusic, secondaryMusic, invincibleMusic;
+    public SequencePlayer sequencePlayerMain, sequencePlayerSecondary, sequencePlayerInvincible;
 
     public int levelMinTileX, levelMinTileY, levelWidthTile, levelHeightTile;
     public float cameraMinY, cameraHeightY, cameraMinX = -1000, cameraMaxX = 1000;
     public bool loopingLevel = true;
+    public bool isE3Level;
 
     private bool piranaplantCanspawn = true;
     public Vector3 spawnpoint;
@@ -613,8 +616,6 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             if (Settings.Instance.scoreboardAlways && players.Count > 2)
                 ScoreboardUpdater.instance.SetEnabled();
         } catch { }
-        Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnims); //ACCURACY: ENABLE E3 BETA ANIMATIONS
-        Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool betaCustomMusic); //ACCURACY: ENABLE E3 BETA CUSTOM MUSIC
         
         if (gameStarting) {
             if (!Application.isEditor){
@@ -652,7 +653,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             }
                 
 
-            if(betaAnims && !enableBeta){//ACCURACY: MARIO/LUIGI START TEXT
+            if(isE3Level){//ACCURACY: MARIO/LUIGI START TEXT
                 if(isMario){
                     startText.GetComponent<TMP_Text>().text = "Mario Start";
                 }else{
@@ -684,50 +685,6 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         if (canvas)
             SceneManager.UnloadSceneAsync("Loading");
 
-
-        //ACCURACY: Music alternating made like the original
-        //it starts playing SNOW and alternates with OVERWORLD theme each game
-        if ((SceneManager.GetActiveScene().buildIndex >= 2 && SceneManager.GetActiveScene().buildIndex <= 6) || isLocalGame) {
-            if (GlobalController.Instance.musicOrdering % 2 == 0)
-            {
-                mainMusic = (MusicData)Resources.Load("Scriptables/Music/MusicLevelSnow");
-            }
-            else {
-                mainMusic = (MusicData)Resources.Load("Scriptables/Music/MusicLevelOverworld");
-            }
-            if (!spectating && !betaAnims) {
-                GlobalController.Instance.musicOrdering++;
-            }
-        
-        }
-
-        if(betaAnims && betaCustomMusic){
-                
-                int betaIndex = SceneManager.GetActiveScene().buildIndex;
-                switch (betaIndex)
-                {
-                    case 7://Plain
-                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaSMBDMusic");
-                        break;
-                    case 8://Cave
-                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaGhostNSMB");
-                        break;
-                    case 9://Castle
-                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaTTYDCastle");
-                        break;
-                    case 10://City
-                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaMusicRPG");
-                        break;
-                    case 11://Desert
-                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaDesert");
-                        break;
-                    default:
-                        Debug.LogError("Invalid random betaMusic anim index");
-                        break;
-                }
-            
-
-            }
         if (SpectationManager.Spectating) fader.SetInvisible(true);
             
     }
@@ -812,9 +769,11 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         //TOOD: make a results screen?
 
         yield return new WaitForSecondsRealtime(secondsUntilMenu);
-        if (PhotonNetwork.IsMasterClient)
+        if (PhotonNetwork.IsMasterClient){
             PhotonNetwork.DestroyAll();
-        if(isLocalGame){
+            GlobalController.Instance.musicOrdering++;
+        }
+        if (isLocalGame){
             PhotonNetwork.LeaveRoom();
             PhotonNetwork.Disconnect();
         }
@@ -991,6 +950,35 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         musicState = state;
     }
 
+    private void PlaySongSeq(Enums.MusicState state)
+    {
+        if (musicState == state)
+            return;
+
+        Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool betaCustomMusic); //ACCURACY: ENABLE E3 BETA CUSTOM MUSIC
+
+        sequencePlayerMain.player.Stop();
+        sequencePlayerSecondary.player.Stop();
+        sequencePlayerInvincible.player.Stop();
+
+        musicState = state;
+
+        //ACCURACY: Music alternating made like the original
+        //it starts playing SNOW and alternates with OVERWORLD theme each game
+        var normalSongToPlay = sequencePlayerMain.player;
+        if (((GlobalController.Instance.musicOrdering % 2 != 0) && (!isE3Level)) || (isE3Level && betaCustomMusic))
+        {
+            normalSongToPlay = sequencePlayerSecondary.player;
+        }
+        var songPlayer = state switch
+        {
+            Enums.MusicState.Normal => normalSongToPlay,
+            Enums.MusicState.Starman => sequencePlayerInvincible.player,
+            _ => null
+        };
+        if (songPlayer != null) songPlayer.Play();
+    }
+
     private IEnumerator DelayedLastLifeSpedup()//ACCURACY: Delay to start speedup when one of the players get to its last life
     {
         yield return new WaitForSeconds(2f);
@@ -1031,13 +1019,29 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         speedup |= players.All(pl => !pl || pl.lives == 1 || pl.lives == 0);
 
-        if (invincible) {
-            PlaySong(Enums.MusicState.Starman, invincibleMusic);
+        if (UsesMidi) {
+            PlaySongSeq(invincible ? Enums.MusicState.Starman : Enums.MusicState.Normal);
         } else {
-            PlaySong(Enums.MusicState.Normal, mainMusic);
+            if (invincible)
+            {
+                PlaySong(Enums.MusicState.Starman, invincibleMusic);
+            } else {
+                Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool betaCustomMusic); //ACCURACY: ENABLE E3 BETA CUSTOM MUSIC
+                //ACCURACY: Music alternating made like the original
+                //it starts playing SNOW and alternates with OVERWORLD theme each game
+                var normalSongToPlay = mainMusic;
+                if (((GlobalController.Instance.musicOrdering % 2 != 0) && (!isE3Level)) || (isE3Level && betaCustomMusic))
+                {
+                    normalSongToPlay = secondaryMusic;
+                }
+                PlaySong(Enums.MusicState.Normal, normalSongToPlay);
+            }
         }
 
-        loopMusic.FastMusic = speedup;
+        if (!UsesMidi)
+        {
+            loopMusic.FastMusic = speedup;
+        }
     }
 
     public void OnPause(InputAction.CallbackContext context) {
