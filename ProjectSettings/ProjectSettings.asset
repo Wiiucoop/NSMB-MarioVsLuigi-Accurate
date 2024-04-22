@@ -139,13 +139,9 @@ PlayerSettings:
   vulkanEnableLateAcquireNextImage: 0
   vulkanEnableCommandBufferRecycling: 1
   loadStoreDebugModeEnabled: 0
-<<<<<<< Updated upstream
-  bundleVersion: 2.2-Accuracy
-=======
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
   bundleVersion: 2.1-Accuracy
->>>>>>> Stashed changes
   preloadedAssets:
   - {fileID: 0}
   - {fileID: 0}
@@ -873,10 +869,6 @@ PlayerSettings:
   suppressCommonWarnings: 1
   allowUnsafeCode: 0
   useDeterministicCompilation: 1
-<<<<<<< Updated upstream
-  selectedPlatform: 4
-=======
->>>>>>> Stashed changes
   additionalIl2CppArgs: 
   scriptingRuntimeVersion: 1
   gcIncremental: 0
