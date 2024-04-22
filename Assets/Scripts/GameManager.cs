@@ -653,11 +653,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             }
                 
 
-<<<<<<< Updated upstream
-            if(betaAnims && !enableBeta){//ACCURACY: MARIO/LUIGI START TEXT
-=======
             if(isE3Level){//ACCURACY: MARIO/LUIGI START TEXT
->>>>>>> Stashed changes
                 if(isMario){
                     startText.GetComponent<TMP_Text>().text = "Mario Start";
                 }else{
