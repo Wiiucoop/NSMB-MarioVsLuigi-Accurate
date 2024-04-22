@@ -83,6 +83,7 @@ MonoBehaviour:
   detonated: 0
   hasBigExplosion: 0
   enemyRenderer: {fileID: 7692719260813536735}
+  redMat: {fileID: 2100000, guid: 4af89aeb2c0aaf74ea366834e14fa628, type: 2}
 --- !u!212 &3286581577125373961
 SpriteRenderer:
   m_ObjectHideFlags: 0

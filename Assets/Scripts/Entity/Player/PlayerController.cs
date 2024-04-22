@@ -128,6 +128,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     public HoldableEntity holding, holdingOld;
     public FrozenCube frozenObject;
 
+    private bool fireSource = false;
+
     private bool powerupButtonHeld;
     private readonly float analogDeadzone = 0.35f;
     public Vector2 joystick, giantSavedVelocity, previousFrameVelocity, previousFramePosition;
@@ -818,8 +820,10 @@ void HandleTornado() {   //ACCURACY: add tornado
 
             if (!fireball.isIceball) {//accuracy: Differentiate between fire AIR knockback and grounded
                 if(onGround){
+                    fireSource = false;
                     photonView.RPC(nameof(Knockback), RpcTarget.All, fireball.left, 1, true, fireball.photonView.ViewID);
                 }else{
+                    fireSource = true;
                     photonView.RPC(nameof(Knockback), RpcTarget.All, fireball.left, 1, false, fireball.photonView.ViewID);
                 }
             } else {
@@ -1767,7 +1771,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-       // storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MegaMushroom");//REMOVER
+        //storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MiniMushroom");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;
@@ -1800,6 +1804,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         knockback = false;
         bounce = false;
         skidding = false;
+        fireSource = false;
         groundpound = false;
         inShell = false;
         landing = 0f;
@@ -2096,9 +2101,9 @@ void HandleTornado() {   //ACCURACY: add tornado
 
     [PunRPC]
     public void Knockback(bool fromRight, int starsToDrop, bool fireball, int attackerView) {
-        if (fireball && fireballKnockback && knockback)
+        if (fireball && fireballKnockback && knockback && !fireSource)
             return;
-        if (knockback && !fireballKnockback)
+        if (knockback && !fireballKnockback && !fireSource)
             return;
 
         if (!GameManager.Instance.started || hitInvincibilityCounter > 0 || pipeEntering || Frozen || dead || giantStartTimer > 0 || giantEndTimer > 0)
@@ -2276,6 +2281,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             bounce = false;
             knockback = false;
             body.velocity = new(0, body.velocity.y);
+            fireSource = false;
             facingRight = initialKnockbackFacingRight;
         }else{        
             StartCoroutine(fireknockbackdelay());
@@ -2528,7 +2534,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         if (!photonView.IsMine || sliding || propeller || knockback)
             return;
 
-        if (state == Enums.PowerupState.MegaMushroom) {
+        if (state == Enums.PowerupState.MegaMushroom || state == Enums.PowerupState.MiniMushroom) {
             crouching = false;
             return;
         }

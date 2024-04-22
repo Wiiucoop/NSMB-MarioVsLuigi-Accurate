@@ -12,11 +12,15 @@ public class BobombWalk : HoldableEntity
     public bool hasBigExplosion;
     private float detonateCount;
 
-    private Color originalColor;
+    
 
     public SkinnedMeshRenderer enemyRenderer;
+
+    public Material redMat;
+
+    private Material originalMat;
     
-    private Color flashColor = Color.red; // Color to flash
+   
     private float flashDuration = 0.05f; // Duration of the flash in seconds
 
     private Vector3 previousFrameVelocity;
@@ -289,8 +293,10 @@ public class BobombWalk : HoldableEntity
             // Get the renderer component of the enemy
          //   enemyRenderer = GetComponent<SkinnedMeshRenderer>();
 
-            // Store the original color for later
-            originalColor = enemyRenderer.material.color;
+            // Store the original MAT for later
+           
+
+            originalMat = enemyRenderer.material;
 
             // Start the flash coroutine
             StartCoroutine(FlashRedInside());
@@ -302,13 +308,14 @@ public class BobombWalk : HoldableEntity
         yield return new WaitForSeconds(3f);
         while(true){
             // Change the enemy's color to the flash color
-            enemyRenderer.material.color = flashColor;
+         
+
+          enemyRenderer.material = redMat;
 
             // Wait for the specified duration
             yield return new WaitForSeconds(flashDuration);
-
-            // Revert back to the original color
-            enemyRenderer.material.color = originalColor;
+            enemyRenderer.material = originalMat;
+  
             yield return new WaitForSeconds(flashDuration);
         }
         

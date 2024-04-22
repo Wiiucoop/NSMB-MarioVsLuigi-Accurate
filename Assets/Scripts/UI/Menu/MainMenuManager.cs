@@ -38,6 +38,8 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     public GameObject errorBox, errorButton, rebindPrompt, reconnectBox;
     public TMP_Text errorText, rebindCountdown, rebindText, reconnectText, updateText;
     public TMP_Dropdown region;
+
+    public GameObject randomMapBG;
     public RebindManager rebindManager;
     public static string lastRegion;
     public string connectThroughSecret = "";
@@ -403,6 +405,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
          */
 
         Instance = this;
+        randomMapBG.SetActive(false);
 
         //Clear game-specific settings so they don't carry over
         HorizontalCamera.OFFSET_TARGET = 0;
@@ -818,6 +821,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void QuitRoom() {
+        randomMapBG.SetActive(false);
         PhotonNetwork.LeaveRoom();
     }
     public void StartGame() {
@@ -1036,7 +1040,9 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         timeField.interactable = PhotonNetwork.IsMasterClient && timeEnabled.isOn;
         drawTimeupToggle.interactable = PhotonNetwork.IsMasterClient;
 
-        levelDropdown.interactable = PhotonNetwork.IsMasterClient && !drawTimeupToggle.isOn;
+        levelDropdown.gameObject.SetActive(PhotonNetwork.IsMasterClient && !drawTimeupToggle.isOn);
+
+        randomMapBG.SetActive(drawTimeupToggle.isOn);
 
         Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool debug);
         privateToggleRoom.interactable = PhotonNetwork.IsMasterClient && !debug;

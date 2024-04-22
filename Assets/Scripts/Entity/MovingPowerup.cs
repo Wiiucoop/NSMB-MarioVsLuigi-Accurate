@@ -21,7 +21,6 @@ public class MovingPowerup : MonoBehaviourPun {
     private int originalLayer;
 
     private bool spawnedFromBlock = false;
-    private bool disableWorkaround = false;
 
     private Vector2 originalPos, targetPosition;
 
@@ -176,18 +175,6 @@ public class MovingPowerup : MonoBehaviourPun {
         Vector2 size = hitbox.size * transform.lossyScale * 0.8f;
         Vector2 origin = body.position + hitbox.offset * transform.lossyScale;
 
-        if (Utils.IsAnyTileSolidBetweenWorldBox(origin, size) || Physics2D.OverlapBox(origin, size, 0, groundMask)) {
-            gameObject.layer = HITS_NOTHING_LAYERID;
-            if (physics.onGround || spawnedFromBlock)
-                    {
-                        photonView.RPC(nameof(DespawnWithPoof), RpcTarget.All);//FIX
-                    }
-            return;
-        } else {
-            gameObject.layer = ENTITY_LAYERID;
-            HandleCollision();
-        }
-
         if (physics.onGround ) {
           //  childAnimator.SetTrigger("trigger");
             hitbox.enabled = false;
@@ -199,6 +186,21 @@ public class MovingPowerup : MonoBehaviourPun {
             body.isKinematic = false;
             body.gravityScale = 2.2f;
         }
+
+        if (Utils.IsAnyTileSolidBetweenWorldBox(origin, size) || Physics2D.OverlapBox(origin, size, 0, groundMask)) {
+            
+            if ((physics.onGround || spawnedFromBlock) && SceneManager.GetActiveScene().buildIndex == 4)//Accuracy: DESPAWN BLOCKS CRUSHED ON FORTRESS LEVEL
+                    {
+                        gameObject.layer = HITS_NOTHING_LAYERID;
+                        photonView.RPC(nameof(DespawnWithPoof), RpcTarget.All);
+                    }
+            return;
+        } else {
+            gameObject.layer = ENTITY_LAYERID;
+            HandleCollision();
+        }
+
+
 
 
         if (avoidPlayers && physics.onGround && !followMe) {
