@@ -248,7 +248,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
             animator.SetFloat("velocityY", body.velocity.y);
             animator.SetBool("doublejump", controller.doublejump);
             animator.SetBool("triplejump", controller.triplejump);
-            animator.SetBool("holding", controller.holding != null);
+            animator.SetBool("holding", (controller.holding != null) || controller.isPushingPlayer != 0f);
             animator.SetBool("head carry", controller.holding != null && controller.holding is FrozenCube);
             animator.SetBool("pipe", controller.pipeEntering != null);
             animator.SetBool("blueshell", controller.state == Enums.PowerupState.BlueShell);

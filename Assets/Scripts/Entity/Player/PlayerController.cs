@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     public bool Active { get; set; } = true;
     private Vector2 previousJoystick;
     private short previousFlags;
+
+    public float isPushingPlayer = 0f;
     private byte previousFlags2;
     private double lastSendTimestamp;
 
@@ -419,6 +421,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             HandleTileProperties();
             TickCounters();
             HandleMovement(Time.fixedDeltaTime);
+            HandlePlayerPushing();
             HandleGiantTiles(true);
             UpdateHitbox();
             if(invincible > 0){
@@ -437,6 +440,17 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         previousFramePosition = body.position;
     }
     #endregion
+
+    void HandlePlayerPushing(){
+        isPushingPlayer -= Time.deltaTime;
+
+        // Clamp the timer to zero (it cannot be negative)
+        isPushingPlayer = Mathf.Max(isPushingPlayer, 0f);
+
+        if(joystick.x == 0){
+            isPushingPlayer = 0f;
+        }        
+    }
 
     void HandleStarman() {//ACCURACY: STARMAN COLLISION REWORK
      
@@ -726,9 +740,18 @@ void HandleTornado() {   //ACCURACY: add tornado
                         
                         otherView.RPC(nameof(PlayerBump), RpcTarget.All, otherObj.transform.position.x < body.position.x, 1, true, photonView.ViewID);
                         photonView.RPC(nameof(PlayerBump), RpcTarget.All, otherObj.transform.position.x > body.position.x, 1, true, otherView.ViewID);
+       
+                    }
 
                     
-                        
+
+                }else if(!otherAbove && onGround && other.onGround && (Mathf.Abs(body.velocity.x) > 0 && Mathf.Abs(body.velocity.x) <= WalkingMaxSpeed)){
+                    //Pushing players
+                    if(joystick.x != 0){
+                        isPushingPlayer += 0.3f;
+
+                        // Clamp the timer to its maximum value
+                        isPushingPlayer = Mathf.Min(isPushingPlayer, 0.9f);
                     }
                     
                 }
