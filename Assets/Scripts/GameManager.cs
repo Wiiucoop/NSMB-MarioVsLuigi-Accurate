@@ -27,6 +27,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     public Slider masterSlider;
 
+    private FluidMidi.SongPlayer songPlayer = null;
+
     public bool isLocalGame = false;
 
     private bool localLuigiWins = false;
@@ -728,6 +730,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = false });
         gameover = true;
         music.Stop();
+        sequencePlayerMain.player.Stop();
+        sequencePlayerSecondary.player.Stop();
+        sequencePlayerInvincible.player.Stop();
         GameObject text = GameObject.FindWithTag("wintext");
         text.GetComponent<TMP_Text>().text = winner != null ? $"{ winnerName } Wins!" : "Match Cancelled..";
         text.GetComponent<Animator>().Play("wintext");
@@ -951,8 +956,18 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         musicState = state;
     }
 
-    private void PlaySongSeq(Enums.MusicState state)
+    public void PlaySongSeq(Enums.MusicState state)
     {
+        
+
+        if(songPlayer != null){
+            if(hurryup){
+                songPlayer.Tempo = 1.25f;
+            }else{
+                songPlayer.Tempo = 1f;
+            }  
+        }
+
         if (musicState == state)
             return;
 
@@ -971,13 +986,16 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         {
             normalSongToPlay = sequencePlayerSecondary.player;
         }
-        var songPlayer = state switch
+        songPlayer = state switch
         {
             Enums.MusicState.Normal => normalSongToPlay,
             Enums.MusicState.Starman => sequencePlayerInvincible.player,
             _ => null
         };
-        if (songPlayer != null) songPlayer.Play();
+        if (songPlayer != null) songPlayer.Play();   
+
+
+
     }
 
     private IEnumerator DelayedLastLifeSpedup()//ACCURACY: Delay to start speedup when one of the players get to its last life
@@ -1003,7 +1021,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             if (!player)
                 continue;
 
-            if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false)
+            if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false){}
                 speedup = true;
             if (player.lives == 1 && players.Count <= 2){
                 StartCoroutine(DelayedLastLifeSpedup());

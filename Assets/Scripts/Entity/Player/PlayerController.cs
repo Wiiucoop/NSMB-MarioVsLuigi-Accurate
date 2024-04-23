@@ -1784,6 +1784,16 @@ void HandleTornado() {   //ACCURACY: add tornado
 
     [PunRPC]
     public void Respawn() {
+        if(GameManager.Instance.UsesMidi && GameManager.Instance.sequencePlayerMain.player.IsPaused){
+            GameManager.Instance.sequencePlayerMain.player.Seek(0);
+            GameManager.Instance.sequencePlayerSecondary.player.Seek(0);
+            GameManager.Instance.sequencePlayerInvincible.player.Seek(0);
+
+            GameManager.Instance.sequencePlayerMain.player.Resume();
+            GameManager.Instance.sequencePlayerSecondary.player.Resume();
+            GameManager.Instance.sequencePlayerInvincible.player.Resume();
+        }
+        
         
         //ACCURACY: Player gets teleported on top of their respective pipes
         if(GameManager.Instance.players.Count <= 2)
@@ -1954,12 +1964,21 @@ void HandleTornado() {   //ACCURACY: add tornado
     {
         if(!isLocalGame){
             GameManager.Instance.music.Pause();
+            GameManager.Instance.sequencePlayerMain.player.Pause();
+            GameManager.Instance.sequencePlayerSecondary.player.Pause();
+            GameManager.Instance.sequencePlayerInvincible.player.Pause();
             GameManager.Instance.music.time = 0f;
             yield return new WaitForSeconds(0.2f); 
             GameManager.Instance.music.Pause();
+            GameManager.Instance.sequencePlayerMain.player.Pause();
+            GameManager.Instance.sequencePlayerSecondary.player.Pause();
+            GameManager.Instance.sequencePlayerInvincible.player.Pause();
             GameManager.Instance.music.time = 0f;
             yield return new WaitForSeconds(1.8f); 
             GameManager.Instance.music.Pause();
+            GameManager.Instance.sequencePlayerMain.player.Pause();
+            GameManager.Instance.sequencePlayerSecondary.player.Pause();
+            GameManager.Instance.sequencePlayerInvincible.player.Pause();
             GameManager.Instance.music.time = 0f;
         }
     }

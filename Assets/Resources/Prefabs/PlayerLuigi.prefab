@@ -651,7 +651,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2061862550066614901}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: SmallLuigi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16198,7 +16198,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5116786882530447704}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: LargeLuigi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22148,6 +22148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 984b6c8bdb2dc4a419d0cd6be4254d4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPushingPlayer: 0
   powerupCompleted: 1
   betaAnims: 1
   invertRotation: 0
