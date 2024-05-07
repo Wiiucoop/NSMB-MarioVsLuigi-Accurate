@@ -248,7 +248,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
             animator.SetFloat("velocityY", body.velocity.y);
             animator.SetBool("doublejump", controller.doublejump);
             animator.SetBool("triplejump", controller.triplejump);
-            animator.SetBool("holding", (controller.holding != null) || controller.isPushingPlayer != 0f);
+            animator.SetBool("holding", (controller.holding != null) || controller.isPushingPlayer != 0f);//Pushing player animation
             animator.SetBool("head carry", controller.holding != null && controller.holding is FrozenCube);
             animator.SetBool("pipe", controller.pipeEntering != null);
             animator.SetBool("blueshell", controller.state == Enums.PowerupState.BlueShell);
@@ -288,22 +288,23 @@ public class PlayerAnimationController : MonoBehaviourPun {
         Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaStarman); //ACCURACY: REMOVE RAINBOW EFFECT FOR E3 BETA MODE
 
         Vector3 colorMultiply = Vector3.one;
-        if (controller.invincible > 0) {
-            if(!betaStarman){
-                materialBlock.SetFloat("RainbowEnabled", controller.invincible > 0 ? 1.1f : 0f);
-            }else{
-                float v = ((Mathf.Sin(controller.invincible * 20f) + 1f) / 2f * 0.9f) + 0.1f;
-                colorMultiply = new Vector3(v, 1, v);
+
+        materialBlock.SetFloat("RainbowEnabled", (controller.invincible > 0 && !betaStarman) ? 1 : 0);
+
+        if (controller.giantTimer > 0 && controller.giantTimer < 4) {
+            float v = ((Mathf.Sin(controller.giantTimer * 20f) + 1f) / 2f * 0.9f) + 0.1f;
+            colorMultiply = new Vector3(v, 1, v);
                 
-            }
-        }else{              
-            if (controller.giantTimer > 0 && controller.giantTimer < 4) {
-                float v = ((Mathf.Sin(controller.giantTimer * 20f) + 1f) / 2f * 0.9f) + 0.1f;
-                colorMultiply = new Vector3(v, 1, v);
+        }else if(betaStarman){
+            float v = ((Mathf.Sin(controller.invincible * 20f) + 1f) / 2f * 0.9f) + 0.1f;
+            colorMultiply = new Vector3(v, 1, v);
                 
-            }
         }
-        materialBlock.SetVector("MultiplyColor", colorMultiply);
+
+        if((controller.giantTimer > 0 && controller.giantTimer < 4 ) || (betaStarman && controller.invincible > 0)){
+            materialBlock.SetVector("MultiplyColor", colorMultiply);
+        }
+        
         
 
         int ps = controller.state switch {
@@ -431,6 +432,8 @@ public class PlayerAnimationController : MonoBehaviourPun {
         }
         pipeTimer += Time.fixedDeltaTime;
     }
+
+   
 
     public void DisableAllModels() {
         smallModel.SetActive(false);

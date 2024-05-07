@@ -25,28 +25,29 @@ namespace FluidMidi
         }
 
         public static void Log(string message)
-        {
-            Debug.Log(FormatMessage(message));
+        {/*
+            Debug.Log(FormatMessage(message));*/
         }
 
         public static void LogWarning(string message)
-        {
-            Debug.LogWarning(FormatMessage(message));
+        {/*
+            Debug.LogWarning(FormatMessage(message));*/
         }
 
         public static void LogError(string message)
-        {
-            Debug.LogError(FormatMessage(message));
+        {/*
+            Debug.LogError(FormatMessage(message));*/
         }
 
         private static string FormatMessage(string message)
         {
-            return "Fluid MIDI: " + message;
+            return "";
+           // return "Fluid MIDI: " + message;
         }
 
         [MonoPInvokeCallback(typeof(Api.Log.FunctionDelegate))]
         private static void Log(int level, string message, IntPtr data)
-        {
+        {/*
             switch (level)
             {
                 case Api.Log.Level.Warn:
@@ -59,7 +60,7 @@ namespace FluidMidi
                 default:
                     Log(message);
                     break;
-            }
+            }*/
         }
     }
 }

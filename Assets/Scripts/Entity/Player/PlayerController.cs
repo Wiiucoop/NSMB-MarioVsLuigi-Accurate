@@ -410,6 +410,13 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             return;
         }
 
+        if (GameManager.Instance.paused) {//Accuracy: ONLINE PAUSING    
+            body.velocity = previousFrameVelocity;
+            body.position = previousFramePosition;
+            hitInvincibilityCounter = 0.01f;
+            return;
+        }
+
         groundpoundLastFrame = groundpound;
         previousOnGround = onGround;
         if (!dead) {
@@ -1224,8 +1231,14 @@ void HandleTornado() {   //ACCURACY: add tornado
                 afstate = powerup.state;
                 //todo: add invincibility frames
                 
-             //   Debug.Log("PODERZAO");
+                //Debug.Log("PODERZAO "+afstate);
+                
                 if(powerup.state != Enums.PowerupState.MegaMushroom){
+               //     Debug.Log(AnimationController.smallModel.Active+" TIQUIN");
+
+
+                    
+
                     StartCoroutine(powerupAnim());
                 }
             }
@@ -1238,7 +1251,6 @@ void HandleTornado() {   //ACCURACY: add tornado
                 
               //  Debug.Log("PODERZAO222");
               //  StartCoroutine(powerupAnim());
-          
 
 
         }
@@ -3660,6 +3672,9 @@ void HandleTornado() {   //ACCURACY: add tornado
             return;
         if (!propeller && !flying && (left || right))
             return;
+
+
+        invincible = 5f;//REMOVER
 
         if (flying) {
             //start drill

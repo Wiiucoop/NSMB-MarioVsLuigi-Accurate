@@ -33,6 +33,8 @@ public class UIUpdater : MonoBehaviour {
     private GameObject starsParent, coinsParent, livesParent, p2LivesParent, timerParent;
 
     public GameObject middleColumnParent;
+    
+    public RectTransform leftColumnParent, rightColumnParent, track1, track2;
     private readonly List<Image> backgrounds = new();
     private bool uiHidden;
     private string pingIcon;
@@ -66,6 +68,15 @@ public class UIUpdater : MonoBehaviour {
         if(isLocalGame){
             middleColumnParent.transform.position += new Vector3(0f, 28f, 0f);
             uiCountdown.text = Utils.GetSymbolString("C" + "0" + "/" + GameManager.Instance.coinRequirement);
+        }
+
+        Debug.Log("4BY3 "+Settings.Instance.fourByThreeRatio);
+
+        if(Settings.Instance.fourByThreeRatio){
+            leftColumnParent.anchoredPosition = new Vector2(leftColumnParent.anchoredPosition.x + 125f, leftColumnParent.anchoredPosition.y);
+            rightColumnParent.anchoredPosition = new Vector2(rightColumnParent.anchoredPosition.x - 125f, rightColumnParent.anchoredPosition.y);
+            track1.anchoredPosition = new Vector2(track1.anchoredPosition.x, -526f);
+            track2.anchoredPosition = new Vector2(track2.anchoredPosition.x, -519f);
         }
 
         foreach (Image bg in backgrounds)

@@ -491,6 +491,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             bg.SetActive(false);   
             LoadLocalLogic();
         }
+
+        
         LocalReserve.SetActive(!isLocalGame);
         LocalTrack.SetActive(!isLocalGame);
         LocalTrackIcons.SetActive(!isLocalGame);
@@ -961,12 +963,17 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         
 
         if(songPlayer != null){
-            if(hurryup){
+           // Debug.Log(songPlayer.Tempo+" TEMPO ");
+            if(hurryup && songPlayer.Tempo != 1.25f){
                 songPlayer.Tempo = 1.25f;
-            }else{
+                Debug.Log(songPlayer.Tempo+" RAPID ");
+            }else if(!hurryup && songPlayer.Tempo != 1f){
                 songPlayer.Tempo = 1f;
+                Debug.Log(songPlayer.Tempo+" SLOW ");
             }  
         }
+
+        
 
         if (musicState == state)
             return;
@@ -976,8 +983,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         sequencePlayerMain.player.Stop();
         sequencePlayerSecondary.player.Stop();
         sequencePlayerInvincible.player.Stop();
-
+        
         musicState = state;
+
+       // Debug.Log(musicState+" ESTADO "+ state);
 
         //ACCURACY: Music alternating made like the original
         //it starts playing SNOW and alternates with OVERWORLD theme each game
@@ -1021,7 +1030,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             if (!player)
                 continue;
 
-            if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false){}
+            if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false)
                 speedup = true;
             if (player.lives == 1 && players.Count <= 2){
                 StartCoroutine(DelayedLastLifeSpedup());
