@@ -897,7 +897,6 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                 continue;
 
             alivePlayers.Add(player);
-            player.onGround = true;
 
             if ((starGame && player.stars >= starRequirement) || timeUp) {
                 //we're in a state where this player would win.
