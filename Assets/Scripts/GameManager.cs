@@ -1012,6 +1012,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     {
         yield return new WaitForSeconds(2f);
         hurryup = true;
+       
         yield break;
     }
 
@@ -1034,8 +1035,11 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             if (player.invincible > 0)
                 invincible = true;
 
-            if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false)
+            if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false){
                 speedup = true;
+                hurryup = speedup;
+            }
+                
             if (player.lives == 1 && players.Count <= 2){
                 StartCoroutine(DelayedLastLifeSpedup());
                 break;
