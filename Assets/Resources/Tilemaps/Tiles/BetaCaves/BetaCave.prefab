@@ -31,7 +31,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4103958650524457102}
-  m_RootOrder: -1
+  m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1839735485 &6044168160199870560
 Tilemap:
@@ -231,7 +231,7 @@ Transform:
   m_Children:
   - {fileID: 710362738613227092}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!156049354 &7745394949828676927
 Grid:

@@ -15,6 +15,7 @@ public class ModelKoopaWalk : HoldableEntity
     private Vector2 velocityLastFrame;
     protected float wakeupTimer;
 
+    public SpriteRenderer sRendererK;
     public GameObject koopaModel;
 
     private BoxCollider2D worldHitbox;
@@ -168,6 +169,9 @@ public class ModelKoopaWalk : HoldableEntity
 
         animator = koopaModel.GetComponent<Animator>();
 
+
+
+
     }
 
     public override void FixedUpdate()
@@ -189,7 +193,7 @@ public class ModelKoopaWalk : HoldableEntity
         if (Frozen || dead)
             return;
 
-        sRenderer.flipX = !FacingLeftTween ^ flipXFlip;
+        sRendererK.flipX = !FacingLeftTween ^ flipXFlip;
         if (FacingLeftTween)//ACCURACY: 3D KOOPA FLIPPING
         {
             // Set rotation to =120f on the Y-axis
@@ -228,6 +232,14 @@ public class ModelKoopaWalk : HoldableEntity
                 transform.eulerAngles.x,
                 transform.eulerAngles.y,
                 wakeupTimer < 3 && wakeupTimer > 0 ? Mathf.Sin(wakeupTimer * 120f) * 15f : 0);
+        }
+
+        if(!Settings.Instance.scoreboardAlways && !shell){//ENABLE 3D ONLY IF DS RESOLUTION IS NOT ON
+            koopaModel.SetActive(false);
+            sRendererK.enabled = true;
+        }else{
+            koopaModel.SetActive(true);
+            sRendererK.enabled = false;
         }
 
         if (shell)

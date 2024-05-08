@@ -70,9 +70,9 @@ public class UIUpdater : MonoBehaviour {
             uiCountdown.text = Utils.GetSymbolString("C" + "0" + "/" + GameManager.Instance.coinRequirement);
         }
 
-        Debug.Log("4BY3 "+Settings.Instance.fourByThreeRatio);
+        
 
-        if(Settings.Instance.fourByThreeRatio){
+        if(Settings.Instance.fourByThreeRatio && Settings.Instance.ndsResolution){// 4by3 4/3 HUD ELEMENTS
             leftColumnParent.anchoredPosition = new Vector2(leftColumnParent.anchoredPosition.x + 125f, leftColumnParent.anchoredPosition.y);
             rightColumnParent.anchoredPosition = new Vector2(rightColumnParent.anchoredPosition.x - 125f, rightColumnParent.anchoredPosition.y);
             track1.anchoredPosition = new Vector2(track1.anchoredPosition.x, -526f);

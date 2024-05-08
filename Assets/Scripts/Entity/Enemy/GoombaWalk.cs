@@ -6,6 +6,8 @@ public class GoombaWalk : KillableEntity {
     [SerializeField] float speed, deathTimer = -1, terminalVelocity = -8;
 
     public GameObject goombaModel;
+
+    public SpriteRenderer sRendererG;
     public new void Start() {
         base.Start();
         body.velocity = new Vector2(speed * (left ? -1 : 1), body.velocity.y);
@@ -14,8 +16,17 @@ public class GoombaWalk : KillableEntity {
      //   hitbox = goombaModel.GetComponent<BoxCollider2D>();
         animator = goombaModel.GetComponent<Animator>();
      //   audioSource = goombaModel.GetComponent<AudioSource>();
-      //  sRenderer = goombaModel.GetComponent<SpriteRenderer>();
+      //  sRendererG = goombaModel.GetComponent<SpriteRenderer>();
       //  physics = goombaModel.GetComponent<PhysicsEntity>();
+
+        if(!Settings.Instance.scoreboardAlways){//ENABLE 3D ONLY IF DS RESOLUTION IS NOT ON
+            goombaModel.SetActive(false);
+            sRendererG.enabled = true;
+        }else{
+            goombaModel.SetActive(true);
+            sRendererG.enabled = false;
+        }
+
 
         animator.SetBool("dead", false);
     }
@@ -45,7 +56,7 @@ public class GoombaWalk : KillableEntity {
             left = physics.hitRight;
         }
         body.velocity = new Vector2(speed * (left ? -1 : 1), Mathf.Max(terminalVelocity, body.velocity.y));
-        sRenderer.flipX = !left;
+        sRendererG.flipX = !left;
         if (left)//ACCURACY: 3D GOOMBA FLIPPING
         {
             // Set rotation to =120f on the Y-axis
@@ -67,5 +78,9 @@ public class GoombaWalk : KillableEntity {
         deathTimer = 0.5f;
         hitbox.enabled = false;
         animator.SetBool("dead", true);
+        sRendererG.transform.localScale = new Vector3(sRendererG.transform.localScale.x, 30f, sRendererG.transform.localScale.z);
+        Animator animator2d = sRendererG.GetComponent<Animator>();
+        animator2d.speed = 0f;
+
     }
 }

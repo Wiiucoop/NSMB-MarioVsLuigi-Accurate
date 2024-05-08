@@ -13,6 +13,11 @@ PrefabInstance:
       propertyPath: sceneViewId
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 184954286564984569, guid: 4f50cb5e806289d43bf820de1f1347bb,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: d6c69338103c35f45b38fce3ab78906e, type: 2}
     - target: {fileID: 818487035572622980, guid: 4f50cb5e806289d43bf820de1f1347bb,
         type: 3}
       propertyPath: floorAndRoofCutoff
@@ -68,6 +73,12 @@ PrefabInstance:
       propertyPath: red
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4410465543807727377, guid: 4f50cb5e806289d43bf820de1f1347bb,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 3022792133873789726, guid: 60f25f7bee1a7f84c946884c48261f34,
+        type: 3}
     - target: {fileID: 5288824992334271388, guid: 4f50cb5e806289d43bf820de1f1347bb,
         type: 3}
       propertyPath: m_Controller
@@ -86,12 +97,12 @@ PrefabInstance:
     - target: {fileID: 8836298984178612584, guid: 4f50cb5e806289d43bf820de1f1347bb,
         type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.x
-      value: 0.17
+      value: 0.53125
       objectReference: {fileID: 0}
     - target: {fileID: 8836298984178612584, guid: 4f50cb5e806289d43bf820de1f1347bb,
         type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
-      value: 0.3
+      value: 0.9375
       objectReference: {fileID: 0}
     - target: {fileID: 8836298984178612585, guid: 4f50cb5e806289d43bf820de1f1347bb,
         type: 3}

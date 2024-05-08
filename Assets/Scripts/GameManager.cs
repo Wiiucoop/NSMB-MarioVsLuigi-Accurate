@@ -1029,6 +1029,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             if (!player)
                 continue;
 
+            if (player.invincible > 0)
+                invincible = true;
+
             if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false)
                 speedup = true;
             if (player.lives == 1 && players.Count <= 2){
@@ -1038,9 +1041,6 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
             if (!player.photonView.IsMine)
                 continue;
-
-            if (player.invincible > 0)
-                invincible = true;
             
         }
 

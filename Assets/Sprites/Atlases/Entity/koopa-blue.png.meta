@@ -57,7 +57,7 @@ TextureImporter:
       213: 64540993215258477
     second: koopa-blue_17
   externalObjects: {}
-  serializedVersion: 12
+  serializedVersion: 11
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -102,7 +102,7 @@ TextureImporter:
   spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 500
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -119,7 +119,6 @@ TextureImporter:
   ignorePngGamma: 0
   applyGammaDecoding: 0
   swizzle: 50462976
-  cookieLightType: 1
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
@@ -193,18 +192,6 @@ TextureImporter:
     overridden: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
-    buildTarget: Windows Store Apps
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 0
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -213,9 +200,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 401
-        width: 94
-        height: 165
+        y: 64
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -233,10 +220,10 @@ TextureImporter:
       name: koopa-blue_1
       rect:
         serializedVersion: 2
-        x: 98
-        y: 401
-        width: 94
-        height: 165
+        x: 19
+        y: 64
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -254,10 +241,10 @@ TextureImporter:
       name: koopa-blue_2
       rect:
         serializedVersion: 2
-        x: 192
-        y: 401
-        width: 94
-        height: 165
+        x: 37
+        y: 64
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -275,10 +262,10 @@ TextureImporter:
       name: koopa-blue_3
       rect:
         serializedVersion: 2
-        x: 288
-        y: 401
-        width: 94
-        height: 165
+        x: 56
+        y: 64
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -296,10 +283,10 @@ TextureImporter:
       name: koopa-blue_4
       rect:
         serializedVersion: 2
-        x: 392
-        y: 401
-        width: 94
-        height: 165
+        x: 74
+        y: 64
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -317,10 +304,10 @@ TextureImporter:
       name: koopa-blue_5
       rect:
         serializedVersion: 2
-        x: 496
-        y: 401
-        width: 94
-        height: 165
+        x: 92
+        y: 64
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -338,10 +325,10 @@ TextureImporter:
       name: koopa-blue_6
       rect:
         serializedVersion: 2
-        x: 0
-        y: 201
-        width: 94
-        height: 165
+        x: 1
+        y: 32
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -359,10 +346,10 @@ TextureImporter:
       name: koopa-blue_7
       rect:
         serializedVersion: 2
-        x: 99
-        y: 201
-        width: 94
-        height: 165
+        x: 21
+        y: 32
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -380,10 +367,10 @@ TextureImporter:
       name: koopa-blue_8
       rect:
         serializedVersion: 2
-        x: 199
-        y: 201
-        width: 94
-        height: 165
+        x: 39
+        y: 32
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -401,10 +388,10 @@ TextureImporter:
       name: koopa-blue_9
       rect:
         serializedVersion: 2
-        x: 295
-        y: 201
-        width: 94
-        height: 165
+        x: 57
+        y: 32
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -422,10 +409,10 @@ TextureImporter:
       name: koopa-blue_10
       rect:
         serializedVersion: 2
-        x: 391
-        y: 201
-        width: 94
-        height: 165
+        x: 75
+        y: 32
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -443,10 +430,10 @@ TextureImporter:
       name: koopa-blue_11
       rect:
         serializedVersion: 2
-        x: 492
-        y: 202
-        width: 94
-        height: 165
+        x: 92
+        y: 32
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -464,10 +451,10 @@ TextureImporter:
       name: koopa-blue_12
       rect:
         serializedVersion: 2
-        x: 0
-        y: 11
-        width: 94
-        height: 165
+        x: 1
+        y: 0
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -485,10 +472,10 @@ TextureImporter:
       name: koopa-blue_13
       rect:
         serializedVersion: 2
-        x: 99
-        y: 12
-        width: 94
-        height: 165
+        x: 19
+        y: 0
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -506,10 +493,10 @@ TextureImporter:
       name: koopa-blue_14
       rect:
         serializedVersion: 2
-        x: 196
-        y: 11
-        width: 94
-        height: 165
+        x: 38
+        y: 0
+        width: 17
+        height: 30
       alignment: 9
       pivot: {x: 0.5, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -527,10 +514,10 @@ TextureImporter:
       name: koopa-blue_15
       rect:
         serializedVersion: 2
-        x: 347
-        y: 8
-        width: 80
-        height: 75
+        x: 56
+        y: 0
+        width: 16
+        height: 15
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -548,10 +535,10 @@ TextureImporter:
       name: koopa-blue_16
       rect:
         serializedVersion: 2
-        x: 447
-        y: 7
-        width: 80
-        height: 75
+        x: 74
+        y: 0
+        width: 16
+        height: 15
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -569,10 +556,10 @@ TextureImporter:
       name: koopa-blue_17
       rect:
         serializedVersion: 2
-        x: 551
-        y: 6
-        width: 80
-        height: 75
+        x: 92
+        y: 0
+        width: 16
+        height: 15
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -590,10 +577,10 @@ TextureImporter:
       name: koopa-blue_18
       rect:
         serializedVersion: 2
-        x: 349
-        y: 114
-        width: 80
-        height: 75
+        x: 56
+        y: 16
+        width: 16
+        height: 15
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
