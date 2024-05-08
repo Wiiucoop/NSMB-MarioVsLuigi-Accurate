@@ -234,7 +234,7 @@ public class ModelKoopaWalk : HoldableEntity
                 wakeupTimer < 3 && wakeupTimer > 0 ? Mathf.Sin(wakeupTimer * 120f) * 15f : 0);
         }
 
-        if(!Settings.Instance.scoreboardAlways && !shell){//ENABLE 3D ONLY IF DS RESOLUTION IS NOT ON
+        if(!Settings.Instance.filter && !shell){//ENABLE 3D ONLY IF DS RESOLUTION IS NOT ON
             koopaModel.SetActive(false);
             sRendererK.enabled = true;
         }else{

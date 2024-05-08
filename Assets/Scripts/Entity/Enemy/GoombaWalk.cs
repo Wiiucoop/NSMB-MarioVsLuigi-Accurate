@@ -19,7 +19,7 @@ public class GoombaWalk : KillableEntity {
       //  sRendererG = goombaModel.GetComponent<SpriteRenderer>();
       //  physics = goombaModel.GetComponent<PhysicsEntity>();
 
-        if(!Settings.Instance.scoreboardAlways){//ENABLE 3D ONLY IF DS RESOLUTION IS NOT ON
+        if(!Settings.Instance.filter){//ENABLE 3D ONLY IF DS RESOLUTION IS NOT ON
             goombaModel.SetActive(false);
             sRendererG.enabled = true;
         }else{

@@ -473,6 +473,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     public void Awake() {
         Instance = this;
+         //ACCURACY: ENABLE MIDI MUSIC PLAYBACK
+        UsesMidi = MainMenuManager.Instance.timeEnabled.isOn;
         isLocalGame = SceneManager.GetActiveScene().buildIndex >= (10 + 2);
         enableBeta = SceneManager.GetActiveScene().buildIndex >= (12 + 2);
         bg = GameObject.FindGameObjectWithTag("Backgrounds");
@@ -676,13 +678,13 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         yield return new WaitForSeconds(1f);
         musicEnabled = true;
-        Utils.GetCustomProperty(Enums.NetRoomProperties.Time, out timedGameDuration);
+        //Utils.GetCustomProperty(Enums.NetRoomProperties.Time, out timedGameDuration);
 
         startRealTime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        if (timedGameDuration > 0) {
-            endServerTime = startTimestamp + 4500 + timedGameDuration * 1000;
-            endRealTime = startRealTime + 4500 + timedGameDuration * 1000;
-        }
+       // if (timedGameDuration > 0) {
+       //     endServerTime = startTimestamp + 4500 + timedGameDuration * 1000;
+     //       endRealTime = startRealTime + 4500 + timedGameDuration * 1000;
+      //  }
 
         GlobalController.Instance.DiscordController.UpdateActivity();
 

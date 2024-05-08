@@ -1037,7 +1037,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             s.interactable = PhotonNetwork.IsMasterClient;
 
         livesField.interactable = PhotonNetwork.IsMasterClient && livesEnabled.isOn;
-        timeField.interactable = PhotonNetwork.IsMasterClient && timeEnabled.isOn;
+       // timeField.interactable = PhotonNetwork.IsMasterClient && timeEnabled.isOn;
         drawTimeupToggle.interactable = PhotonNetwork.IsMasterClient;
 
         levelDropdown.gameObject.SetActive(PhotonNetwork.IsMasterClient && !drawTimeupToggle.isOn);
