@@ -23,9 +23,11 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     private GameObject bg;
 
-    public bool enableBeta = false;
+    private bool enableBeta = false;
 
     public Slider masterSlider;
+
+    public GameObject blackLoadBG;
 
     private FluidMidi.SongPlayer songPlayer = null;
 
@@ -46,7 +48,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         private set => _instance = value;
     }
 
-    public bool UsesMidi;
+    private bool UsesMidi = false;
     public MusicData mainMusic, secondaryMusic, invincibleMusic;
     public SequencePlayer sequencePlayerMain, sequencePlayerSecondary, sequencePlayerInvincible;
 
@@ -84,6 +86,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public readonly HashSet<Player> loadedPlayers = new();
     public int starRequirement, timedGameDuration = -1, coinRequirement;
     public bool hurryup = false;
+    public bool lastStarSpeedup = false;
     public bool tenSecondCountdown = false;
 
     public int playerCount = 1;
@@ -401,6 +404,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         }
     }
 
+    public bool getUsesMidi(){
+        return UsesMidi;
+    }
+
     public bool getPiranaplantCanspawn(){
         return piranaplantCanspawn;
     }
@@ -474,7 +481,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public void Awake() {
         Instance = this;
          //ACCURACY: ENABLE MIDI MUSIC PLAYBACK
-        UsesMidi = MainMenuManager.Instance.timeEnabled.isOn;
+        if(PhotonNetwork.IsConnectedAndReady){
+            UsesMidi = MainMenuManager.Instance.timeEnabled.isOn;
+        }
+        
         isLocalGame = SceneManager.GetActiveScene().buildIndex >= (10 + 2);
         enableBeta = SceneManager.GetActiveScene().buildIndex >= (12 + 2);
         bg = GameObject.FindGameObjectWithTag("Backgrounds");
@@ -488,9 +498,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         startText = GameObject.FindWithTag("starttext");//ACCURACY: MARIO/LUIGI START
         if(isLocalGame){
             Settings.Instance.fourByThreeRatio = false;
-            startText.GetComponent<TMP_Text>().text = "Loading...";
-            startText.GetComponent<Animator>().SetTrigger("startNegative");          
-            bg.SetActive(false);   
+                   
+            blackLoadBG.SetActive(true);   
             LoadLocalLogic();
         }
 
@@ -631,8 +640,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             fader.SetIsMario(isMario);
             fader.FadeOut();
             if(isLocalGame){
-                StartCoroutine(RemoveStartMessage(0f));
-                bg.SetActive(true);
+                blackLoadBG.SetActive(false);
             }
             StartCoroutine(PlayerController.ZoomOutAnim());//ACCURACY: ZOOMOUT ANIMATION
             
@@ -965,10 +973,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         if(songPlayer != null){
            // Debug.Log(songPlayer.Tempo+" TEMPO ");
-            if(hurryup && songPlayer.Tempo != 1.25f){
+            if((lastStarSpeedup||hurryup) && songPlayer.Tempo != 1.25f){
                 songPlayer.Tempo = 1.25f;
                 Debug.Log(songPlayer.Tempo+" RAPID ");
-            }else if(!hurryup && songPlayer.Tempo != 1f){
+            }else if(!(lastStarSpeedup||hurryup) && songPlayer.Tempo != 1f){
                 songPlayer.Tempo = 1f;
                 Debug.Log(songPlayer.Tempo+" SLOW ");
             }  
@@ -1037,8 +1045,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
             if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false){
                 speedup = true;
-                hurryup = speedup;
             }
+            lastStarSpeedup = speedup;
                 
             if (player.lives == 1 && players.Count <= 2){
                 StartCoroutine(DelayedLastLifeSpedup());

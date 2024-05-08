@@ -104,9 +104,9 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             valid &= room.IsVisible && room.IsOpen;
             valid &= !room.RemovedFromList;
             valid &= room.MaxPlayers >= 2 && room.MaxPlayers <= 10;
-            valid &= lives <= 99;
-            valid &= stars >= 1 && stars <= 99;
-            valid &= coins >= 1 && coins <= 99;
+            valid &= lives <= 5;
+            valid &= stars >= 3 && stars <= 10;
+            valid &= coins >= 4 && coins <= 8;
             //valid &= host.IsValidUsername();
 
             if (!valid) {

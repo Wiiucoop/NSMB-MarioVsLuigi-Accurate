@@ -1796,7 +1796,7 @@ void HandleTornado() {   //ACCURACY: add tornado
 
     [PunRPC]
     public void Respawn() {
-        if(GameManager.Instance.UsesMidi && GameManager.Instance.sequencePlayerMain.player.IsPaused){
+        if(GameManager.Instance.getUsesMidi() && GameManager.Instance.sequencePlayerMain.player.IsPaused){
             GameManager.Instance.sequencePlayerMain.player.Seek(0);
             GameManager.Instance.sequencePlayerSecondary.player.Seek(0);
             GameManager.Instance.sequencePlayerInvincible.player.Seek(0);
@@ -3674,7 +3674,6 @@ void HandleTornado() {   //ACCURACY: add tornado
             return;
 
 
-        invincible = 5f;//REMOVER
 
         if (flying) {
             //start drill
