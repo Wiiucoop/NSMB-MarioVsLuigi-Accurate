@@ -26,6 +26,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     private bool wallJumpFacingLock = false;
     public bool powerupCompleted = true;
 
+    private bool growCompleted = true;
+
     public static bool isLocalGame = false;
 
     // == MONOBEHAVIOURS ==
@@ -1221,7 +1223,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         bool soundPlayed = false;
         //Powerup animation setup
 
-        if(powerupCompleted){
+        if(powerupCompleted || growCompleted){
             if (((state != previousState) && !reserve) || powerup.state == Enums.PowerupState.Mushroom && !reserve)
             {
                 //befstate should be the state before collecting the powerup
@@ -1238,8 +1240,17 @@ void HandleTornado() {   //ACCURACY: add tornado
 
 
                     
+                    if(powerup.state >= Enums.PowerupState.Mushroom && (befstate == Enums.PowerupState.Small || befstate == Enums.PowerupState.MiniMushroom)){
+                        Debug.Log("GRANGRAN");
 
-                    StartCoroutine(powerupAnim());
+                        
+                        //animator.SetTrigger("SizeChange");
+                        
+                        StartCoroutine(growAnim());
+                    }else{
+                        StartCoroutine(powerupAnim());
+                    }
+                    
                 }
             }
 
@@ -1393,7 +1404,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         if (!ignoreInvincible && (hitInvincibilityCounter > 0 || invincible > 0))
             return;
 
-        if(!powerupCompleted)
+        if(!powerupCompleted || !growCompleted)
             return;
 
         previousState = state;
@@ -1855,6 +1866,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         landing = 0f;
         previousState = Enums.PowerupState.MiniMushroom; //ACCURACY: FIX POWERUP NOT ANIMATING WHEN SPAWNING
         powerupCompleted = true;    //ACCURACY: FIX POWERUP NOT ANIMATING WHEN SPAWNING
+        growCompleted = true;
         
         if (photonView.IsMine && !GameManager.Instance.music.isPlaying)
             GameManager.Instance.music.Play();
@@ -1942,6 +1954,15 @@ void HandleTornado() {   //ACCURACY: add tornado
             StartCoroutine(powerupAnim());
         }
         
+    }
+
+     private System.Collections.IEnumerator growAnim()
+    {
+        growCompleted = false;
+        yield return new WaitForSeconds(0.01f); 
+        animator.SetTrigger("SizeChange");
+        yield return new WaitForSeconds(0.41f);
+        growCompleted = true;
     }
 
 //Fireflower knockback delay

@@ -813,7 +813,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             Vector3 spawnPos = remainingSpawns[index].transform.position;
             //Check for people camping spawn
             if(!isLocalGame){
-                foreach (var hit in Physics2D.OverlapCircleAll(spawnPos, 4)) {
+                foreach (var hit in Physics2D.OverlapCircleAll(spawnPos, 2.5f)) {
                 if (hit.gameObject.CompareTag("Player")) {
                     //cant spawn here
                     remainingSpawns.RemoveAt(index);

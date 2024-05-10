@@ -25,6 +25,7 @@ public class BulletBillMover : KillableEntity
         }
 
         ps.Play();
+        transform.position = new Vector3(transform.position.x, transform.position.y, -0.5f);
         sRenderer.flipX = !FacingLeftTween;
     }
 

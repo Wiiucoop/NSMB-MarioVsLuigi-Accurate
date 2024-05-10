@@ -15,6 +15,8 @@ public class ModelKoopaWalk : HoldableEntity
     private Vector2 velocityLastFrame;
     protected float wakeupTimer;
 
+    protected float destroyTimer = 25f;
+
     public SpriteRenderer sRendererK;
     public GameObject koopaModel;
 
@@ -249,6 +251,7 @@ public class ModelKoopaWalk : HoldableEntity
 
             if (stationary)
             {
+                destroyTimer = 25f;
                 if (physics.onGround)
                     body.velocity = new Vector2(0, body.velocity.y);
                 if ((wakeupTimer -= Time.fixedDeltaTime) < 0)
@@ -258,6 +261,16 @@ public class ModelKoopaWalk : HoldableEntity
             else
             {
                 wakeupTimer = wakeup;
+                if ((destroyTimer -= Time.fixedDeltaTime) < 0)
+                {
+                    // Execute the destroy action if destroyTimer reaches 0
+                    if (photonView.IsMine)
+                    {
+                        Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
+                        PhotonNetwork.Destroy(photonView);
+                    }
+                        
+                }
             }
         }
         else

@@ -18,7 +18,7 @@ MonoBehaviour:
   soundfont:
     path: BGM_CHIJO.sf2
   startTicks: 0
-  startLoopTicks: 768
+  startLoopTicks: 384
   endTicks: 0
   mutedChannelsNormal: 0
   mutedChannelsSpectating: 8

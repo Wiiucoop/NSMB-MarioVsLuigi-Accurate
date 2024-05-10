@@ -751,7 +751,9 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         creditsMenu.SetActive(false);
         localPlayMenu.SetActive(true);
         privatePrompt.SetActive(false);
+        
         isOffline = true;
+        PhotonNetwork.Disconnect();
 
         EventSystem.current.SetSelectedGameObject(localPlaySelected);
     }

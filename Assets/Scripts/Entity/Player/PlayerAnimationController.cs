@@ -229,6 +229,12 @@ public class PlayerAnimationController : MonoBehaviourPun {
         animator.SetBool("flying", controller.flying);
         animator.SetBool("drill", controller.drill);
 
+        if(controller.crouching){//REMOVER
+        Debug.Log("TRAIG");
+            animator.SetTrigger("SizeChange");
+            
+        }
+
         if (photonView.IsMine) {
             //Animation
             animator.SetBool("turnaround", controller.turnaround);
