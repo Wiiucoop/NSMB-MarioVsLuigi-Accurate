@@ -1241,15 +1241,15 @@ void HandleTornado() {   //ACCURACY: add tornado
 
                     
                     if(powerup.state >= Enums.PowerupState.Mushroom && (befstate == Enums.PowerupState.Small || befstate == Enums.PowerupState.MiniMushroom)){
-                        Debug.Log("GRANGRAN");
+                       // Debug.Log("GRANGRAN");
 
                         
                         //animator.SetTrigger("SizeChange");
                         
                         StartCoroutine(growAnim());
-                    }else{
+                    }//else{
                         StartCoroutine(powerupAnim());
-                    }
+                  //  }
                     
                 }
             }
@@ -1445,7 +1445,9 @@ void HandleTornado() {   //ACCURACY: add tornado
             hitInvincibilityCounter = 3f;
             PlaySound(Enums.Sounds.Player_Sound_Powerdown);
             afstate = state;
-            if(!hitRoof){
+            if(state == Enums.PowerupState.Small){
+                StartCoroutine(growAnim());
+            }else if(!hitRoof){
                 StartCoroutine(powerupAnim());
             }
         }
@@ -1683,8 +1685,10 @@ void HandleTornado() {   //ACCURACY: add tornado
             GameManager.Instance.CheckForWinner();
         }
 
-        if (deathplane)
+        if (deathplane){
+            state = Enums.PowerupState.Small;//Accuracy: SET STATE TO SMALL BEFORE SPAWNING TO AVOID UNWANTED POWERUP ANIMATION
             spawned = false;
+        }
         dead = true;
         onSpinner = null;
         pipeEntering = null;
@@ -1827,7 +1831,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-        //storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MiniMushroom");//REMOVER
+        storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/FireFlower");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;
@@ -1932,6 +1936,10 @@ void HandleTornado() {   //ACCURACY: add tornado
 
             if(befstate != Enums.PowerupState.PropellerMushroom){
 
+                if(befstate == Enums.PowerupState.Small || befstate == Enums.PowerupState.MiniMushroom){
+                    befstate = Enums.PowerupState.Mushroom;//Set state to mushroom to avoid conflicting with GrowAnimation
+                }
+
                 yield return new WaitForSeconds(0.1f); 
             
                 state = befstate;
@@ -1956,10 +1964,10 @@ void HandleTornado() {   //ACCURACY: add tornado
         
     }
 
-     private System.Collections.IEnumerator growAnim()
+    public System.Collections.IEnumerator growAnim()
     {
         growCompleted = false;
-        yield return new WaitForSeconds(0.01f); 
+        yield return new WaitForSeconds(0.001f); 
         animator.SetTrigger("SizeChange");
         yield return new WaitForSeconds(0.41f);
         growCompleted = true;

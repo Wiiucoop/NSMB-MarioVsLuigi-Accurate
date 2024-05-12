@@ -751,7 +751,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         creditsMenu.SetActive(false);
         localPlayMenu.SetActive(true);
         privatePrompt.SetActive(false);
-        
+
         isOffline = true;
         PhotonNetwork.Disconnect();
 
@@ -828,7 +828,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
     public void StartGame() {
         if(drawTimeupToggle.isOn){//ACCURACY: DRAWTIMEUPTOGGLE IS THE RANDOM MAP THING 
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(0, 5) });
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(0, 5) });
         }
         
         //set started game

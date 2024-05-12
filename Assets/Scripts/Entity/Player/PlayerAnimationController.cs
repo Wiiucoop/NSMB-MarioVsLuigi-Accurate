@@ -209,7 +209,10 @@ public class PlayerAnimationController : MonoBehaviourPun {
         }
     }
 
+    private int activeModel = 0;
     public void UpdateAnimatorStates() {
+
+        int lastActiveModel = activeModel;
 
         bool right = controller.joystick.x > 0.35f;
         bool left = controller.joystick.x < -0.35f;
@@ -229,11 +232,6 @@ public class PlayerAnimationController : MonoBehaviourPun {
         animator.SetBool("flying", controller.flying);
         animator.SetBool("drill", controller.drill);
 
-        if(controller.crouching){//REMOVER
-        Debug.Log("TRAIG");
-            animator.SetTrigger("SizeChange");
-            
-        }
 
         if (photonView.IsMine) {
             //Animation
@@ -343,6 +341,24 @@ public class PlayerAnimationController : MonoBehaviourPun {
         largeModel.SetActive(large);
         smallModel.SetActive(!large);
         blueShell.SetActive(controller.state == Enums.PowerupState.BlueShell);
+
+        if (large)
+        {
+            activeModel = 1;
+        }
+        else
+        {
+            activeModel = 0;
+        }
+
+        bool changed = false;
+        if(lastActiveModel != activeModel){
+            changed = true;
+        }
+
+        if(changed){
+            StartCoroutine(controller.growAnim());
+        }
 
         largeShellExclude.SetActive(!animator.GetCurrentAnimatorStateInfo(0).IsName("in-shell"));
         propellerHelmet.SetActive(controller.state == Enums.PowerupState.PropellerMushroom);

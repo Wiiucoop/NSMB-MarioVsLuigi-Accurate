@@ -73,10 +73,10 @@ public class UIUpdater : MonoBehaviour {
         
 
         if(Settings.Instance.fourByThreeRatio && Settings.Instance.ndsResolution){// 4by3 4/3 HUD ELEMENTS
-            leftColumnParent.anchoredPosition = new Vector2(leftColumnParent.anchoredPosition.x + 125f, leftColumnParent.anchoredPosition.y);
-            rightColumnParent.anchoredPosition = new Vector2(rightColumnParent.anchoredPosition.x - 125f, rightColumnParent.anchoredPosition.y);
-            track1.anchoredPosition = new Vector2(track1.anchoredPosition.x, -526f);
-            track2.anchoredPosition = new Vector2(track2.anchoredPosition.x, -519f);
+            leftColumnParent.sizeDelta = new Vector2(-240, leftColumnParent.sizeDelta.y);
+            rightColumnParent.sizeDelta = new Vector2(240, rightColumnParent.sizeDelta.y);
+          //  track1.anchoredPosition = new Vector2(track1.anchoredPosition.x, -526f);
+           // track2.anchoredPosition = new Vector2(track2.anchoredPosition.x, -519f);
         }
 
         foreach (Image bg in backgrounds)
@@ -380,6 +380,10 @@ private void flushStars(string p1) {
             if (player.lives != lives) {
                 lives = player.lives;
                 string lifeIcon = Utils.GetCharacterData(player.photonView.Owner).uistring;
+                if(player.gameObject.name.Equals("PlayerMario(Clone)")){
+                    lifeIcon = "<sprite=3>";
+                }
+
                 string lifeAmount = "";
                 for(int i = 0; i<player.lives; i++){
                     lifeAmount += ""+lifeIcon;
