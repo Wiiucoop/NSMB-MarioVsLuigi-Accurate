@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     public bool dead = false, spawned = false;
     public Enums.PowerupState state = Enums.PowerupState.Small, previousState, befstate, afstate;
     public float slowriseGravity = 0.85f, normalGravity = 2.5f, flyingGravity = 0.8f, flyingTerminalVelocity = 1.25f, drillVelocity = 7f, groundpoundTime = 0.25f, groundpoundVelocity = 10, blinkingSpeed = 0.25f, terminalVelocity = -7f, jumpVelocity = 6.25f, megaJumpVelocity = 16f, launchVelocity = 12f, wallslideSpeed = -4.25f, giantStartTime = 1.5f, soundRange = 10f, slopeSlidingAngle = 12.5f, pickupTime = 0.5f;
-    public float propellerLaunchVelocity = 6, propellerFallSpeed = 2, propellerSpinFallSpeed = 1.5f, propellerSpinTime = 0.75f, propellerDrillBuffer, heightSmallModel = 0.42f, heightLargeModel = 0.82f;
+    public float propellerLaunchVelocity = 6, propellerFallSpeed = 2, propellerSpinFallSpeed = 1.5f, propellerSpinTime = 0.75f, propellerDrillBuffer, heightSmallModel = 0.34f, heightLargeModel = 0.64f, heightMegaModel = 0.84f;
 
     BoxCollider2D[] hitboxes;
     GameObject models;
@@ -665,8 +665,8 @@ void HandleTornado() {   //ACCURACY: add tornado
                             drill = false;
                             photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Enemy_Generic_Stomp);
                         } else if (!otherAbove) {
-                            otherView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x < body.position.x, 0, true, photonView.ViewID);
-                            photonView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x > body.position.x, 0, true, otherView.ViewID);
+                            otherView.RPC(nameof(PlayerBump), RpcTarget.All, otherObj.transform.position.x < body.position.x, 0, true, photonView.ViewID);
+                            photonView.RPC(nameof(PlayerBump), RpcTarget.All, otherObj.transform.position.x > body.position.x, 0, true, otherView.ViewID);
                         }
                     } else if (state == Enums.PowerupState.MegaMushroom) {
                         //only we are giant
@@ -744,7 +744,7 @@ void HandleTornado() {   //ACCURACY: add tornado
                     return;
                 } else if ( !otherAbove && onGround && other.onGround && (Mathf.Abs(previousFrameVelocity.x) > 1.7f || Mathf.Abs(other.previousFrameVelocity.x) > 1.7f)) {
                     //bump
-                    if(running || other.running){
+                    if((running || other.running) && (isPushingPlayer==0 && other.isPushingPlayer==0)){
                         
                         
                         otherView.RPC(nameof(PlayerBump), RpcTarget.All, otherObj.transform.position.x < body.position.x, 1, true, photonView.ViewID);
@@ -1240,14 +1240,7 @@ void HandleTornado() {   //ACCURACY: add tornado
 
 
                     
-                    if(powerup.state >= Enums.PowerupState.Mushroom && (befstate == Enums.PowerupState.Small || befstate == Enums.PowerupState.MiniMushroom)){
-                       // Debug.Log("GRANGRAN");
-
-                        
-                        //animator.SetTrigger("SizeChange");
-                        
-                        StartCoroutine(growAnim());
-                    }//else{
+                    
                         StartCoroutine(powerupAnim());
                   //  }
                     
@@ -1445,9 +1438,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             hitInvincibilityCounter = 3f;
             PlaySound(Enums.Sounds.Player_Sound_Powerdown);
             afstate = state;
-            if(state == Enums.PowerupState.Small){
-                StartCoroutine(growAnim());
-            }else if(!hitRoof){
+            if(!hitRoof || state != Enums.PowerupState.Small){//Accuracy: Do not use powerupAnim for big-small transtion (that one is set at PlayerAnimController)
                 StartCoroutine(powerupAnim());
             }
         }
@@ -1831,7 +1822,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-        storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/FireFlower");//REMOVER
+        storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MiniMushroom");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;
@@ -1939,6 +1930,9 @@ void HandleTornado() {   //ACCURACY: add tornado
                 if(befstate == Enums.PowerupState.Small || befstate == Enums.PowerupState.MiniMushroom){
                     befstate = Enums.PowerupState.Mushroom;//Set state to mushroom to avoid conflicting with GrowAnimation
                 }
+                if(afstate == Enums.PowerupState.MiniMushroom && befstate != Enums.PowerupState.Small){
+                    befstate = Enums.PowerupState.MiniMushroom;//Set state to mushroom to avoid conflicting with GrowAnimation
+                }
 
                 yield return new WaitForSeconds(0.1f); 
             
@@ -1964,14 +1958,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         
     }
 
-    public System.Collections.IEnumerator growAnim()
-    {
-        growCompleted = false;
-        yield return new WaitForSeconds(0.001f); 
-        animator.SetTrigger("SizeChange");
-        yield return new WaitForSeconds(0.41f);
-        growCompleted = true;
-    }
+
 
 //Fireflower knockback delay
     private System.Collections.IEnumerator fireknockbackdelay()
@@ -2879,7 +2866,9 @@ void HandleTornado() {   //ACCURACY: add tornado
 
         if (state <= Enums.PowerupState.Small || (invincible > 0 && !onGround && !crouching && !sliding && !flying && !propeller) || groundpound) {
             height = heightSmallModel;
-        } else {
+        } else if(state == Enums.PowerupState.MegaMushroom){//Accuracy: Hitbox accuracy changes
+            height = heightMegaModel;
+        }else{
             height = heightLargeModel;
         }
 

@@ -307,6 +307,8 @@ public class PlayerAnimationController : MonoBehaviourPun {
 
         if((controller.giantTimer > 0 && controller.giantTimer < 4 ) || (betaStarman && controller.invincible > 0)){
             materialBlock.SetVector("MultiplyColor", colorMultiply);
+        }else{
+            materialBlock.SetVector("MultiplyColor", Vector3.one);
         }
         
         
@@ -356,9 +358,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
             changed = true;
         }
 
-        if(changed){
-            StartCoroutine(controller.growAnim());
-        }
+        
 
         largeShellExclude.SetActive(!animator.GetCurrentAnimatorStateInfo(0).IsName("in-shell"));
         propellerHelmet.SetActive(controller.state == Enums.PowerupState.PropellerMushroom);
@@ -373,6 +373,9 @@ public class PlayerAnimationController : MonoBehaviourPun {
         HandlePipeAnimation();
 
         transform.position = new(transform.position.x, transform.position.y, animator.GetBool("pipe") ? 1 : -4);
+        if((changed && controller.state != Enums.PowerupState.MegaMushroom)||controller.state == Enums.PowerupState.MiniMushroom){
+            animator.SetTrigger("SizeChange");
+        }
     }
     void HandleDeathAnimation() {
         if (!controller.dead) {

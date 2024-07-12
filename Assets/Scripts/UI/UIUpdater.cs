@@ -72,9 +72,9 @@ public class UIUpdater : MonoBehaviour {
 
         
 
-        if(Settings.Instance.fourByThreeRatio && Settings.Instance.ndsResolution){// 4by3 4/3 HUD ELEMENTS
-            leftColumnParent.sizeDelta = new Vector2(-240, leftColumnParent.sizeDelta.y);
-            rightColumnParent.sizeDelta = new Vector2(240, rightColumnParent.sizeDelta.y);
+        if((Settings.Instance.fourByThreeRatio && Settings.Instance.ndsResolution) && !isLocalGame){// 4by3 4/3 HUD ELEMENTS
+            leftColumnParent.anchoredPosition = new Vector2(leftColumnParent.anchoredPosition.x+230, leftColumnParent.anchoredPosition.y);
+            rightColumnParent.anchoredPosition = new Vector2(rightColumnParent.anchoredPosition.x-230, rightColumnParent.anchoredPosition.y);
           //  track1.anchoredPosition = new Vector2(track1.anchoredPosition.x, -526f);
            // track2.anchoredPosition = new Vector2(track2.anchoredPosition.x, -519f);
         }

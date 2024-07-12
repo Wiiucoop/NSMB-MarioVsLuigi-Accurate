@@ -10812,8 +10812,9 @@ MonoBehaviour:
   propellerSpinFallSpeed: 1.5
   propellerSpinTime: 0.5
   propellerDrillBuffer: 0
-  heightSmallModel: 0.42
-  heightLargeModel: 0.82
+  heightSmallModel: 0.34
+  heightLargeModel: 0.64
+  heightMegaModel: 0.84
   cameraController: {fileID: 0}
   fadeOut: {fileID: 0}
   sfx: {fileID: 0}
