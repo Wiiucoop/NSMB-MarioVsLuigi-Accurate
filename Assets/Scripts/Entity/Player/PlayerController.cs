@@ -18,11 +18,15 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     public bool Active { get; set; } = true;
     private Vector2 previousJoystick;
     private short previousFlags;
+
+    public float isPushingPlayer = 0f;
     private byte previousFlags2;
     private double lastSendTimestamp;
 
     private bool wallJumpFacingLock = false;
     public bool powerupCompleted = true;
+
+    private bool growCompleted = true;
 
     public static bool isLocalGame = false;
 
@@ -43,7 +47,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     public bool dead = false, spawned = false;
     public Enums.PowerupState state = Enums.PowerupState.Small, previousState, befstate, afstate;
     public float slowriseGravity = 0.85f, normalGravity = 2.5f, flyingGravity = 0.8f, flyingTerminalVelocity = 1.25f, drillVelocity = 7f, groundpoundTime = 0.25f, groundpoundVelocity = 10, blinkingSpeed = 0.25f, terminalVelocity = -7f, jumpVelocity = 6.25f, megaJumpVelocity = 16f, launchVelocity = 12f, wallslideSpeed = -4.25f, giantStartTime = 1.5f, soundRange = 10f, slopeSlidingAngle = 12.5f, pickupTime = 0.5f;
-    public float propellerLaunchVelocity = 6, propellerFallSpeed = 2, propellerSpinFallSpeed = 1.5f, propellerSpinTime = 0.75f, propellerDrillBuffer, heightSmallModel = 0.42f, heightLargeModel = 0.82f;
+    public float propellerLaunchVelocity = 6, propellerFallSpeed = 2, propellerSpinFallSpeed = 1.5f, propellerSpinTime = 0.75f, propellerDrillBuffer, heightSmallModel = 0.34f, heightLargeModel = 0.64f, heightMegaModel = 0.84f;
 
     BoxCollider2D[] hitboxes;
     GameObject models;
@@ -243,7 +247,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         sfxBrick = GetComponents<AudioSource>()[1];
         //hitboxManager = GetComponent<WrappingHitbox>();
         AnimationController = GetComponent<PlayerAnimationController>();
-        fadeOut = GameObject.FindGameObjectWithTag("FadeUI").GetComponent<FadeOutManager>();
+        fadeOut = GameObject.FindGameObjectWithTag("FadeUI").GetComponent<FadeOutManager>();//ACCURACY: FADE OUT transition animation
         isLocalGame = GameManager.Instance.isLocalGame;
         if(isLocalGame){
             fadeOut = null;
@@ -408,6 +412,13 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             return;
         }
 
+        if (GameManager.Instance.paused) {//Accuracy: ONLINE PAUSING  , POSTPONED to another update!!!
+        //    body.velocity = previousFrameVelocity;
+        //    body.position = previousFramePosition;
+        //    hitInvincibilityCounter = 0.01f;
+        //    return;
+        }
+
         groundpoundLastFrame = groundpound;
         previousOnGround = onGround;
         if (!dead) {
@@ -419,6 +430,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             HandleTileProperties();
             TickCounters();
             HandleMovement(Time.fixedDeltaTime);
+            HandlePlayerPushing();
             HandleGiantTiles(true);
             UpdateHitbox();
             if(invincible > 0){
@@ -437,6 +449,17 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         previousFramePosition = body.position;
     }
     #endregion
+
+    void HandlePlayerPushing(){
+        isPushingPlayer -= Time.deltaTime;
+
+        // Clamp the timer to zero (it cannot be negative)
+        isPushingPlayer = Mathf.Max(isPushingPlayer, 0f);
+
+        if(joystick.x == 0){
+            isPushingPlayer = 0f;
+        }        
+    }
 
     void HandleStarman() {//ACCURACY: STARMAN COLLISION REWORK
      
@@ -642,8 +665,8 @@ void HandleTornado() {   //ACCURACY: add tornado
                             drill = false;
                             photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Enemy_Generic_Stomp);
                         } else if (!otherAbove) {
-                            otherView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x < body.position.x, 0, true, photonView.ViewID);
-                            photonView.RPC(nameof(Knockback), RpcTarget.All, otherObj.transform.position.x > body.position.x, 0, true, otherView.ViewID);
+                            otherView.RPC(nameof(PlayerBump), RpcTarget.All, otherObj.transform.position.x < body.position.x, 0, true, photonView.ViewID);
+                            photonView.RPC(nameof(PlayerBump), RpcTarget.All, otherObj.transform.position.x > body.position.x, 0, true, otherView.ViewID);
                         }
                     } else if (state == Enums.PowerupState.MegaMushroom) {
                         //only we are giant
@@ -721,14 +744,23 @@ void HandleTornado() {   //ACCURACY: add tornado
                     return;
                 } else if ( !otherAbove && onGround && other.onGround && (Mathf.Abs(previousFrameVelocity.x) > 1.7f || Mathf.Abs(other.previousFrameVelocity.x) > 1.7f)) {
                     //bump
-                    if(running || other.running){
+                    if((running || other.running) && (isPushingPlayer==0 && other.isPushingPlayer==0)){
                         
                         
                         otherView.RPC(nameof(PlayerBump), RpcTarget.All, otherObj.transform.position.x < body.position.x, 1, true, photonView.ViewID);
                         photonView.RPC(nameof(PlayerBump), RpcTarget.All, otherObj.transform.position.x > body.position.x, 1, true, otherView.ViewID);
+       
+                    }
 
                     
-                        
+
+                }else if(!otherAbove && onGround && other.onGround && (Mathf.Abs(body.velocity.x) > 0 && Mathf.Abs(body.velocity.x) <= WalkingMaxSpeed)){
+                    //Pushing players
+                    if(joystick.x != 0){
+                        isPushingPlayer += 0.3f;
+
+                        // Clamp the timer to its maximum value
+                        isPushingPlayer = Mathf.Min(isPushingPlayer, 0.9f);
                     }
                     
                 }
@@ -1191,7 +1223,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         bool soundPlayed = false;
         //Powerup animation setup
 
-        if(powerupCompleted){
+        if(powerupCompleted || growCompleted){
             if (((state != previousState) && !reserve) || powerup.state == Enums.PowerupState.Mushroom && !reserve)
             {
                 //befstate should be the state before collecting the powerup
@@ -1201,9 +1233,17 @@ void HandleTornado() {   //ACCURACY: add tornado
                 afstate = powerup.state;
                 //todo: add invincibility frames
                 
-             //   Debug.Log("PODERZAO");
+                //Debug.Log("PODERZAO "+afstate);
+                
                 if(powerup.state != Enums.PowerupState.MegaMushroom){
-                    StartCoroutine(powerupAnim());
+               //     Debug.Log(AnimationController.smallModel.Active+" TIQUIN");
+
+
+                    
+                    
+                        StartCoroutine(powerupAnim());
+                  //  }
+                    
                 }
             }
 
@@ -1215,7 +1255,6 @@ void HandleTornado() {   //ACCURACY: add tornado
                 
               //  Debug.Log("PODERZAO222");
               //  StartCoroutine(powerupAnim());
-          
 
 
         }
@@ -1358,7 +1397,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         if (!ignoreInvincible && (hitInvincibilityCounter > 0 || invincible > 0))
             return;
 
-        if(!powerupCompleted)
+        if(!powerupCompleted || !growCompleted)
             return;
 
         previousState = state;
@@ -1399,7 +1438,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             hitInvincibilityCounter = 3f;
             PlaySound(Enums.Sounds.Player_Sound_Powerdown);
             afstate = state;
-            if(!hitRoof){
+            if(!hitRoof || state != Enums.PowerupState.Small){//Accuracy: Do not use powerupAnim for big-small transtion (that one is set at PlayerAnimController)
                 StartCoroutine(powerupAnim());
             }
         }
@@ -1637,8 +1676,10 @@ void HandleTornado() {   //ACCURACY: add tornado
             GameManager.Instance.CheckForWinner();
         }
 
-        if (deathplane)
+        if (deathplane){
+            state = Enums.PowerupState.Small;//Accuracy: SET STATE TO SMALL BEFORE SPAWNING TO AVOID UNWANTED POWERUP ANIMATION
             spawned = false;
+        }
         dead = true;
         onSpinner = null;
         pipeEntering = null;
@@ -1761,6 +1802,16 @@ void HandleTornado() {   //ACCURACY: add tornado
 
     [PunRPC]
     public void Respawn() {
+        if(GameManager.Instance.getUsesMidi() && GameManager.Instance.sequencePlayerMain.player.IsPaused){
+            GameManager.Instance.sequencePlayerMain.player.Seek(0);
+            GameManager.Instance.sequencePlayerSecondary.player.Seek(0);
+            GameManager.Instance.sequencePlayerInvincible.player.Seek(0);
+
+            GameManager.Instance.sequencePlayerMain.player.Resume();
+            GameManager.Instance.sequencePlayerSecondary.player.Resume();
+            GameManager.Instance.sequencePlayerInvincible.player.Resume();
+        }
+        
         
         //ACCURACY: Player gets teleported on top of their respective pipes
         if(GameManager.Instance.players.Count <= 2)
@@ -1771,7 +1822,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-        //storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MiniMushroom");//REMOVER
+        storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MiniMushroom");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;
@@ -1810,6 +1861,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         landing = 0f;
         previousState = Enums.PowerupState.MiniMushroom; //ACCURACY: FIX POWERUP NOT ANIMATING WHEN SPAWNING
         powerupCompleted = true;    //ACCURACY: FIX POWERUP NOT ANIMATING WHEN SPAWNING
+        growCompleted = true;
         
         if (photonView.IsMine && !GameManager.Instance.music.isPlaying)
             GameManager.Instance.music.Play();
@@ -1875,6 +1927,23 @@ void HandleTornado() {   //ACCURACY: add tornado
 
             if(befstate != Enums.PowerupState.PropellerMushroom){
 
+                
+
+                if(befstate == Enums.PowerupState.Small || befstate == Enums.PowerupState.MiniMushroom){
+                    befstate = Enums.PowerupState.Mushroom;//ACCURACY: Set state to mushroom to avoid conflicting with GrowAnimation
+                }
+                if(afstate == Enums.PowerupState.MiniMushroom){
+                   // state = Enums.PowerupState.MiniMushroom;//ACCURACY: Set state to mushroom to avoid conflicting with GrowAnimation
+                    powerupCompleted = true;
+                    AnimationController.ForcePowerupAnimation();//ACCURACY: FORCE POWERUPANIMATION WHEN MINIMARIO
+                    yield break;
+                }
+                if(afstate == Enums.PowerupState.Small){
+                 //   state = Enums.PowerupState.Small;//ACCURACY: Set state to mushroom to avoid conflicting with GrowAnimation
+                    powerupCompleted = true;
+                    yield break;
+                }
+
                 yield return new WaitForSeconds(0.1f); 
             
                 state = befstate;
@@ -1899,7 +1968,10 @@ void HandleTornado() {   //ACCURACY: add tornado
         
     }
 
-//Fireflower knockback delay
+
+
+
+//ACCURACY: Fireflower knockback delay
     private System.Collections.IEnumerator fireknockbackdelay()
     {
         bounce = false;
@@ -1910,8 +1982,8 @@ void HandleTornado() {   //ACCURACY: add tornado
         hitInvincibilityCounter = state != Enums.PowerupState.MegaMushroom ? 2f : 0f;
     }
 
-//blockSquish is that BRICK block at the start of FORTRESS LEVEL where if you hit someone from below, it will get hit by the ceiling.
-//strangely in the original game, you dont lose a powerup if you are BIG or MINI. But you do with all other powerups.
+//ACCURACY: blockSquish is that BRICK block at the start of FORTRESS LEVEL where if you hit someone from below, it will get hit by the ceiling.
+//ACCURACY: strangely in the original game, you dont lose a powerup if you are BIG or MINI. But you do with all other powerups.
     private System.Collections.IEnumerator blockSquish()
     {
         yield return new WaitForSeconds(0.1f); 
@@ -1926,17 +1998,26 @@ void HandleTornado() {   //ACCURACY: add tornado
     
 
 
-    //This delay has been added so that SPEEDUP doesnt mess with the music stop
+    //ACCURACY: This delay has been added so that SPEEDUP doesnt mess with the music stop
     private System.Collections.IEnumerator StopMusicOnDeath()
     {
         if(!isLocalGame){
             GameManager.Instance.music.Pause();
+            GameManager.Instance.sequencePlayerMain.player.Pause();
+            GameManager.Instance.sequencePlayerSecondary.player.Pause();
+            GameManager.Instance.sequencePlayerInvincible.player.Pause();
             GameManager.Instance.music.time = 0f;
             yield return new WaitForSeconds(0.2f); 
             GameManager.Instance.music.Pause();
+            GameManager.Instance.sequencePlayerMain.player.Pause();
+            GameManager.Instance.sequencePlayerSecondary.player.Pause();
+            GameManager.Instance.sequencePlayerInvincible.player.Pause();
             GameManager.Instance.music.time = 0f;
             yield return new WaitForSeconds(1.8f); 
             GameManager.Instance.music.Pause();
+            GameManager.Instance.sequencePlayerMain.player.Pause();
+            GameManager.Instance.sequencePlayerSecondary.player.Pause();
+            GameManager.Instance.sequencePlayerInvincible.player.Pause();
             GameManager.Instance.music.time = 0f;
         }
     }
@@ -2796,7 +2877,9 @@ void HandleTornado() {   //ACCURACY: add tornado
 
         if (state <= Enums.PowerupState.Small || (invincible > 0 && !onGround && !crouching && !sliding && !flying && !propeller) || groundpound) {
             height = heightSmallModel;
-        } else {
+        } else if(state == Enums.PowerupState.MegaMushroom){//Accuracy: Hitbox accuracy changes
+            height = heightMegaModel;
+        }else{
             height = heightLargeModel;
         }
 
@@ -3396,7 +3479,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             if (photonView.IsMine && hitRoof && crushGround && hitInvincibilityCounter <= 2.65 && body.velocity.y <= 0.1 && state != Enums.PowerupState.MegaMushroom) {
                 //Crushed.
                 
-               
+               Debug.Log("CRUSHADO");
                 photonView.RPC(nameof(Powerdown), RpcTarget.All, true);
                
 
@@ -3618,6 +3701,8 @@ void HandleTornado() {   //ACCURACY: add tornado
             return;
         if (!propeller && !flying && (left || right))
             return;
+
+
 
         if (flying) {
             //start drill

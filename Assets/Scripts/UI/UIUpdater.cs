@@ -10,7 +10,7 @@ using NSMB.Utils;
 public class UIUpdater : MonoBehaviour {
 
     public static UIUpdater Instance;
-    public GameObject playerTrackTemplate, starTrackTemplate;
+    public GameObject playerTrackTemplate, starTrackTemplate, storedItem, PingObject;
     public PlayerController player, other;
     public Sprite storedItemNull;
     public TMP_Text uiStar1,uiStar2,uiStar3,uiStar4,uiStar5, uiCoins, uiDebug, uiLives, uiCountdown;
@@ -33,6 +33,8 @@ public class UIUpdater : MonoBehaviour {
     private GameObject starsParent, coinsParent, livesParent, p2LivesParent, timerParent;
 
     public GameObject middleColumnParent;
+    
+    public RectTransform leftColumnParent, rightColumnParent, track1, track2;
     private readonly List<Image> backgrounds = new();
     private bool uiHidden;
     private string pingIcon;
@@ -41,6 +43,8 @@ public class UIUpdater : MonoBehaviour {
     private bool shouldP2Animate = false;
     private bool isP2AnimationRunning = true;
 
+    private int lastScreenWidth;
+private int lastScreenHeight;
     private bool isP2LifeAnimationRunning = false;
 
     private int coins = -1, coins2 = -1, stars = -1, p2stars = -1, lives = -1, timer = -1;
@@ -68,10 +72,54 @@ public class UIUpdater : MonoBehaviour {
             uiCountdown.text = Utils.GetSymbolString("C" + "0" + "/" + GameManager.Instance.coinRequirement);
         }
 
+        
+
+        if((Settings.Instance.fourByThreeRatio && Settings.Instance.ndsResolution) && !isLocalGame){// 4by3 4/3 HUD ELEMENTS
+
+        
+            // Initialize the last known screen resolution
+            lastScreenWidth = Screen.width;
+            lastScreenHeight = Screen.height;
+            
+            // Adjust HUD positions initially
+            Adjust4by3HUDPositions();
+
+        }
+
         foreach (Image bg in backgrounds)
             bg.color = GameManager.Instance.levelUIColor;
         itemColor.color = new(GameManager.Instance.levelUIColor.r - 0.2f, GameManager.Instance.levelUIColor.g - 0.2f, GameManager.Instance.levelUIColor.b - 0.2f, GameManager.Instance.levelUIColor.a);
     }
+
+    public void Adjust4by3HUDPositions()
+    {
+        float baseOffset = 125f;  // Fixed offset
+        float referenceWidth = 1000f;  // Reference resolution width
+        float referenceHeight = 800f;  // Reference resolution height
+
+        // Calculate scale factor based on CanvasScaler settings
+        float widthScale = Screen.width / referenceWidth;
+        float heightScale = Screen.height / referenceHeight;
+        float scaleFactor = Mathf.Lerp(widthScale, heightScale, 0.5f); // Match 50% width & height
+
+        
+
+        //if(Screen.fullScreen){
+       //     baseOffset = 100f;  // Fixed offset
+      //  }else{
+      //      baseOffset = 125f;  // Fixed offset
+       // }
+        float adjustedOffset = baseOffset; //* scaleFactor; // Scale dynamically
+
+        // Apply positions
+        leftColumnParent.anchoredPosition = new Vector2(adjustedOffset, leftColumnParent.anchoredPosition.y);
+        rightColumnParent.anchoredPosition = new Vector2(-adjustedOffset, rightColumnParent.anchoredPosition.y);
+        storedItem.GetComponent<RectTransform>().anchoredPosition = new Vector2(-adjustedOffset, storedItem.GetComponent<RectTransform>().anchoredPosition.y);
+        PingObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(adjustedOffset, PingObject.GetComponent<RectTransform>().anchoredPosition.y);
+        track1.localScale = new Vector3(track1.localScale.x/1.5f, track1.localScale.y/1.5f, track1.localScale.z);
+        track2.localScale = new Vector3(track2.localScale.x/1.5f, track2.localScale.y/1.5f, track2.localScale.z);
+    }
+
 
     public void loadOtherPlayer(IEnumerable<PlayerController> players) {
         is1v1 = true;
@@ -109,9 +157,25 @@ public class UIUpdater : MonoBehaviour {
             pingIcon = "<sprite=52>"; 
         }
 
-        uiDebug.text = "<mark=#000000b0 padding=\"20, 20, 20, 20\"><font=\"defaultFont\">"+pingIcon+" " + (int) pingSample + "ms</font>";
+        uiDebug.text = ""+pingIcon;
 
-       // other = GameManager.Instance..GetComponent<PlayerController>();
+       //+" " + (int) pingSample + "ms</font>"
+
+           //ACCURACY: Only update HUD positions when resolution changes
+        if (Screen.width != lastScreenWidth || Screen.height != lastScreenHeight)
+        {
+            if((Settings.Instance.fourByThreeRatio && Settings.Instance.ndsResolution) && !isLocalGame){// 4by3 4/3 HUD ELEMENTS
+
+        
+            // Initialize the last known screen resolution
+            lastScreenWidth = Screen.width;
+            lastScreenHeight = Screen.height;
+            
+            // Adjust HUD positions initially
+            Adjust4by3HUDPositions();
+
+            }
+        }
 
         //Player stuff update.//
         if (!player && GameManager.Instance.localPlayer)
@@ -369,6 +433,10 @@ private void flushStars(string p1) {
             if (player.lives != lives) {
                 lives = player.lives;
                 string lifeIcon = Utils.GetCharacterData(player.photonView.Owner).uistring;
+                if(player.gameObject.name.Equals("PlayerMario(Clone)")){
+                    lifeIcon = "<sprite=3>";
+                }
+
                 string lifeAmount = "";
                 for(int i = 0; i<player.lives; i++){
                     lifeAmount += ""+lifeIcon;

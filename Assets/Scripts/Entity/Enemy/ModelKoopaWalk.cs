@@ -15,6 +15,11 @@ public class ModelKoopaWalk : HoldableEntity
     private Vector2 velocityLastFrame;
     protected float wakeupTimer;
 
+    protected float destroyTimer = 25f;
+
+    public SpriteRenderer sRendererK;
+
+    //public SpriteRenderer sRendererKshell; //remover
     public GameObject koopaModel;
 
     private BoxCollider2D worldHitbox;
@@ -168,6 +173,9 @@ public class ModelKoopaWalk : HoldableEntity
 
         animator = koopaModel.GetComponent<Animator>();
 
+
+
+
     }
 
     public override void FixedUpdate()
@@ -189,7 +197,7 @@ public class ModelKoopaWalk : HoldableEntity
         if (Frozen || dead)
             return;
 
-        sRenderer.flipX = !FacingLeftTween ^ flipXFlip;
+        sRendererK.flipX = !FacingLeftTween ^ flipXFlip;
         if (FacingLeftTween)//ACCURACY: 3D KOOPA FLIPPING
         {
             // Set rotation to =120f on the Y-axis
@@ -230,13 +238,24 @@ public class ModelKoopaWalk : HoldableEntity
                 wakeupTimer < 3 && wakeupTimer > 0 ? Mathf.Sin(wakeupTimer * 120f) * 15f : 0);
         }
 
+        if(!Settings.Instance.filter){//ACCURACY: ENABLE 3D ONLY IF DS RESOLUTION IS NOT ON
+            koopaModel.SetActive(false);
+            sRendererK.enabled = true;
+            animator = sRendererK.GetComponent<Animator>();
+        }else{
+            koopaModel.SetActive(true);
+            sRendererK.enabled = false;
+        }
+
         if (shell)
         {
+            
             worldHitbox.size = hitbox.size = inShellHitboxSize;
             worldHitbox.offset = hitbox.offset = inShellHitboxOffset;
 
             if (stationary)
             {
+                destroyTimer = 25f;
                 if (physics.onGround)
                     body.velocity = new Vector2(0, body.velocity.y);
                 if ((wakeupTimer -= Time.fixedDeltaTime) < 0)
@@ -246,6 +265,16 @@ public class ModelKoopaWalk : HoldableEntity
             else
             {
                 wakeupTimer = wakeup;
+                if ((destroyTimer -= Time.fixedDeltaTime) < 0)
+                {
+                    // Execute the destroy action if destroyTimer reaches 0
+                    if (photonView.IsMine)
+                    {
+                        Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
+                        PhotonNetwork.Destroy(photonView);
+                    }
+                        
+                }
             }
         }
         else
@@ -406,7 +435,7 @@ public class ModelKoopaWalk : HoldableEntity
         shell = true;
         photonView.TransferOwnership(PhotonNetwork.MasterClient);
         // facingLeft = fromLeft;
-        Debug.Log("RIGHT "+previousHolder.facingRight);
+        
         if (crouch)
         {
             body.velocity = new Vector2(2f * (fromLeft ? -1 : 1), body.velocity.y);

@@ -68,6 +68,8 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
     private readonly Dictionary<Player, double> lastMessage = new();
 
+    private bool previousMuteSetting;
+
     Coroutine updatePingCoroutine;
 
     public ColorChooser colorManager;
@@ -104,9 +106,9 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             valid &= room.IsVisible && room.IsOpen;
             valid &= !room.RemovedFromList;
             valid &= room.MaxPlayers >= 2 && room.MaxPlayers <= 10;
-            valid &= lives <= 99;
-            valid &= stars >= 1 && stars <= 99;
-            valid &= coins >= 1 && coins <= 99;
+            valid &= lives <= 5;
+            valid &= stars >= 3 && stars <= 10;
+            valid &= coins >= 4 && coins <= 8;
             //valid &= host.IsValidUsername();
 
             if (!valid) {
@@ -384,7 +386,12 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     private void JoinMainLobby() {
         //Match match = Regex.Match(Application.version, "^\\w*\\.\\w*\\.\\w*");
         //PhotonNetwork.JoinLobby(new TypedLobby(match.Groups[0].Value, LobbyType.Default));
-
+        
+        if(previousMuteSetting == false){
+            music.Stop();
+            music.mute = previousMuteSetting;
+            music.Play();
+        }
         PhotonNetwork.JoinLobby();
     }
 
@@ -503,8 +510,10 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             if(isOffline){
                return; 
             }
-
-
+            previousMuteSetting = music.mute;
+            if(!PhotonNetwork.IsConnectedAndReady){
+                music.mute = true;
+            }
             PhotonNetwork.NetworkingClient.AppId = "40c2f241-79f7-4721-bdac-3c0366d00f58";
 
             //version separation
@@ -751,7 +760,9 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         creditsMenu.SetActive(false);
         localPlayMenu.SetActive(true);
         privatePrompt.SetActive(false);
+
         isOffline = true;
+        PhotonNetwork.Disconnect();
 
         EventSystem.current.SetSelectedGameObject(localPlaySelected);
     }
@@ -826,7 +837,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
     public void StartGame() {
         if(drawTimeupToggle.isOn){//ACCURACY: DRAWTIMEUPTOGGLE IS THE RANDOM MAP THING 
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(0, 5) });
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(0, 5) });
         }
         
         //set started game
@@ -1037,7 +1048,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             s.interactable = PhotonNetwork.IsMasterClient;
 
         livesField.interactable = PhotonNetwork.IsMasterClient && livesEnabled.isOn;
-        timeField.interactable = PhotonNetwork.IsMasterClient && timeEnabled.isOn;
+       // timeField.interactable = PhotonNetwork.IsMasterClient && timeEnabled.isOn;
         drawTimeupToggle.interactable = PhotonNetwork.IsMasterClient;
 
         levelDropdown.gameObject.SetActive(PhotonNetwork.IsMasterClient && !drawTimeupToggle.isOn);
@@ -1250,7 +1261,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             return;
         }
         
-        case "debug": {
+        case "debug": {//ACCURACY: ENABLE/DISABLE CUSTOM MUSIC FOR E3 BETA LEVELS
             Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool debugEnabled);
 
             if (debugEnabled) {

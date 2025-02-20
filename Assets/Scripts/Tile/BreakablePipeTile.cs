@@ -61,6 +61,7 @@ public class BreakablePipeTile : InteractableTile {
             //shrink the pipe by 1. simple as moving the hat tiles up/down one
             tileHeight = 2;
             shrink = true;
+            
         } else {
             //hit left/right side of pipe
 

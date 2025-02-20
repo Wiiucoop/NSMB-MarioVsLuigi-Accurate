@@ -50,6 +50,8 @@ public class PlayerAnimationController : MonoBehaviourPun {
     float blinkTimer, pipeTimer, deathTimer, propellerVelocity;
     public bool deathUp, wasTurnaround, enableGlow;
 
+    private bool isTransitioning = false;
+
     public void Start() {
         controller = GetComponent<PlayerController>();
         animator = GetComponent<Animator>();
@@ -209,7 +211,10 @@ public class PlayerAnimationController : MonoBehaviourPun {
         }
     }
 
+    private int activeModel = 0;
     public void UpdateAnimatorStates() {
+
+        int lastActiveModel = activeModel;
 
         bool right = controller.joystick.x > 0.35f;
         bool left = controller.joystick.x < -0.35f;
@@ -228,6 +233,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
         animator.SetBool("facingRight", (left ^ right) ? right : controller.facingRight);
         animator.SetBool("flying", controller.flying);
         animator.SetBool("drill", controller.drill);
+
 
         if (photonView.IsMine) {
             //Animation
@@ -248,7 +254,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
             animator.SetFloat("velocityY", body.velocity.y);
             animator.SetBool("doublejump", controller.doublejump);
             animator.SetBool("triplejump", controller.triplejump);
-            animator.SetBool("holding", controller.holding != null);
+            animator.SetBool("holding", (controller.holding != null) || controller.isPushingPlayer != 0f);//Pushing player animation
             animator.SetBool("head carry", controller.holding != null && controller.holding is FrozenCube);
             animator.SetBool("pipe", controller.pipeEntering != null);
             animator.SetBool("blueshell", controller.state == Enums.PowerupState.BlueShell);
@@ -288,22 +294,25 @@ public class PlayerAnimationController : MonoBehaviourPun {
         Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaStarman); //ACCURACY: REMOVE RAINBOW EFFECT FOR E3 BETA MODE
 
         Vector3 colorMultiply = Vector3.one;
-        if (controller.invincible > 0) {
-            if(!betaStarman){
-                materialBlock.SetFloat("RainbowEnabled", controller.invincible > 0 ? 1.1f : 0f);
-            }else{
-                float v = ((Mathf.Sin(controller.invincible * 20f) + 1f) / 2f * 0.9f) + 0.1f;
-                colorMultiply = new Vector3(v, 1, v);
+
+        materialBlock.SetFloat("RainbowEnabled", (controller.invincible > 0 && !betaStarman) ? 1 : 0);
+
+        if (controller.giantTimer > 0 && controller.giantTimer < 4) {
+            float v = ((Mathf.Sin(controller.giantTimer * 20f) + 1f) / 2f * 0.9f) + 0.1f;
+            colorMultiply = new Vector3(v, 1, v);
                 
-            }
-        }else{              
-            if (controller.giantTimer > 0 && controller.giantTimer < 4) {
-                float v = ((Mathf.Sin(controller.giantTimer * 20f) + 1f) / 2f * 0.9f) + 0.1f;
-                colorMultiply = new Vector3(v, 1, v);
+        }else if(betaStarman){
+            float v = ((Mathf.Sin(controller.invincible * 20f) + 1f) / 2f * 0.9f) + 0.1f;
+            colorMultiply = new Vector3(v, 1, v);
                 
-            }
         }
-        materialBlock.SetVector("MultiplyColor", colorMultiply);
+
+        if((controller.giantTimer > 0 && controller.giantTimer < 4 ) || (betaStarman && controller.invincible > 0)){
+            materialBlock.SetVector("MultiplyColor", colorMultiply);
+        }else{
+            materialBlock.SetVector("MultiplyColor", Vector3.one);
+        }
+        
         
 
         int ps = controller.state switch {
@@ -337,6 +346,22 @@ public class PlayerAnimationController : MonoBehaviourPun {
         smallModel.SetActive(!large);
         blueShell.SetActive(controller.state == Enums.PowerupState.BlueShell);
 
+        if (large)
+        {
+            activeModel = 1;
+        }
+        else
+        {
+            activeModel = 0;
+        }
+
+        bool changed = false;
+        if(lastActiveModel != activeModel){
+            changed = true;
+        }
+
+        
+
         largeShellExclude.SetActive(!animator.GetCurrentAnimatorStateInfo(0).IsName("in-shell"));
         propellerHelmet.SetActive(controller.state == Enums.PowerupState.PropellerMushroom);
         animator.avatar = large ? largeAvatar : smallAvatar;
@@ -350,6 +375,13 @@ public class PlayerAnimationController : MonoBehaviourPun {
         HandlePipeAnimation();
 
         transform.position = new(transform.position.x, transform.position.y, animator.GetBool("pipe") ? 1 : -4);
+        if((changed && controller.state != Enums.PowerupState.MegaMushroom)){
+            animator.SetTrigger("SizeChange");//ACCURACY: POWERUP GROW ANIMATION powerupanim
+        }
+    }
+
+    public void ForcePowerupAnimation(){//ACCURACY: Manually force powerup grow/shrink animation to play
+        animator.SetTrigger("SizeChange");
     }
     void HandleDeathAnimation() {
         if (!controller.dead) {
@@ -377,7 +409,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
             body.velocity = new Vector2(0, Mathf.Max(-deathForce, body.velocity.y));
         }
         if (controller.photonView.IsMine && deathTimer + Time.fixedDeltaTime > (3 - 0.43f) && deathTimer < (3 - 0.43f))
-            controller.fadeOut.FadeOutAndIn(0.33f, .1f);
+            controller.fadeOut.FadeOutAndIn();//ACCURACY: Fade out in transition animation
 
         if (photonView.IsMine && deathTimer >= 3f)
             photonView.RPC("PreRespawn", RpcTarget.All);
@@ -394,12 +426,18 @@ public class PlayerAnimationController : MonoBehaviourPun {
             return;
         if (!controller.pipeEntering) {
             pipeTimer = 0;
+            isTransitioning = false;
             return;
         }
 
         controller.UpdateHitbox();
 
         PipeManager pe = controller.pipeEntering;
+
+        if(!isTransitioning && !pe.isRed){
+            controller.fadeOut.PipeFadeOutAndIn();//ACCURACY: Pipe Fade out in transition animation
+            isTransitioning = true;
+        }
 
         body.isKinematic = true;
         body.velocity = controller.pipeDirection;
@@ -431,6 +469,8 @@ public class PlayerAnimationController : MonoBehaviourPun {
         }
         pipeTimer += Time.fixedDeltaTime;
     }
+
+   
 
     public void DisableAllModels() {
         smallModel.SetActive(false);

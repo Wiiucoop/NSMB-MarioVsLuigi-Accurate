@@ -23,9 +23,13 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     private GameObject bg;
 
-    public bool enableBeta = false;
+    private bool enableBeta = false;
 
     public Slider masterSlider;
+
+    public GameObject blackLoadBG;
+
+    private FluidMidi.SongPlayer songPlayer = null;
 
     public bool isLocalGame = false;
 
@@ -44,11 +48,14 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         private set => _instance = value;
     }
 
-    public MusicData mainMusic, invincibleMusic;
+    private bool UsesMidi = false;
+    public MusicData mainMusic, secondaryMusic, invincibleMusic;
+    public SequencePlayer sequencePlayerMain, sequencePlayerSecondary, sequencePlayerInvincible;
 
     public int levelMinTileX, levelMinTileY, levelWidthTile, levelHeightTile;
     public float cameraMinY, cameraHeightY, cameraMinX = -1000, cameraMaxX = 1000;
     public bool loopingLevel = true;
+    public bool isE3Level;
 
     private bool piranaplantCanspawn = true;
     public Vector3 spawnpoint;
@@ -79,13 +86,14 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public readonly HashSet<Player> loadedPlayers = new();
     public int starRequirement, timedGameDuration = -1, coinRequirement;
     public bool hurryup = false;
+    public bool lastStarSpeedup = false;
     public bool tenSecondCountdown = false;
 
     public int playerCount = 1;
     public List<PlayerController> players = new();
     public EnemySpawnpoint[] enemySpawnpoints;
 
-    public FadeOutManager fader;
+    public FadeOutManager fader; //accuracy fade out in transition animation
     private GameObject[] coins;
     public SpectationManager SpectationManager { get; private set; }
 
@@ -396,6 +404,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         }
     }
 
+    public bool getUsesMidi(){
+        return UsesMidi;
+    }
+
     public bool getPiranaplantCanspawn(){
         return piranaplantCanspawn;
     }
@@ -468,6 +480,11 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     public void Awake() {
         Instance = this;
+         //ACCURACY: ENABLE MIDI MUSIC PLAYBACK
+        if(PhotonNetwork.IsConnectedAndReady && (Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)){
+            UsesMidi = MainMenuManager.Instance.timeEnabled.isOn;
+        }
+        
         isLocalGame = SceneManager.GetActiveScene().buildIndex >= (10 + 2);
         enableBeta = SceneManager.GetActiveScene().buildIndex >= (12 + 2);
         bg = GameObject.FindGameObjectWithTag("Backgrounds");
@@ -481,11 +498,12 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         startText = GameObject.FindWithTag("starttext");//ACCURACY: MARIO/LUIGI START
         if(isLocalGame){
             Settings.Instance.fourByThreeRatio = false;
-            startText.GetComponent<TMP_Text>().text = "Loading...";
-            startText.GetComponent<Animator>().SetTrigger("startNegative");          
-            bg.SetActive(false);   
+                   
+            blackLoadBG.SetActive(true);   
             LoadLocalLogic();
         }
+
+        
         LocalReserve.SetActive(!isLocalGame);
         LocalTrack.SetActive(!isLocalGame);
         LocalTrackIcons.SetActive(!isLocalGame);
@@ -575,7 +593,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         }
 
         yield return new WaitForSeconds(Mathf.Max(1f, (startTimestamp - PhotonNetwork.ServerTimestamp) / 1000f));
-
+//ACCURACY: TESTPOINT REMOVER
         GameObject canvas = GameObject.FindGameObjectWithTag("LoadingCanvas");
         if (canvas) {
             canvas.GetComponent<Animator>().SetTrigger(spectating ? "spectating" : "loaded");
@@ -613,8 +631,6 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             if (Settings.Instance.scoreboardAlways && players.Count > 2)
                 ScoreboardUpdater.instance.SetEnabled();
         } catch { }
-        Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnims); //ACCURACY: ENABLE E3 BETA ANIMATIONS
-        Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool betaCustomMusic); //ACCURACY: ENABLE E3 BETA CUSTOM MUSIC
         
         if (gameStarting) {
             if (!Application.isEditor){
@@ -624,8 +640,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             fader.SetIsMario(isMario);
             fader.FadeOut();
             if(isLocalGame){
-                StartCoroutine(RemoveStartMessage(0f));
-                bg.SetActive(true);
+                blackLoadBG.SetActive(false);
             }
             StartCoroutine(PlayerController.ZoomOutAnim());//ACCURACY: ZOOMOUT ANIMATION
             
@@ -652,7 +667,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             }
                 
 
-            if(betaAnims && !enableBeta){//ACCURACY: MARIO/LUIGI START TEXT
+            if(isE3Level){//ACCURACY: MARIO/LUIGI START TEXT
                 if(isMario){
                     startText.GetComponent<TMP_Text>().text = "Mario Start";
                 }else{
@@ -671,63 +686,19 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         yield return new WaitForSeconds(1f);
         musicEnabled = true;
-        Utils.GetCustomProperty(Enums.NetRoomProperties.Time, out timedGameDuration);
+        //Utils.GetCustomProperty(Enums.NetRoomProperties.Time, out timedGameDuration);
 
         startRealTime = System.DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        if (timedGameDuration > 0) {
-            endServerTime = startTimestamp + 4500 + timedGameDuration * 1000;
-            endRealTime = startRealTime + 4500 + timedGameDuration * 1000;
-        }
+       // if (timedGameDuration > 0) {
+       //     endServerTime = startTimestamp + 4500 + timedGameDuration * 1000;
+     //       endRealTime = startRealTime + 4500 + timedGameDuration * 1000;
+      //  }
 
         GlobalController.Instance.DiscordController.UpdateActivity();
 
         if (canvas)
             SceneManager.UnloadSceneAsync("Loading");
 
-
-        //ACCURACY: Music alternating made like the original
-        //it starts playing SNOW and alternates with OVERWORLD theme each game
-        if ((SceneManager.GetActiveScene().buildIndex >= 2 && SceneManager.GetActiveScene().buildIndex <= 6) || isLocalGame) {
-            if (GlobalController.Instance.musicOrdering % 2 == 0)
-            {
-                mainMusic = (MusicData)Resources.Load("Scriptables/Music/MusicLevelSnow");
-            }
-            else {
-                mainMusic = (MusicData)Resources.Load("Scriptables/Music/MusicLevelOverworld");
-            }
-            if (!spectating && !betaAnims) {
-                GlobalController.Instance.musicOrdering++;
-            }
-        
-        }
-
-        if(betaAnims && betaCustomMusic){
-                
-                int betaIndex = SceneManager.GetActiveScene().buildIndex;
-                switch (betaIndex)
-                {
-                    case 7://Plain
-                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaSMBDMusic");
-                        break;
-                    case 8://Cave
-                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaGhostNSMB");
-                        break;
-                    case 9://Castle
-                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaTTYDCastle");
-                        break;
-                    case 10://City
-                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaMusicRPG");
-                        break;
-                    case 11://Desert
-                        mainMusic = (MusicData)Resources.Load("Scriptables/Music/BetaDesert");
-                        break;
-                    default:
-                        Debug.LogError("Invalid random betaMusic anim index");
-                        break;
-                }
-            
-
-            }
         if (SpectationManager.Spectating) fader.SetInvisible(true);
             
     }
@@ -771,6 +742,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = false });
         gameover = true;
         music.Stop();
+        sequencePlayerMain.player.Stop();
+        sequencePlayerSecondary.player.Stop();
+        sequencePlayerInvincible.player.Stop();
         GameObject text = GameObject.FindWithTag("wintext");
         text.GetComponent<TMP_Text>().text = winner != null ? $"{ winnerName } Wins!" : "Match Cancelled..";
         text.GetComponent<Animator>().Play("wintext");
@@ -812,9 +786,11 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         //TOOD: make a results screen?
 
         yield return new WaitForSecondsRealtime(secondsUntilMenu);
-        if (PhotonNetwork.IsMasterClient)
+        if (PhotonNetwork.IsMasterClient){
             PhotonNetwork.DestroyAll();
-        if(isLocalGame){
+            GlobalController.Instance.musicOrdering++;
+        }
+        if (isLocalGame){
             PhotonNetwork.LeaveRoom();
             PhotonNetwork.Disconnect();
         }
@@ -837,7 +813,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             Vector3 spawnPos = remainingSpawns[index].transform.position;
             //Check for people camping spawn
             if(!isLocalGame){
-                foreach (var hit in Physics2D.OverlapCircleAll(spawnPos, 4)) {
+                foreach (var hit in Physics2D.OverlapCircleAll(spawnPos, 2.5f)) {
                 if (hit.gameObject.CompareTag("Player")) {
                     //cant spawn here
                     remainingSpawns.RemoveAt(index);
@@ -991,10 +967,60 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         musicState = state;
     }
 
+    public void PlaySongSeq(Enums.MusicState state)
+    {
+        
+
+        if(songPlayer != null){
+           // Debug.Log(songPlayer.Tempo+" TEMPO ");
+            if((lastStarSpeedup||hurryup) && songPlayer.Tempo != 1.25f){
+                songPlayer.Tempo = 1.25f;
+                Debug.Log(songPlayer.Tempo+" RAPID ");
+            }else if(!(lastStarSpeedup||hurryup) && songPlayer.Tempo != 1f){
+                songPlayer.Tempo = 1f;
+                Debug.Log(songPlayer.Tempo+" SLOW ");
+            }  
+        }
+
+        
+
+        if (musicState == state)
+            return;
+
+        Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool betaCustomMusic); //ACCURACY: ENABLE E3 BETA CUSTOM MUSIC
+
+        sequencePlayerMain.player.Stop();
+        sequencePlayerSecondary.player.Stop();
+        sequencePlayerInvincible.player.Stop();
+        
+        musicState = state;
+
+       // Debug.Log(musicState+" ESTADO "+ state);
+
+        //ACCURACY: Music alternating made like the original
+        //it starts playing SNOW and alternates with OVERWORLD theme each game
+        var normalSongToPlay = sequencePlayerMain.player;
+        if (((GlobalController.Instance.musicOrdering % 2 != 0) && (!isE3Level)) || (isE3Level && betaCustomMusic))
+        {
+            normalSongToPlay = sequencePlayerSecondary.player;
+        }
+        songPlayer = state switch
+        {
+            Enums.MusicState.Normal => normalSongToPlay,
+            Enums.MusicState.Starman => sequencePlayerInvincible.player,
+            _ => null
+        };
+        if (songPlayer != null) songPlayer.Play();   
+
+
+
+    }
+
     private IEnumerator DelayedLastLifeSpedup()//ACCURACY: Delay to start speedup when one of the players get to its last life
     {
         yield return new WaitForSeconds(2f);
         hurryup = true;
+       
         yield break;
     }
 
@@ -1014,8 +1040,14 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             if (!player)
                 continue;
 
-            if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false)
+            if (player.invincible > 0)
+                invincible = true;
+
+            if ((player.stars + 1f) / starRequirement >= 0.95f || hurryup != false){
                 speedup = true;
+            }
+            lastStarSpeedup = speedup;
+                
             if (player.lives == 1 && players.Count <= 2){
                 StartCoroutine(DelayedLastLifeSpedup());
                 break;
@@ -1023,21 +1055,34 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
             if (!player.photonView.IsMine)
                 continue;
-
-            if (player.invincible > 0)
-                invincible = true;
             
         }
 
         speedup |= players.All(pl => !pl || pl.lives == 1 || pl.lives == 0);
 
-        if (invincible) {
-            PlaySong(Enums.MusicState.Starman, invincibleMusic);
+        if (UsesMidi) {
+            PlaySongSeq(invincible ? Enums.MusicState.Starman : Enums.MusicState.Normal);
         } else {
-            PlaySong(Enums.MusicState.Normal, mainMusic);
+            if (invincible)
+            {
+                PlaySong(Enums.MusicState.Starman, invincibleMusic);
+            } else {
+                Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool betaCustomMusic); //ACCURACY: ENABLE E3 BETA CUSTOM MUSIC
+                //ACCURACY: Music alternating made like the original
+                //it starts playing SNOW and alternates with OVERWORLD theme each game
+                var normalSongToPlay = mainMusic;
+                if (((GlobalController.Instance.musicOrdering % 2 != 0) && (!isE3Level)) || (isE3Level && betaCustomMusic))
+                {
+                    normalSongToPlay = secondaryMusic;
+                }
+                PlaySong(Enums.MusicState.Normal, normalSongToPlay);
+            }
         }
 
-        loopMusic.FastMusic = speedup;
+        if (!UsesMidi)
+        {
+            loopMusic.FastMusic = speedup;
+        }
     }
 
     public void OnPause(InputAction.CallbackContext context) {

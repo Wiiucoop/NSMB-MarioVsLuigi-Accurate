@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66163224104dda4439b5aa0acf8f05ed, type: 3}
+  m_Name: SeqInvincible
+  m_EditorClassIdentifier: 
+  song:
+    path: BGM_MUTEKI.mid
+  autoSoundfont: 1
+  soundfont:
+    path: BGM_MUTEKI.sf2
+  startTicks: 0
+  startLoopTicks: 768
+  endTicks: 0
+  mutedChannelsNormal: 0
+  mutedChannelsSpectating: 12
+  mutedChannelsFrontRunning: 1
+  mutedChannelsLastLife: 224
+  playbackSpeedNormal: 1
+  playbackSpeedFast: 1.25
