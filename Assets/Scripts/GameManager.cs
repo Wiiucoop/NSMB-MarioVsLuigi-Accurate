@@ -93,7 +93,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public List<PlayerController> players = new();
     public EnemySpawnpoint[] enemySpawnpoints;
 
-    public FadeOutManager fader;
+    public FadeOutManager fader; //accuracy fade out in transition animation
     private GameObject[] coins;
     public SpectationManager SpectationManager { get; private set; }
 
@@ -481,7 +481,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public void Awake() {
         Instance = this;
          //ACCURACY: ENABLE MIDI MUSIC PLAYBACK
-        if(PhotonNetwork.IsConnectedAndReady){
+        if(PhotonNetwork.IsConnectedAndReady && (Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)){
             UsesMidi = MainMenuManager.Instance.timeEnabled.isOn;
         }
         
@@ -593,7 +593,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         }
 
         yield return new WaitForSeconds(Mathf.Max(1f, (startTimestamp - PhotonNetwork.ServerTimestamp) / 1000f));
-
+//ACCURACY: TESTPOINT REMOVER
         GameObject canvas = GameObject.FindGameObjectWithTag("LoadingCanvas");
         if (canvas) {
             canvas.GetComponent<Animator>().SetTrigger(spectating ? "spectating" : "loaded");

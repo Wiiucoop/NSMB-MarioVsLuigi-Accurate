@@ -50,6 +50,8 @@ public class PlayerAnimationController : MonoBehaviourPun {
     float blinkTimer, pipeTimer, deathTimer, propellerVelocity;
     public bool deathUp, wasTurnaround, enableGlow;
 
+    private bool isTransitioning = false;
+
     public void Start() {
         controller = GetComponent<PlayerController>();
         animator = GetComponent<Animator>();
@@ -373,9 +375,13 @@ public class PlayerAnimationController : MonoBehaviourPun {
         HandlePipeAnimation();
 
         transform.position = new(transform.position.x, transform.position.y, animator.GetBool("pipe") ? 1 : -4);
-        if((changed && controller.state != Enums.PowerupState.MegaMushroom)||controller.state == Enums.PowerupState.MiniMushroom){
-            animator.SetTrigger("SizeChange");
+        if((changed && controller.state != Enums.PowerupState.MegaMushroom)){
+            animator.SetTrigger("SizeChange");//ACCURACY: POWERUP GROW ANIMATION powerupanim
         }
+    }
+
+    public void ForcePowerupAnimation(){//ACCURACY: Manually force powerup grow/shrink animation to play
+        animator.SetTrigger("SizeChange");
     }
     void HandleDeathAnimation() {
         if (!controller.dead) {
@@ -403,7 +409,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
             body.velocity = new Vector2(0, Mathf.Max(-deathForce, body.velocity.y));
         }
         if (controller.photonView.IsMine && deathTimer + Time.fixedDeltaTime > (3 - 0.43f) && deathTimer < (3 - 0.43f))
-            controller.fadeOut.FadeOutAndIn(0.33f, .1f);
+            controller.fadeOut.FadeOutAndIn();//ACCURACY: Fade out in transition animation
 
         if (photonView.IsMine && deathTimer >= 3f)
             photonView.RPC("PreRespawn", RpcTarget.All);
@@ -420,12 +426,18 @@ public class PlayerAnimationController : MonoBehaviourPun {
             return;
         if (!controller.pipeEntering) {
             pipeTimer = 0;
+            isTransitioning = false;
             return;
         }
 
         controller.UpdateHitbox();
 
         PipeManager pe = controller.pipeEntering;
+
+        if(!isTransitioning && !pe.isRed){
+            controller.fadeOut.PipeFadeOutAndIn();//ACCURACY: Pipe Fade out in transition animation
+            isTransitioning = true;
+        }
 
         body.isKinematic = true;
         body.velocity = controller.pipeDirection;

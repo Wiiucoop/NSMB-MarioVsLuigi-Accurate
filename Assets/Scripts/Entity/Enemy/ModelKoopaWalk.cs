@@ -18,6 +18,8 @@ public class ModelKoopaWalk : HoldableEntity
     protected float destroyTimer = 25f;
 
     public SpriteRenderer sRendererK;
+
+    //public SpriteRenderer sRendererKshell; //remover
     public GameObject koopaModel;
 
     private BoxCollider2D worldHitbox;
@@ -236,9 +238,10 @@ public class ModelKoopaWalk : HoldableEntity
                 wakeupTimer < 3 && wakeupTimer > 0 ? Mathf.Sin(wakeupTimer * 120f) * 15f : 0);
         }
 
-        if(!Settings.Instance.filter && !shell){//ENABLE 3D ONLY IF DS RESOLUTION IS NOT ON
+        if(!Settings.Instance.filter){//ACCURACY: ENABLE 3D ONLY IF DS RESOLUTION IS NOT ON
             koopaModel.SetActive(false);
             sRendererK.enabled = true;
+            animator = sRendererK.GetComponent<Animator>();
         }else{
             koopaModel.SetActive(true);
             sRendererK.enabled = false;
@@ -246,6 +249,7 @@ public class ModelKoopaWalk : HoldableEntity
 
         if (shell)
         {
+            
             worldHitbox.size = hitbox.size = inShellHitboxSize;
             worldHitbox.offset = hitbox.offset = inShellHitboxOffset;
 
@@ -431,7 +435,7 @@ public class ModelKoopaWalk : HoldableEntity
         shell = true;
         photonView.TransferOwnership(PhotonNetwork.MasterClient);
         // facingLeft = fromLeft;
-        Debug.Log("RIGHT "+previousHolder.facingRight);
+        
         if (crouch)
         {
             body.velocity = new Vector2(2f * (fromLeft ? -1 : 1), body.velocity.y);

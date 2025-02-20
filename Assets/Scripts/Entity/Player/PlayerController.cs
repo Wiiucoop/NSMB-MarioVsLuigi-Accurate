@@ -247,7 +247,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         sfxBrick = GetComponents<AudioSource>()[1];
         //hitboxManager = GetComponent<WrappingHitbox>();
         AnimationController = GetComponent<PlayerAnimationController>();
-        fadeOut = GameObject.FindGameObjectWithTag("FadeUI").GetComponent<FadeOutManager>();
+        fadeOut = GameObject.FindGameObjectWithTag("FadeUI").GetComponent<FadeOutManager>();//ACCURACY: FADE OUT transition animation
         isLocalGame = GameManager.Instance.isLocalGame;
         if(isLocalGame){
             fadeOut = null;
@@ -412,11 +412,11 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             return;
         }
 
-        if (GameManager.Instance.paused) {//Accuracy: ONLINE PAUSING    
-            body.velocity = previousFrameVelocity;
-            body.position = previousFramePosition;
-            hitInvincibilityCounter = 0.01f;
-            return;
+        if (GameManager.Instance.paused) {//Accuracy: ONLINE PAUSING  , POSTPONED to another update!!!
+        //    body.velocity = previousFrameVelocity;
+        //    body.position = previousFramePosition;
+        //    hitInvincibilityCounter = 0.01f;
+        //    return;
         }
 
         groundpoundLastFrame = groundpound;
@@ -1927,11 +1927,21 @@ void HandleTornado() {   //ACCURACY: add tornado
 
             if(befstate != Enums.PowerupState.PropellerMushroom){
 
+                
+
                 if(befstate == Enums.PowerupState.Small || befstate == Enums.PowerupState.MiniMushroom){
-                    befstate = Enums.PowerupState.Mushroom;//Set state to mushroom to avoid conflicting with GrowAnimation
+                    befstate = Enums.PowerupState.Mushroom;//ACCURACY: Set state to mushroom to avoid conflicting with GrowAnimation
                 }
-                if(afstate == Enums.PowerupState.MiniMushroom && befstate != Enums.PowerupState.Small){
-                    befstate = Enums.PowerupState.MiniMushroom;//Set state to mushroom to avoid conflicting with GrowAnimation
+                if(afstate == Enums.PowerupState.MiniMushroom){
+                   // state = Enums.PowerupState.MiniMushroom;//ACCURACY: Set state to mushroom to avoid conflicting with GrowAnimation
+                    powerupCompleted = true;
+                    AnimationController.ForcePowerupAnimation();//ACCURACY: FORCE POWERUPANIMATION WHEN MINIMARIO
+                    yield break;
+                }
+                if(afstate == Enums.PowerupState.Small){
+                 //   state = Enums.PowerupState.Small;//ACCURACY: Set state to mushroom to avoid conflicting with GrowAnimation
+                    powerupCompleted = true;
+                    yield break;
                 }
 
                 yield return new WaitForSeconds(0.1f); 
@@ -1960,7 +1970,8 @@ void HandleTornado() {   //ACCURACY: add tornado
 
 
 
-//Fireflower knockback delay
+
+//ACCURACY: Fireflower knockback delay
     private System.Collections.IEnumerator fireknockbackdelay()
     {
         bounce = false;
@@ -1971,8 +1982,8 @@ void HandleTornado() {   //ACCURACY: add tornado
         hitInvincibilityCounter = state != Enums.PowerupState.MegaMushroom ? 2f : 0f;
     }
 
-//blockSquish is that BRICK block at the start of FORTRESS LEVEL where if you hit someone from below, it will get hit by the ceiling.
-//strangely in the original game, you dont lose a powerup if you are BIG or MINI. But you do with all other powerups.
+//ACCURACY: blockSquish is that BRICK block at the start of FORTRESS LEVEL where if you hit someone from below, it will get hit by the ceiling.
+//ACCURACY: strangely in the original game, you dont lose a powerup if you are BIG or MINI. But you do with all other powerups.
     private System.Collections.IEnumerator blockSquish()
     {
         yield return new WaitForSeconds(0.1f); 
@@ -1987,7 +1998,7 @@ void HandleTornado() {   //ACCURACY: add tornado
     
 
 
-    //This delay has been added so that SPEEDUP doesnt mess with the music stop
+    //ACCURACY: This delay has been added so that SPEEDUP doesnt mess with the music stop
     private System.Collections.IEnumerator StopMusicOnDeath()
     {
         if(!isLocalGame){
@@ -3468,7 +3479,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             if (photonView.IsMine && hitRoof && crushGround && hitInvincibilityCounter <= 2.65 && body.velocity.y <= 0.1 && state != Enums.PowerupState.MegaMushroom) {
                 //Crushed.
                 
-               
+               Debug.Log("CRUSHADO");
                 photonView.RPC(nameof(Powerdown), RpcTarget.All, true);
                
 

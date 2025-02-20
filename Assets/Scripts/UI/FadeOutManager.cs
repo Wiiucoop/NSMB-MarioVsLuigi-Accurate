@@ -30,10 +30,16 @@ public class FadeOutManager : MonoBehaviour
         }
     }
 
-    public void FadeOutAndIn(float fadeTime, float blackTime)
+    public void FadeOutAndIn()//ACCURACY: Death animation transition
     {
         anim.speed = 1;
         anim.SetTrigger("FadeInAndOut");
+    }
+
+    public void PipeFadeOutAndIn()//ACCURACY: Pipe animation transition
+    {
+        anim.speed = 1;
+        anim.SetTrigger("PipeFadeInAndOut");
     }
 
     public void FadeOut()

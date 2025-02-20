@@ -1193,9 +1193,9 @@ RectTransform:
   - {fileID: 8458805573681264457}
   - {fileID: 4458757181877368581}
   - {fileID: 7236583208946453886}
+  - {fileID: 9209994447078489783}
   - {fileID: 4647285815972490597}
   - {fileID: 8030641483347438724}
-  - {fileID: 9209994447078489783}
   - {fileID: 3434108692064916511}
   - {fileID: 5120608939572704758}
   - {fileID: 2669404857376320752}
@@ -1288,6 +1288,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerTrackTemplate: {fileID: 6653134736574937390}
   starTrackTemplate: {fileID: 6482663392417085427}
+  storedItem: {fileID: 1859109520274027233}
+  PingObject: {fileID: 4857584355896743727}
   player: {fileID: 0}
   other: {fileID: 0}
   storedItemNull: {fileID: -4773353537684922170, guid: a87d3b028baa82640b06b88398a8c4f0,
@@ -6136,8 +6138,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 0
