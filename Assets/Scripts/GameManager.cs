@@ -771,7 +771,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         bool win = winner != null && winner.IsLocal;
         bool draw = winner == null;
         int secondsUntilMenu;
-        secondsUntilMenu = draw ? 5 : 4;
+        secondsUntilMenu = draw ? 2 : 4;
 
         if (draw){
             sfx.PlayOneShot(Enums.Sounds.UI_Match_Lose.GetClip());
