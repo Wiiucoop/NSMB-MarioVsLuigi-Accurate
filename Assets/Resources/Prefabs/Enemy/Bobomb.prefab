@@ -73,7 +73,7 @@ MonoBehaviour:
   previousHolder: {fileID: 0}
   holderOffset: {x: -0.35, y: -0.4, z: 0}
   canPlace: 1
-  explosionPrefab: {fileID: 1681235843256999355, guid: a89a150bbd7d5d74aa28f02a5d5a0dfb,
+  explosionPrefab: {fileID: 1674080856964950978, guid: 7ac2c558b7c96304eb065980d84e1c67,
     type: 3}
   walkSpeed: 0.6
   kickSpeed: 4.5

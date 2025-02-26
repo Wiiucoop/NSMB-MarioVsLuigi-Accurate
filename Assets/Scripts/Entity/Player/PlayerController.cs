@@ -42,6 +42,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     public static GameObject InstantiatedKickObject;
     private bool hasTornado = false;
 
+    public bool Grasslands, Bricks, Snow, Pipes, Castle, BetaGrasslands, BetaCave, BetaDesert, BetaCity, BetaCastle, LocalGrasslands, LocalBricks, LocalBeta;
+
     private float tornadoTimer;
     public int playerId = -1;
     public bool dead = false, spawned = false;
@@ -93,6 +95,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     private static readonly float TURNAROUND_ACC = 0.46875f;
     private float turnaroundFrames;
     private int turnaroundBoostFrames;
+
+    public bool isSpawningAnimation = false;
 
     private static readonly float[] BUTTON_RELEASE_ICE_DEC = { 0.00732421875f, 0.02471923828125f, 0.02471923828125f, 0.02471923828125f, 0.02471923828125f };
     private static readonly float SKIDDING_ICE_DEC = 0.06591796875f;
@@ -310,6 +314,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     }
 
     public void Start() {
+        SetLevelBooleans();//ACCURACY: CURRENT LEVEL CHECKING
         hitboxes = GetComponents<BoxCollider2D>();
         trackIcon = UIUpdater.Instance.CreatePlayerIcon(this);
         transform.position = body.position = GameManager.Instance.spawnpoint;
@@ -1720,6 +1725,25 @@ void HandleTornado() {   //ACCURACY: add tornado
             ScoreboardUpdater.instance.OnDeathToggle();
     }
 
+    void SetLevelBooleans()
+    {
+        int currentScene = SceneManager.GetActiveScene().buildIndex;
+
+        Grasslands = currentScene == 2;
+        Bricks = currentScene == 3;
+        Snow = currentScene == 6;
+        Pipes = currentScene == 5;
+        Castle = currentScene == 4;
+        BetaGrasslands = currentScene == 7;
+        BetaCave = currentScene == 8;
+        BetaDesert = currentScene == 11;
+        BetaCity = currentScene == 10;
+        BetaCastle = currentScene == 9;
+        LocalGrasslands = currentScene == 12;
+        LocalBricks = currentScene == 13;
+        LocalBeta = currentScene == 14;
+    }
+
     [PunRPC]
     public void PreRespawn() {
         sfx.enabled = true;
@@ -1754,6 +1778,32 @@ void HandleTornado() {   //ACCURACY: add tornado
         {
             entryPipe = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/Entrypipe"), new Vector2(body.position.x - playerId + 0.5f, body.position.y), Quaternion.identity);
             entryPipe.GetComponent<RespawnParticle>().player = this;
+            RaycastHit2D piperay = Physics2D.Raycast(transform.position, Vector2.down, 10f, Layers.LayerGround);
+            if(Bricks || BetaCave){//BRICKS
+                entryPipe.transform.position = new Vector2(entryPipe.transform.position.x, piperay.point.y);
+            }else if(Snow || BetaCity || BetaDesert){//SNOW
+                entryPipe.transform.position = new Vector2(entryPipe.transform.position.x, piperay.point.y+1f);
+            }else{
+                entryPipe.transform.position = new Vector2(entryPipe.transform.position.x, piperay.point.y+0.5f);
+            }
+            
+            foreach (RaycastHit2D hit in Physics2D.RaycastAll(body.position, Vector2.up, 1f)) {
+                GameObject obj = hit.transform.gameObject;
+                if (obj.CompareTag("pipeSpawn")){
+
+                    PipeManager pipe = obj.GetComponent<PipeManager>();
+
+                    //pipe found
+                    pipeEntering = pipe;
+                    pipeDirection = Vector2.up;
+                    isSpawningAnimation = true;
+
+                    break;
+                }
+                    
+                
+            }
+            
         }
         else {
             GameObject particle = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/Respawn"), body.position, Quaternion.identity);
@@ -1816,7 +1866,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         //ACCURACY: Player gets teleported on top of their respective pipes
         if(GameManager.Instance.players.Count <= 2)
         {
-            gameObject.transform.position = new Vector2(entryPipe.transform.position.x, entryPipe.transform.position.y+1.2f);
+            gameObject.transform.position = new Vector2(entryPipe.transform.position.x, entryPipe.transform.position.y+0.5f);
         }
         else
         {//Particle plays if pipe entry is disabled
@@ -1890,13 +1940,13 @@ void HandleTornado() {   //ACCURACY: add tornado
     {
         Renderer blinker = entryPipe.GetComponent<Renderer>();
         Color newColor = blinker.material.color;
-        float pipeTimer = 0.8f;
-        yield return new WaitForSeconds(0.5f);
+        float pipedesTimer = 0.8f;
+        yield return new WaitForSeconds(0.7f);
         hitInvincibilityCounter = 0; //ACCURACY: REDUCES SPAWN INVINCIBILITY
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitForSeconds(2.3f);
 
-        while (pipeTimer > 0) {
-            pipeTimer -= 0.02f;
+        while (pipedesTimer > 0) {
+            pipedesTimer -= 0.02f;
             yield return new WaitForSeconds(0.02f);
             newColor.a = 0;
             blinker.material.color = newColor;

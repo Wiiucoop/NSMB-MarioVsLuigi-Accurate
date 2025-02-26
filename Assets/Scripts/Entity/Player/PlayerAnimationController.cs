@@ -421,15 +421,26 @@ public class PlayerAnimationController : MonoBehaviourPun {
         }
     }
 
+    public float getPipeDuration(){
+        return pipeDuration;
+    }
+
     void HandlePipeAnimation() {
         if (!photonView.IsMine)
             return;
         if (!controller.pipeEntering) {
             pipeTimer = 0;
             isTransitioning = false;
+            controller.isSpawningAnimation = false;
             return;
         }
 
+        if(controller.isSpawningAnimation){
+            pipeDuration=0.5f;
+            HandleEntryPipeAnimation();
+            return;
+        }
+        pipeDuration=2f;
         controller.UpdateHitbox();
 
         PipeManager pe = controller.pipeEntering;
@@ -454,6 +465,33 @@ public class PlayerAnimationController : MonoBehaviourPun {
             }
             transform.position = body.position = new Vector3(pe.otherPipe.transform.position.x, pe.otherPipe.transform.position.y, 1) - (Vector3) offset;
             photonView.RPC("PlaySound", RpcTarget.All, Enums.Sounds.Player_Sound_Powerdown);
+            controller.cameraController.Recenter();
+        }
+        if (pipeTimer >= pipeDuration) {
+            controller.pipeEntering = null;
+            body.isKinematic = false;
+            controller.onGround = false;
+            controller.properJump = false;
+            controller.koyoteTime = 1;
+            controller.crouching = false;
+            controller.alreadyGroundpounded = true;
+            controller.pipeTimer = 0.25f;
+            body.velocity = Vector2.zero;
+        }
+        pipeTimer += Time.fixedDeltaTime;
+    }
+
+    void HandleEntryPipeAnimation() {//ACCURACY: SPAWN PIPE ENTRY PIPE ANIMATION
+
+        controller.UpdateHitbox();
+
+        PipeManager pe = controller.pipeEntering;
+        body.isKinematic = true;
+        body.velocity = controller.pipeDirection;
+
+        if (pipeTimer < pipeDuration / 2f && pipeTimer + Time.fixedDeltaTime >= pipeDuration / 2f) {
+            Vector2 offset = controller.pipeDirection * (pipeDuration / 2f);
+            transform.position = body.position = new Vector3(pe.transform.position.x, pe.transform.position.y+1.5f, 1) - (Vector3) offset;
             controller.cameraController.Recenter();
         }
         if (pipeTimer >= pipeDuration) {
