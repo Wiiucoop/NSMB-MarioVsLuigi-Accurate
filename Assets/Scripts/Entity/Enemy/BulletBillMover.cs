@@ -7,6 +7,8 @@ public class BulletBillMover : KillableEntity
     public float speed, playerSearchRadius = 4, despawnDistance = 8;
     private Vector2 searchVector;
 
+    public GameObject bulletTrail;
+
     public new void Start()
     {
         base.Start();
@@ -79,11 +81,16 @@ public class BulletBillMover : KillableEntity
         {
             if (player.drill)
             {
-                player.bounce = true;
                 player.drill = false;
+                player.bounce = true;
+                player.body.velocity = new Vector2(player.body.velocity.x, 5f);
             }
-
-            photonView.RPC(nameof(Kill), RpcTarget.All);
+            
+            if(player.groundpound){
+                photonView.RPC(nameof(SpecialKill), RpcTarget.All, !FacingLeftTween, true, 0);
+            }else{
+                photonView.RPC(nameof(Kill), RpcTarget.All);
+            }
             return;
         }
 
@@ -91,7 +98,6 @@ public class BulletBillMover : KillableEntity
         {
             if (!(player.state == Enums.PowerupState.MiniMushroom && !player.groundpound))
             {
-             //   GameManager.Instance.MatchConditioner.ConditionActioned(player, "SteppedOnEnemy");
                 photonView.RPC(nameof(Kill), RpcTarget.All);
             }
 
@@ -131,6 +137,7 @@ public class BulletBillMover : KillableEntity
     [PunRPC]
     public override void SpecialKill(bool right, bool groundpound, int combo)
     {
+        bulletTrail.SetActive(false);
         body.velocity = new Vector2(0, 2.5f);
         body.constraints = RigidbodyConstraints2D.None;
         body.angularVelocity = 400f * (right ? 1 : -1);
@@ -139,9 +146,11 @@ public class BulletBillMover : KillableEntity
         hitbox.enabled = false;
         animator.speed = 0;
         gameObject.layer = LayerMask.NameToLayer("HitsNothing");
-        if (groundpound)
-            Instantiate(Resources.Load("Prefabs/Particle/EnemySpecialKill"), body.position + new Vector2(0, 0.5f),
-                Quaternion.identity);
+        if (groundpound){
+            Instantiate(Resources.Load("Prefabs/Particle/EnemySpecialKill"), body.position + new Vector2(0, 0.5f), Quaternion.identity);
+            gameObject.SetActive(false);
+        }
+            
 
         dead = true;
         PlaySound(Enums.Sounds.Enemy_Shell_Kick);

@@ -2832,6 +2832,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             float speed = Mathf.Abs(body.velocity.x);
 
             if (!bounce && onSpinner && !holding) {
+                Instantiate(Resources.Load("Prefabs/Particle/GroundpoundDust"), body.position + new Vector2(0, 0.2f), Quaternion.identity);
                 photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Player_Voice_SpinnerLaunch);
                 photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.World_Spinner_Launch);
                 body.velocity = new Vector2(body.velocity.x, launchVelocity);
