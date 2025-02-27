@@ -49,6 +49,8 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     public Image overallColor, shirtColor;
     public GameObject palette, paletteDisabled;
 
+    public GameObject LevelSelectPopup;
+
     public ScrollRect settingsScroll;
 
     public Selectable[] roomSettings;
@@ -835,9 +837,18 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         randomMapBG.SetActive(false);
         PhotonNetwork.LeaveRoom();
     }
+
+    public void DisableLevelPopup(){
+        LevelSelectPopup.SetActive(false);
+    }
     public void StartGame() {
         if(drawTimeupToggle.isOn){//ACCURACY: DRAWTIMEUPTOGGLE IS THE RANDOM MAP THING 
             PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(0, 5) });
+        }
+
+        if(!powerupsEnabled.isOn && !drawTimeupToggle.isOn){//ACCURACY: IF E3 BETA MAPS IS NOT ENABLED, OPEN POP-UP
+            LevelSelectPopup.SetActive(true);
+            return;
         }
         
         //set started game
@@ -846,6 +857,19 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         //start game with all players
         RaiseEventOptions options = new() { Receivers = ReceiverGroup.All };
         PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
+    }
+
+    public void StartGame(float levelpic) {
+        Debug.Log(levelpic+"NIVEL");
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = (int)levelpic });
+        
+        //set started game
+        PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.GameStarted] = true });
+
+        //start game with all players
+        RaiseEventOptions options = new() { Receivers = ReceiverGroup.All };
+        PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
+        LevelSelectPopup.SetActive(false);
     }
 
     public void StartLocalGrass() {
@@ -1051,7 +1075,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
        // timeField.interactable = PhotonNetwork.IsMasterClient && timeEnabled.isOn;
         drawTimeupToggle.interactable = PhotonNetwork.IsMasterClient;
 
-        levelDropdown.gameObject.SetActive(PhotonNetwork.IsMasterClient && !drawTimeupToggle.isOn);
+        levelDropdown.gameObject.SetActive(PhotonNetwork.IsMasterClient && !drawTimeupToggle.isOn && powerupsEnabled.isOn);//ACCURACY: Only show maps if NOT random and in beta experience mode
 
         randomMapBG.SetActive(drawTimeupToggle.isOn);
 

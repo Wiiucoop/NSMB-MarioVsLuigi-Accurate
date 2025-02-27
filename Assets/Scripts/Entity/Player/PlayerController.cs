@@ -1779,7 +1779,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             entryPipe = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/Entrypipe"), new Vector2(body.position.x - playerId + 0.5f, body.position.y), Quaternion.identity);
             entryPipe.GetComponent<RespawnParticle>().player = this;
             RaycastHit2D piperay = Physics2D.Raycast(transform.position, Vector2.down, 10f, Layers.LayerGround);
-            if(Bricks || BetaCave){//BRICKS
+            if(Bricks || BetaCave || LocalBricks){//BRICKS
                 entryPipe.transform.position = new Vector2(entryPipe.transform.position.x, piperay.point.y);
             }else if(Snow || BetaCity || BetaDesert){//SNOW
                 entryPipe.transform.position = new Vector2(entryPipe.transform.position.x, piperay.point.y+1f);
@@ -1872,7 +1872,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-        storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MiniMushroom");//REMOVER
+       // storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MiniMushroom");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;

@@ -87,6 +87,7 @@ public class BulletBillMover : KillableEntity
             }
             
             if(player.groundpound){
+                player.photonView.RPC(nameof(PlayerController.PlaySound), RpcTarget.All, Enums.Sounds.Enemy_Shell_Kick);
                 photonView.RPC(nameof(SpecialKill), RpcTarget.All, !FacingLeftTween, true, 0);
             }else{
                 photonView.RPC(nameof(Kill), RpcTarget.All);
@@ -100,8 +101,9 @@ public class BulletBillMover : KillableEntity
             {
                 photonView.RPC(nameof(Kill), RpcTarget.All);
             }
-
-            player.photonView.RPC(nameof(PlayerController.PlaySound), RpcTarget.All, Enums.Sounds.Enemy_Generic_Stomp);
+            if(player.state == Enums.PowerupState.MiniMushroom){
+                player.photonView.RPC(nameof(PlayerController.PlaySound), RpcTarget.All, Enums.Sounds.Enemy_Generic_Stomp);
+            }
             player.drill = false;
             player.groundpound = false;
             player.bounce = true;
@@ -148,11 +150,12 @@ public class BulletBillMover : KillableEntity
         gameObject.layer = LayerMask.NameToLayer("HitsNothing");
         if (groundpound){
             Instantiate(Resources.Load("Prefabs/Particle/EnemySpecialKill"), body.position + new Vector2(0, 0.5f), Quaternion.identity);
-            gameObject.SetActive(false);
+            dead = true;
+            Destroy(gameObject);
         }
             
 
         dead = true;
-        PlaySound(Enums.Sounds.Enemy_Shell_Kick);
+        PlaySound(Enums.Sounds.Enemy_Generic_Stomp);
     }
 }
