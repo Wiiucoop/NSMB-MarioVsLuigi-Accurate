@@ -26,7 +26,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     public GameObject connecting;
     public GameObject title, bg, mainMenu, optionsMenu, localPlayMenu, lobbyMenu, createLobbyPrompt, inLobbyMenu, creditsMenu, controlsMenu, privatePrompt, updateBox;
     public GameObject[] levelCameraPositions;
-    public GameObject sliderText, lobbyText, currentMaxPlayers, settingsPanel;
+    public GameObject sliderText, lobbyText, currentMaxPlayers, settingsPanel, obsoleteMapSelector, chatPanel;
     public TMP_Dropdown levelDropdown, characterDropdown;
     public RoomIcon selectedRoomIcon, privateJoinRoom;
     public Button joinRoomBtn, createRoomBtn, startGameBtn;
@@ -869,7 +869,6 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         //start game with all players
         RaiseEventOptions options = new() { Receivers = ReceiverGroup.All };
         PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
-        LevelSelectPopup.SetActive(false);
     }
 
     public void StartLocalGrass() {
@@ -1075,7 +1074,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
        // timeField.interactable = PhotonNetwork.IsMasterClient && timeEnabled.isOn;
         drawTimeupToggle.interactable = PhotonNetwork.IsMasterClient;
 
-        levelDropdown.gameObject.SetActive(PhotonNetwork.IsMasterClient && !drawTimeupToggle.isOn && powerupsEnabled.isOn);//ACCURACY: Only show maps if NOT random and in beta experience mode
+        obsoleteMapSelector.gameObject.SetActive(PhotonNetwork.IsMasterClient && !drawTimeupToggle.isOn && powerupsEnabled.isOn);//ACCURACY: Only show maps if NOT random and in beta experience mode
 
         randomMapBG.SetActive(drawTimeupToggle.isOn);
 
@@ -1119,6 +1118,16 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         //RectTransform tf = txtObject.GetComponent<RectTransform>();
         //Bounds bounds = txtObject.GetComponent<TextMeshProUGUI>().textBounds;
         //tf.sizeDelta = new Vector2(tf.sizeDelta.x, bounds.max.y - bounds.min.y - 15f);
+    }
+
+    public void toggleSettingsChat(){
+        if(settingsPanel.activeSelf){
+            chatPanel.SetActive(true);
+            settingsPanel.SetActive(false);
+        }else{
+            chatPanel.SetActive(false);
+            settingsPanel.SetActive(true);
+        } 
     }
     public void SendChat() {
         double time = lastMessage.GetValueOrDefault(PhotonNetwork.LocalPlayer);
@@ -1612,6 +1621,6 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         return seconds;
     }
     public void ChangeLobbyHeader(string name) {
-        SetText(lobbyText, $"{name.ToValidUsername()}'s Lobby", true);
+       // SetText(lobbyText, $"{name.ToValidUsername()}'s Lobby", true);//remover
     }
 }

@@ -458,7 +458,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     void HandlePlayerPushing(){
         isPushingPlayer -= Time.deltaTime;
 
-        // Clamp the timer to zero (it cannot be negative)
+        //ACCURACY: Clamp the timer to zero (it cannot be negative)
         isPushingPlayer = Mathf.Max(isPushingPlayer, 0f);
 
         if(joystick.x == 0){
@@ -760,10 +760,13 @@ void HandleTornado() {   //ACCURACY: add tornado
                     
 
                 }else if(!otherAbove && onGround && other.onGround && (Mathf.Abs(body.velocity.x) > 0 && Mathf.Abs(body.velocity.x) <= WalkingMaxSpeed)){
-                    //Pushing players
+                    //ACCURACY: Pushing players
                     if(joystick.x != 0){
                         isPushingPlayer += 0.3f;
 
+                    if(isPushingPlayer >= 0.8f){
+                        body.velocity = new Vector2(WalkingMaxSpeed, body.velocity.y);
+                    }
                         // Clamp the timer to its maximum value
                         isPushingPlayer = Mathf.Min(isPushingPlayer, 0.9f);
                     }
