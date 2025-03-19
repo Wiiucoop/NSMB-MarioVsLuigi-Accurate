@@ -30,16 +30,19 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     public TMP_Dropdown levelDropdown, characterDropdown;
     public RoomIcon selectedRoomIcon, privateJoinRoom;
     public Button joinRoomBtn, createRoomBtn, startGameBtn;
-    public Toggle ndsResolutionToggle, n3dsResolutionToggle, fullscreenToggle, livesEnabled, powerupsEnabled, timeEnabled, drawTimeupToggle, fireballToggle, vsyncToggle, privateToggle, privateToggleRoom, aspectToggle, spectateToggle, scoreboardToggle, filterToggle;
+    public Toggle ndsResolutionToggle, n3dsResolutionToggle, fullscreenToggle, powerupsEnabled, timeEnabled, drawTimeupToggle, fireballToggle, vsyncToggle, privateToggle, privateToggleRoom, aspectToggle, spectateToggle, scoreboardToggle, filterToggle;
     public GameObject playersContent, playersPrefab, chatContent, chatPrefab;
     public TMP_InputField nicknameField, starsText, coinsText, livesField, timeField, lobbyJoinField, chatTextField;
+
     public Slider musicSlider, sfxSlider, masterSlider, lobbyPlayersSlider, changePlayersSlider;
     public GameObject mainMenuSelected, optionsSelected, lobbySelected, currentLobbySelected, localPlaySelected, createLobbySelected, creditsSelected, controlsSelected, privateSelected, reconnectSelected, updateBoxSelected;
     public GameObject errorBox, errorButton, rebindPrompt, reconnectBox;
-    public TMP_Text errorText, rebindCountdown, rebindText, reconnectText, updateText;
+    public TMP_Text errorText, rebindCountdown, rebindText, reconnectText, updateText, playerLivesText;
     public TMP_Dropdown region;
 
-    public GameObject randomMapBG;
+    public GameObject randomMapObj;
+
+    public GameObject randomMapTxt;
     public RebindManager rebindManager;
     public static string lastRegion;
     public string connectThroughSecret = "";
@@ -108,9 +111,6 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             valid &= room.IsVisible && room.IsOpen;
             valid &= !room.RemovedFromList;
             valid &= room.MaxPlayers >= 2 && room.MaxPlayers <= 10;
-            valid &= lives <= 5;
-            valid &= stars >= 3 && stars <= 10;
-            valid &= coins >= 4 && coins <= 8;
             //valid &= host.IsValidUsername();
 
             if (!valid) {
@@ -414,7 +414,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
          */
 
         Instance = this;
-        randomMapBG.SetActive(false);
+    
 
         //Clear game-specific settings so they don't carry over
         HorizontalCamera.OFFSET_TARGET = 0;
@@ -834,7 +834,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void QuitRoom() {
-        randomMapBG.SetActive(false);
+      
         PhotonNetwork.LeaveRoom();
     }
 
@@ -842,6 +842,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         LevelSelectPopup.SetActive(false);
     }
     public void StartGame() {
+        
         if(drawTimeupToggle.isOn){//ACCURACY: DRAWTIMEUPTOGGLE IS THE RANDOM MAP THING 
             PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = Random.Range(0, 5) });
         }
@@ -925,31 +926,21 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void ChangeLives(int lives) {
-        livesEnabled.SetIsOnWithoutNotify(lives != -1);
         UpdateSettingEnableStates();
-        if (lives == -1)
-            return;
-
-        if (lives > 5){
-            lives = 5;
+        if (lives == -1){
+            livesField.SetTextWithoutNotify("Endless");
+        }else{
+            livesField.SetTextWithoutNotify(lives.ToString());
         }
-
-        livesField.SetTextWithoutNotify(lives.ToString());
     }
-    public void SetLives(TMP_InputField input) {
+    public void SetLives(string input) {
         if (!PhotonNetwork.IsMasterClient)
             return;
 
-        int.TryParse(input.text, out int newValue);
-        if (newValue == -1)
-            return;
-
-        if (newValue < 1)
-            newValue = 5;
-
-        if (newValue > 5){
-            newValue = 5;
-        }
+        bool livesEnabled = int.TryParse(input, out int newValue);
+        if (!livesEnabled){
+            newValue = -1;
+        } 
 
         ChangeLives(newValue);
         if (newValue == (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.Lives])
@@ -966,11 +957,35 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(properties);
     }
-    public void EnableLives(Toggle toggle) {
+    public void EnableLives(Toggle toggle) {//REMOVER
         Hashtable properties = new() {
             [Enums.NetRoomProperties.Lives] = toggle.isOn ? int.Parse(livesField.text) : -1
         };
         PhotonNetwork.CurrentRoom.SetCustomProperties(properties);
+    }
+
+    public void ReduceLives(Button btn) {
+        int lives = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.Lives];
+        if(lives == 5){
+            SetLives("3");
+        }else if(lives ==3){
+            SetLives("Endless");
+        }else{
+            SetLives("5");
+        }
+        
+    }
+
+    public void IncreaseLives(Button btn) {
+        int lives = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.Lives];
+        if(lives == 3){
+            SetLives("5");
+        }else if(lives == 5){
+            SetLives("Endless");
+        }else{
+            SetLives("3");
+        }
+        
     }
 
     public void ChangeLevel(int index) {
@@ -1070,13 +1085,28 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         foreach (Selectable s in roomSettings)
             s.interactable = PhotonNetwork.IsMasterClient;
 
-        livesField.interactable = PhotonNetwork.IsMasterClient && livesEnabled.isOn;
+     //   livesField.interactable = PhotonNetwork.IsMasterClient && livesEnabled.isOn;
        // timeField.interactable = PhotonNetwork.IsMasterClient && timeEnabled.isOn;
         drawTimeupToggle.interactable = PhotonNetwork.IsMasterClient;
 
         obsoleteMapSelector.gameObject.SetActive(PhotonNetwork.IsMasterClient && !drawTimeupToggle.isOn && powerupsEnabled.isOn);//ACCURACY: Only show maps if NOT random and in beta experience mode
+        randomMapObj.gameObject.SetActive(!obsoleteMapSelector.gameObject.activeSelf);//ACCURACY: Enable random map buttons
 
-        randomMapBG.SetActive(drawTimeupToggle.isOn);
+        if(Settings.Instance.character==0){
+            playerLivesText.SetText("Mario's\n Lives");
+        }else{
+            playerLivesText.SetText("Luigi's\nLives");
+        }
+
+        Utils.GetCustomProperty(Enums.NetRoomProperties.DrawTime, out bool isRandom);
+        if(isRandom){
+            randomMapTxt.GetComponent<TextMeshProUGUI>().SetText("Random");
+            randomMapTxt.transform.localScale = new Vector3(1f, 1f, 1f);
+        }else{
+            randomMapTxt.GetComponent<TextMeshProUGUI>().SetText("Choose Each Time");
+            randomMapTxt.transform.localScale = new Vector3(0.9f, 1.3f, 1f);
+        }
+        
 
         Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool debug);
         privateToggleRoom.interactable = PhotonNetwork.IsMasterClient && !debug;
@@ -1441,7 +1471,56 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     public void ChangeStarRequirement(int stars) {
         starsText.text = stars.ToString();
     }
-    public void SetStarRequirement(TMP_InputField input) {
+
+    public void ReduceStars(Button btn) {
+        int stars = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.StarRequirement];
+
+        if (stars == 3) {
+            stars = 10;
+            
+        }
+        else if (stars == 5) {
+            stars = 3;
+           
+        }
+        else if (stars == 10) {
+            stars = 5;
+            
+        }
+
+        ChangeStarRequirement(stars);
+
+        Hashtable table = new() {
+            [Enums.NetRoomProperties.StarRequirement] = stars
+        };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(table);
+        
+    }
+
+    public void IncreaseStars(Button btn) {
+        int stars = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.StarRequirement];
+
+        if (stars == 3) {
+            stars = 5;
+            
+        }
+        else if (stars == 5) {
+            stars = 10;
+            
+        }
+        else if (stars == 10) {
+            stars = 3;
+            
+        }
+        ChangeStarRequirement(stars);
+        Hashtable table = new() {
+            [Enums.NetRoomProperties.StarRequirement] = stars
+        };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(table);
+        
+    }
+
+    public void SetStarRequirement(TMP_InputField input) {// 3 , 5 or 10
         if (!PhotonNetwork.IsMasterClient)
             return;
 
@@ -1489,6 +1568,41 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         PhotonNetwork.CurrentRoom.SetCustomProperties(table);
         //ChangeCoinRequirement(newValue);
     }
+
+    public void ReduceCoins(Button btn) {
+        int coins = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.CoinRequirement];
+
+        if (coins <= 1) {
+            coins = 8;
+            
+        }
+        else{
+            coins--;
+        }
+        ChangeCoinRequirement(coins);
+        Hashtable table = new() {
+            [Enums.NetRoomProperties.CoinRequirement] = coins
+        };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(table);
+    }
+
+    public void IncreaseCoins(Button btn) {
+        int coins = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.CoinRequirement];
+
+        if (coins >= 8) {
+            coins = 1;
+            
+        }
+        else{
+            coins++;
+        }
+        ChangeCoinRequirement(coins);
+        Hashtable table = new() {
+            [Enums.NetRoomProperties.CoinRequirement] = coins
+        };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(table);
+    }
+
 
     public void CopyRoomCode() {
         TextEditor te = new();
@@ -1592,11 +1706,25 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         if (!PhotonNetwork.IsMasterClient)
             return;
 
+        if (toggle.isOn) {
+            toggle.isOn = false;  // Turn toggle off
+        } else {
+            toggle.isOn = true;   // Turn toggle on
+        }
+
         Hashtable properties = new() {
             [Enums.NetRoomProperties.DrawTime] = toggle.isOn
         };
+        if(toggle.isOn){
+            randomMapTxt.GetComponent<TextMeshProUGUI>().SetText("Random");
+            randomMapTxt.transform.localScale = new Vector3(1f, 1f, 1f);
+        }else{
+            randomMapTxt.GetComponent<TextMeshProUGUI>().SetText("Choose Each Time");
+            randomMapTxt.transform.localScale = new Vector3(0.9f, 1.3f, 1f);
+        }
         PhotonNetwork.CurrentRoom.SetCustomProperties(properties);
     }
+
     public int ParseTimeToSeconds(string time) {
 
         int minutes;

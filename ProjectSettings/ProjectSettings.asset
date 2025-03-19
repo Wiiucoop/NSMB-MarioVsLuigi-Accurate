@@ -165,7 +165,6 @@ PlayerSettings:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 11400000, guid: 49335f30d253220488d2d332ade6e901, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -186,7 +185,7 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
     Android: com.Wiiucoop.MarioVsLuigiAccurate
-    Standalone: com.Wiiucoop.MarioVsLuigi
+    Standalone: com.Wiiucoop.MarioVsLuigi-Accurate
   buildNumber:
     Standalone: 0
     VisionOS: 0
@@ -411,36 +410,6 @@ PlayerSettings:
   - m_BuildTarget: Android
     m_Icons:
     - m_Textures: []
-      m_Width: 432
-      m_Height: 432
-      m_Kind: 2
-      m_SubKind: 
-    - m_Textures: []
-      m_Width: 324
-      m_Height: 324
-      m_Kind: 2
-      m_SubKind: 
-    - m_Textures: []
-      m_Width: 216
-      m_Height: 216
-      m_Kind: 2
-      m_SubKind: 
-    - m_Textures: []
-      m_Width: 162
-      m_Height: 162
-      m_Kind: 2
-      m_SubKind: 
-    - m_Textures: []
-      m_Width: 108
-      m_Height: 108
-      m_Kind: 2
-      m_SubKind: 
-    - m_Textures: []
-      m_Width: 81
-      m_Height: 81
-      m_Kind: 2
-      m_SubKind: 
-    - m_Textures: []
       m_Width: 192
       m_Height: 192
       m_Kind: 1
@@ -469,6 +438,36 @@ PlayerSettings:
       m_Width: 36
       m_Height: 36
       m_Kind: 1
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 432
+      m_Height: 432
+      m_Kind: 2
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 324
+      m_Height: 324
+      m_Kind: 2
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 216
+      m_Height: 216
+      m_Kind: 2
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 162
+      m_Height: 162
+      m_Kind: 2
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 108
+      m_Height: 108
+      m_Kind: 2
+      m_SubKind: 
+    - m_Textures: []
+      m_Width: 81
+      m_Height: 81
+      m_Kind: 2
       m_SubKind: 
     - m_Textures:
       - {fileID: 2800000, guid: 9975e570bf2e9004db0e2b088741b9b4, type: 3}

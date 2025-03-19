@@ -21,6 +21,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
     private List<Renderer> renderers = new();
     private MaterialPropertyBlock materialBlock;
 
+    public bool hasEverDied = false;
     public bool betaAnims = false;
 
     public Color GlowColor {
@@ -388,7 +389,10 @@ public class PlayerAnimationController : MonoBehaviourPun {
             deathTimer = 0;
             return;
         }
-
+        if(!hasEverDied){
+            hasEverDied = true;
+        }
+        
         deathTimer += Time.fixedDeltaTime;
         if (deathTimer < deathUpTime) {
             deathUp = false;
@@ -482,9 +486,8 @@ public class PlayerAnimationController : MonoBehaviourPun {
     }
 
     void HandleEntryPipeAnimation() {//ACCURACY: SPAWN PIPE ENTRY PIPE ANIMATION
-
         controller.UpdateHitbox();
-
+        controller.hitInvincibilityCounter = 0; //ACCURACY: REMOVE SPAWN BLINK
         PipeManager pe = controller.pipeEntering;
         body.isKinematic = true;
         body.velocity = controller.pipeDirection;
@@ -495,6 +498,9 @@ public class PlayerAnimationController : MonoBehaviourPun {
             controller.cameraController.Recenter();
         }
         if (pipeTimer >= pipeDuration) {
+            if(hasEverDied.Equals(true)){//ACCURACY: Only give iframes when RE-spawning, and not when first spawning
+                controller.hitInvincibilityCounter = 0.5f;
+            }
             controller.pipeEntering = null;
             body.isKinematic = false;
             controller.onGround = false;

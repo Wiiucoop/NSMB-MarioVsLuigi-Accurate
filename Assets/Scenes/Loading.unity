@@ -527,7 +527,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Searching for opponent...
+  m_text: Waiting for opponent...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 38e8769007229044bb229d69f8cbae74, type: 2}
   m_sharedMaterial: {fileID: 3023213983796840565, guid: 38e8769007229044bb229d69f8cbae74,

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-
+using DG.Tweening;
 using Photon.Pun;
 using ExitGames.Client.Photon;
 using NSMB.Utils;
@@ -280,7 +280,6 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
         if (photonView.IsMine && !isLocalGame)
         { 
-         //   Debug.Log("NAO LOCAL");
             InputSystem.controls.Player.Movement.performed += OnMovement;
             InputSystem.controls.Player.Movement.canceled += OnMovement;
             InputSystem.controls.Player.Jump.performed += OnJump;
@@ -764,9 +763,6 @@ void HandleTornado() {   //ACCURACY: add tornado
                     if(joystick.x != 0){
                         isPushingPlayer += 0.3f;
 
-                    if(isPushingPlayer >= 0.8f){
-                        body.velocity = new Vector2(WalkingMaxSpeed, body.velocity.y);
-                    }
                         // Clamp the timer to its maximum value
                         isPushingPlayer = Mathf.Min(isPushingPlayer, 0.9f);
                     }
@@ -1709,7 +1705,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         animator.SetBool("firedeath", fire);
         if (photonView.IsMine) {
             StartCoroutine(StopMusicOnDeath());
-
+            
             if (lives == 0)
                 PlaySound(Enums.Sounds.Player_Sound_DeathOthers);
             else
@@ -1782,6 +1778,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             entryPipe = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/Entrypipe"), new Vector2(body.position.x - playerId + 0.5f, body.position.y), Quaternion.identity);
             entryPipe.GetComponent<RespawnParticle>().player = this;
             RaycastHit2D piperay = Physics2D.Raycast(transform.position, Vector2.down, 10f, Layers.LayerGround);
+            
             if(Bricks || BetaCave || LocalBricks){//BRICKS
                 entryPipe.transform.position = new Vector2(entryPipe.transform.position.x, piperay.point.y);
             }else if(Snow || BetaCity || BetaDesert){//SNOW
@@ -1789,6 +1786,8 @@ void HandleTornado() {   //ACCURACY: add tornado
             }else{
                 entryPipe.transform.position = new Vector2(entryPipe.transform.position.x, piperay.point.y+0.5f);
             }
+            entryPipe.transform.position = new Vector3(transform.position.x - playerId + 0.5f, entryPipe.transform.position.y-2f, transform.position.z);
+            entryPipe.transform.DOMoveY(entryPipe.transform.position.y+2f, 1.5f).SetEase(Ease.OutQuad); // Animate scale
             
             foreach (RaycastHit2D hit in Physics2D.RaycastAll(body.position, Vector2.up, 1f)) {
                 GameObject obj = hit.transform.gameObject;
@@ -1925,7 +1924,6 @@ void HandleTornado() {   //ACCURACY: add tornado
       //  photonView.RPC("PlaySound", RpcTarget.All, Enums.Sounds.Player_Sound_Powerdown);
         sfx.PlayOneShot(Enums.Sounds.Player_Sound_Powerdown.GetClip());
 
-
         StartCoroutine(DestroyPipe());
 
 
@@ -1944,9 +1942,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         Renderer blinker = entryPipe.GetComponent<Renderer>();
         Color newColor = blinker.material.color;
         float pipedesTimer = 0.8f;
-        yield return new WaitForSeconds(0.7f);
-        hitInvincibilityCounter = 0; //ACCURACY: REDUCES SPAWN INVINCIBILITY
-        yield return new WaitForSeconds(2.3f);
+        yield return new WaitForSeconds(3f);
 
         while (pipedesTimer > 0) {
             pipedesTimer -= 0.02f;
