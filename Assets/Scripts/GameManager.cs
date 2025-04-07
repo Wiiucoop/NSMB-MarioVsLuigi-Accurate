@@ -593,7 +593,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         }
 
         yield return new WaitForSeconds(Mathf.Max(1f, (startTimestamp - PhotonNetwork.ServerTimestamp) / 1000f));
-//ACCURACY: TESTPOINT REMOVER
+
         GameObject canvas = GameObject.FindGameObjectWithTag("LoadingCanvas");
         if (canvas) {
             canvas.GetComponent<Animator>().SetTrigger(spectating ? "spectating" : "loaded");
@@ -633,9 +633,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         } catch { }
         
         if (gameStarting) {
-            if (!Application.isEditor){
-                yield return new WaitForSeconds(3.5f);
-            }
+                if (players.Count > 1){//ACCURACY: ONLY SKIP 3.5 SECOND SPAWN IF ON SOLO, SO BETTER DEBUGGING
+                    yield return new WaitForSeconds(3.5f);
+                }
             bool isMario = Utils.GetCharacterData(PhotonNetwork.LocalPlayer).uistring.Equals("<sprite=3>");
             fader.SetIsMario(isMario);
             fader.FadeOut();

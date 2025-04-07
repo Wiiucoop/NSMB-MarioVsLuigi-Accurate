@@ -42,6 +42,8 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
     public static GameObject InstantiatedKickObject;
     private bool hasTornado = false;
 
+    private bool firstRespawn = true;
+
     public bool Grasslands, Bricks, Snow, Pipes, Castle, BetaGrasslands, BetaCave, BetaDesert, BetaCity, BetaCastle, LocalGrasslands, LocalBricks, LocalBeta;
 
     private float tornadoTimer;
@@ -718,6 +720,7 @@ void HandleTornado() {   //ACCURACY: add tornado
                     if(knockback){
                         ResetKnockback();
                         bounce = true;
+                        photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Enemy_Generic_Stomp);//TESTE HAGAS REMOVER ACCURACY
                     }
 
                     if (state == Enums.PowerupState.MiniMushroom && other.state != Enums.PowerupState.MiniMushroom) {
@@ -1772,6 +1775,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         giantStartTimer = 0;
         groundpound = false;
         body.isKinematic = false;
+        animator.speed = 1f;
         //Loads the entrypipe object, instead of SMM2's ring. Made to be more accurate with NSMB only for 1v1 matches.
         if (GameManager.Instance.players.Count <= 2)
         {
@@ -1789,7 +1793,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             entryPipe.transform.position = new Vector3(transform.position.x - playerId + 0.5f, entryPipe.transform.position.y-2f, transform.position.z);
             entryPipe.transform.DOMoveY(entryPipe.transform.position.y+2f, 1.5f).SetEase(Ease.OutQuad); // Animate scale
             
-            foreach (RaycastHit2D hit in Physics2D.RaycastAll(body.position, Vector2.up, 1f)) {
+            foreach (RaycastHit2D hit in Physics2D.RaycastAll(entryPipe.transform.position, Vector2.up, 5f)) {
                 GameObject obj = hit.transform.gameObject;
                 if (obj.CompareTag("pipeSpawn")){
 
@@ -1917,7 +1921,9 @@ void HandleTornado() {   //ACCURACY: add tornado
         
         if (photonView.IsMine && !GameManager.Instance.music.isPlaying)
             GameManager.Instance.music.Play();
+            
         ResetKnockback();
+
 
 
         //ACCURACY: Sound played right after player spawns on top of the PIPE
@@ -1932,6 +1938,10 @@ void HandleTornado() {   //ACCURACY: add tornado
         if (photonView.IsMine)
             ScoreboardUpdater.instance.OnRespawnToggle();
 
+        if(firstRespawn){
+            hitInvincibilityCounter=0f;
+            firstRespawn = false;
+        }
         UpdateGameState();
     }
     #endregion
@@ -2020,16 +2030,8 @@ void HandleTornado() {   //ACCURACY: add tornado
 
 
 
-//ACCURACY: Fireflower knockback delay
-    private System.Collections.IEnumerator fireknockbackdelay()
-    {
-        bounce = false;
-        knockback = false;
-        body.velocity = new(0, body.velocity.y);
-        facingRight = initialKnockbackFacingRight;
-        yield return new WaitForSeconds(0.5f);
-        hitInvincibilityCounter = state != Enums.PowerupState.MegaMushroom ? 2f : 0f;
-    }
+
+
 
 //ACCURACY: blockSquish is that BRICK block at the start of FORTRESS LEVEL where if you hit someone from below, it will get hit by the ceiling.
 //ACCURACY: strangely in the original game, you dont lose a powerup if you are BIG or MINI. But you do with all other powerups.
@@ -2252,9 +2254,9 @@ void HandleTornado() {   //ACCURACY: add tornado
             starsToDrop = Mathf.Min(1, starsToDrop);
 
         knockback = true;
-        knockbackTimer = 0.5f;
         fireballKnockback = fireball;
         initialKnockbackFacingRight = facingRight;
+        knockbackTimer = fireballKnockback ? 1f : 0.5f;//ACCURACY: LONGER KNOCKBACK DEPENDING ON HOW IT HAPPENS delay*
 
         PhotonView attacker = PhotonNetwork.GetPhotonView(attackerView);
         if (attackerView >= 0) {
@@ -2349,11 +2351,10 @@ void HandleTornado() {   //ACCURACY: add tornado
             starsToDrop = Mathf.Min(1, starsToDrop);
 
         knockback = true;
-       
-        knockbackTimer = 0.5f;
         bumpingKnockback = true;
         fireballKnockback = true;
         initialKnockbackFacingRight = facingRight;
+        knockbackTimer = fireballKnockback ? 1f : 0.5f;//ACCURACY: LONGER KNOCKBACK DEPENDING ON HOW IT HAPPENS delay*
 
         PhotonView attacker = PhotonNetwork.GetPhotonView(attackerView);
         
@@ -2375,7 +2376,7 @@ void HandleTornado() {   //ACCURACY: add tornado
 
 
         float megaVelo = (state == Enums.PowerupState.MegaMushroom ? 3 : 1);
-       //BUMPING knockback distance
+       //ACCURACY: BUMPING knockback distance
             body.velocity = new Vector2((fromRight ? -3.5f : 3.5f), 0);
 
         
@@ -2406,18 +2407,13 @@ void HandleTornado() {   //ACCURACY: add tornado
     [PunRPC]
     protected void ResetKnockback() {
 
-        if(!fireballKnockback){
             hitInvincibilityCounter = state != Enums.PowerupState.MegaMushroom ? 2f : 0f;
             bounce = false;
             knockback = false;
             body.velocity = new(0, body.velocity.y);
             fireSource = false;
             facingRight = initialKnockbackFacingRight;
-        }else{        
-            StartCoroutine(fireknockbackdelay());
-        }
-
-        
+    
     }
     #endregion
 
@@ -2519,7 +2515,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         }
     }
 
-    private void HandleSlopes() {
+    private void HandleSlopes() {//ACCURACY: REMOVER UNUSED CODE DEPRECATED
         if (!onGround) {
             floorAngle = 0;
             return;
@@ -3566,7 +3562,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         HandleTornado();//ACCURACY: TORNADO
         HandleWallslide(left, right, jump);
 
-        HandleSlopes();
+    //    HandleSlopes();
 
         if (crouch && !alreadyGroundpounded) {
             HandleGroundpoundStart(left, right);
@@ -3624,7 +3620,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             photonView.RPC(nameof(EndMega), RpcTarget.All);
         }
 
-        HandleSlopes();
+       // HandleSlopes();
         HandleSliding(up, crouch, left, right);
         HandleFacingDirection();
 

@@ -21,7 +21,6 @@ public class PlayerAnimationController : MonoBehaviourPun {
     private List<Renderer> renderers = new();
     private MaterialPropertyBlock materialBlock;
 
-    public bool hasEverDied = false;
     public bool betaAnims = false;
 
     public Color GlowColor {
@@ -389,9 +388,6 @@ public class PlayerAnimationController : MonoBehaviourPun {
             deathTimer = 0;
             return;
         }
-        if(!hasEverDied){
-            hasEverDied = true;
-        }
         
         deathTimer += Time.fixedDeltaTime;
         if (deathTimer < deathUpTime) {
@@ -412,11 +408,25 @@ public class PlayerAnimationController : MonoBehaviourPun {
             body.gravityScale = 1.2f;
             body.velocity = new Vector2(0, Mathf.Max(-deathForce, body.velocity.y));
         }
-        if (controller.photonView.IsMine && deathTimer + Time.fixedDeltaTime > (3 - 0.43f) && deathTimer < (3 - 0.43f))
+        if (controller.photonView.IsMine && deathTimer + Time.fixedDeltaTime > (3 - 0.43f) && deathTimer < (3 - 0.43f)){
             controller.fadeOut.FadeOutAndIn();//ACCURACY: Fade out in transition animation
+        }
 
-        if (photonView.IsMine && deathTimer >= 3f)
+        if(deathTimer + Time.fixedDeltaTime > (3 - 0.5f) && deathTimer < (3f)){//ACCURACY: FREEZE PLAYER IN AIR DURING DEATH TRANSITION
+            body.gravityScale = 0f;
+            body.velocity = Vector2.zero;
+            body.position = controller.previousFramePosition;
+            animator.speed = 0f;
+        }
+
+        if(deathTimer >= 3f){
+            animator.speed = 1f;
+        }
+
+        if (photonView.IsMine && deathTimer >= 3f){
             photonView.RPC("PreRespawn", RpcTarget.All);
+        }
+            
 
         if (body.position.y < GameManager.Instance.GetLevelMinY() - transform.lossyScale.y) {
             models.SetActive(false);
@@ -487,7 +497,6 @@ public class PlayerAnimationController : MonoBehaviourPun {
 
     void HandleEntryPipeAnimation() {//ACCURACY: SPAWN PIPE ENTRY PIPE ANIMATION
         controller.UpdateHitbox();
-        controller.hitInvincibilityCounter = 0; //ACCURACY: REMOVE SPAWN BLINK
         PipeManager pe = controller.pipeEntering;
         body.isKinematic = true;
         body.velocity = controller.pipeDirection;
@@ -498,9 +507,6 @@ public class PlayerAnimationController : MonoBehaviourPun {
             controller.cameraController.Recenter();
         }
         if (pipeTimer >= pipeDuration) {
-            if(hasEverDied.Equals(true)){//ACCURACY: Only give iframes when RE-spawning, and not when first spawning
-                controller.hitInvincibilityCounter = 0.5f;
-            }
             controller.pipeEntering = null;
             body.isKinematic = false;
             controller.onGround = false;
