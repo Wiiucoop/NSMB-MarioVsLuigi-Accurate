@@ -422,6 +422,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
             body.velocity = Vector2.zero;
             body.position = controller.previousFramePosition;
             animator.speed = 0f;
+            controller.state = Enums.PowerupState.Small;//Accuracy: SET STATE TO SMALL BEFORE SPAWNING TO AVOID UNWANTED POWERUP ANIMATION
         }
 
         if(deathTimer >= 3f){
@@ -429,7 +430,6 @@ public class PlayerAnimationController : MonoBehaviourPun {
         }
 
         if (photonView.IsMine && deathTimer >= 3f){
-            controller.state = Enums.PowerupState.Small;//Accuracy: SET STATE TO SMALL BEFORE SPAWNING TO AVOID UNWANTED POWERUP ANIMATION
             photonView.RPC("PreRespawn", RpcTarget.All);
         }
             
