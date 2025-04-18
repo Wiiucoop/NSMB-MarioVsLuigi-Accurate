@@ -328,7 +328,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
         switch (e.Code) {
         case (byte) Enums.NetEventIds.StartGame: {
-
+            GlobalController.Instance.musicOrdering++;
             if (!(sender?.IsMasterClient ?? false) && e.SenderKey != 255)
                 return;
 
@@ -538,6 +538,10 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         musicSlider.value = Settings.Instance.VolumeMusic;
         sfxSlider.value = Settings.Instance.VolumeSFX;
         masterSlider.value = Settings.Instance.VolumeMaster;
+
+        //ACCURACY: REMOVE PLAYER SKINS
+        paletteDisabled.SetActive(true);
+        palette.SetActive(false);
 
         n3dsResolutionToggle.interactable = ndsResolutionToggle.isOn = Settings.Instance.ndsResolution;
         n3dsResolutionToggle.isOn = Settings.Instance.n3dsResolution;
@@ -965,6 +969,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void ReduceLives(Button btn) {
+        sfx.PlayOneShot(Enums.Sounds.UI_Cursor.GetClip());
         int lives = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.Lives];
         if(lives == 5){
             SetLives("3");
@@ -977,6 +982,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void IncreaseLives(Button btn) {
+        sfx.PlayOneShot(Enums.Sounds.UI_Cursor.GetClip());
         int lives = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.Lives];
         if(lives == 3){
             SetLives("5");
@@ -1109,7 +1115,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         
 
         Utils.GetCustomProperty(Enums.NetRoomProperties.Debug, out bool debug);
-        privateToggleRoom.interactable = PhotonNetwork.IsMasterClient && !debug;
+        privateToggleRoom.interactable = PhotonNetwork.IsMasterClient;
 
         int playingPlayers = PhotonNetwork.CurrentRoom.Players.Where(pl => {
             Utils.GetCustomProperty(Enums.NetPlayerProperties.Spectator, out bool spectating, pl.Value.CustomProperties);
@@ -1330,8 +1336,12 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             if (debugEnabled) {
                 LocalChatMessage("Custom MUSIC have been disabled for E3 levels.", Color.red);
             } else {
+                timeEnabled.isOn = false;
                 LocalChatMessage("Custom MUSIC have been enabled for E3  levels.", Color.red);
             }
+           
+            
+
             PhotonNetwork.CurrentRoom.SetCustomProperties(new() {
                 [Enums.NetRoomProperties.Debug] = !debugEnabled
             });
@@ -1473,6 +1483,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void ReduceStars(Button btn) {
+        sfx.PlayOneShot(Enums.Sounds.UI_Cursor.GetClip());
         int stars = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.StarRequirement];
 
         if (stars == 3) {
@@ -1498,6 +1509,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void IncreaseStars(Button btn) {
+        sfx.PlayOneShot(Enums.Sounds.UI_Cursor.GetClip());
         int stars = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.StarRequirement];
 
         if (stars == 3) {
@@ -1570,6 +1582,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void ReduceCoins(Button btn) {
+        sfx.PlayOneShot(Enums.Sounds.UI_Cursor.GetClip());
         int coins = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.CoinRequirement];
 
         if (coins <= 1) {
@@ -1587,6 +1600,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void IncreaseCoins(Button btn) {
+        sfx.PlayOneShot(Enums.Sounds.UI_Cursor.GetClip());
         int coins = (int) PhotonNetwork.CurrentRoom.CustomProperties[Enums.NetRoomProperties.CoinRequirement];
 
         if (coins >= 8) {
@@ -1703,6 +1717,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         drawTimeupToggle.SetIsOnWithoutNotify(value);
     }
     public void SetDrawTime(Toggle toggle) {
+        sfx.PlayOneShot(Enums.Sounds.UI_Cursor.GetClip());
         if (!PhotonNetwork.IsMasterClient)
             return;
 

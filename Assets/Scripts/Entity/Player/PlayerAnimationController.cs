@@ -337,8 +337,13 @@ public class PlayerAnimationController : MonoBehaviourPun {
             r.SetPropertyBlock(materialBlock);
 
         //hit flash
-        models.SetActive(GameManager.Instance.gameover || controller.dead || !(controller.hitInvincibilityCounter > 0 && controller.hitInvincibilityCounter * (controller.hitInvincibilityCounter <= 0.75f ? 5 : 2) % (blinkDuration * 2f) < blinkDuration));
-
+        //ACCURACY: HIDE MARIO MODEL ON FIRST FRAME OF PIPE SPAWN
+        if(controller.isSpawningAnimation && (controller.pipeTimer > 2.4f)){
+            models.SetActive(false);
+        }else{
+            models.SetActive(GameManager.Instance.gameover || controller.dead || !(controller.hitInvincibilityCounter > 0 && controller.hitInvincibilityCounter * (controller.hitInvincibilityCounter <= 0.75f ? 5 : 2) % (blinkDuration * 2f) < blinkDuration));
+        }
+        
         //Model changing
         bool large = controller.state >= Enums.PowerupState.Mushroom;
 
@@ -424,6 +429,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
         }
 
         if (photonView.IsMine && deathTimer >= 3f){
+            controller.state = Enums.PowerupState.Small;//Accuracy: SET STATE TO SMALL BEFORE SPAWNING TO AVOID UNWANTED POWERUP ANIMATION
             photonView.RPC("PreRespawn", RpcTarget.All);
         }
             
@@ -500,6 +506,8 @@ public class PlayerAnimationController : MonoBehaviourPun {
         PipeManager pe = controller.pipeEntering;
         body.isKinematic = true;
         body.velocity = controller.pipeDirection;
+       // Debug.Log("DURATION"+controller.isSpawningAnimation);
+       // Debug.Log("CONDICAO"+( controller.pipeTimer));
 
         if (pipeTimer < pipeDuration / 2f && pipeTimer + Time.fixedDeltaTime >= pipeDuration / 2f) {
             Vector2 offset = controller.pipeDirection * (pipeDuration / 2f);

@@ -592,7 +592,7 @@ void HandleTornado() {   //ACCURACY: add tornado
                             //invalid flooring
                             continue;
                     }
-                    //ACCURACY: Avoid getting crushed by Spawn Pipe
+                    //ACCURACY: Avoid getting crushed by Spawn Pipe DEPRECATED!!!!
                     crushGround |= !go.CompareTag("platform") && !go.CompareTag("frozencube") && !go.CompareTag("pipeSpawn");
                     down++;
                     tilesStandingOn.Add(vec);
@@ -715,7 +715,11 @@ void HandleTornado() {   //ACCURACY: add tornado
 
                 if (above) {
                     //hit them from above
-                    bounce = !groundpound && !drill;
+                    bounce = !groundpound && !drill;//ACCURACY: BOUNCE MULTIPLE TIMES ON PLAYER
+                    if(bounce){
+                        photonView.RPC(nameof(PlaySound), RpcTarget.All, Enums.Sounds.Enemy_Generic_Stomp);
+                        SpawnParticle("Prefabs/Particle/PlayerBounce", body.transform.position);
+                    }
                     bool groundpounded = groundpound || drill;
                     if(knockback){
                         ResetKnockback();
@@ -1684,7 +1688,6 @@ void HandleTornado() {   //ACCURACY: add tornado
         }
 
         if (deathplane){
-            state = Enums.PowerupState.Small;//Accuracy: SET STATE TO SMALL BEFORE SPAWNING TO AVOID UNWANTED POWERUP ANIMATION
             spawned = false;
         }
         dead = true;
@@ -1803,7 +1806,8 @@ void HandleTornado() {   //ACCURACY: add tornado
                     pipeEntering = pipe;
                     pipeDirection = Vector2.up;
                     isSpawningAnimation = true;
-
+                    pipeTimer = 2.5f;
+                   // Debug.Log("SUPERIO "+pipeTimer);
                     break;
                 }
                     
@@ -1815,6 +1819,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             GameObject particle = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/Respawn"), body.position, Quaternion.identity);
             particle.GetComponent<RespawnParticle>().player = this;
         }
+
         gameObject.SetActive(false);
     }
 
@@ -1858,7 +1863,7 @@ void HandleTornado() {   //ACCURACY: add tornado
 
     [PunRPC]
     public void Respawn() {
-        if(GameManager.Instance.getUsesMidi() && GameManager.Instance.sequencePlayerMain.player.IsPaused){
+        if(GameManager.Instance.getUsesMidi() && photonView.IsMine && (GameManager.Instance.sequencePlayerMain.player.IsPaused || GameManager.Instance.sequencePlayerSecondary.player.IsPaused)){
             GameManager.Instance.sequencePlayerMain.player.Seek(0);
             GameManager.Instance.sequencePlayerSecondary.player.Seek(0);
             GameManager.Instance.sequencePlayerInvincible.player.Seek(0);
@@ -1952,7 +1957,9 @@ void HandleTornado() {   //ACCURACY: add tornado
         Renderer blinker = entryPipe.GetComponent<Renderer>();
         Color newColor = blinker.material.color;
         float pipedesTimer = 0.8f;
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(0.2f);
+        
+        yield return new WaitForSeconds(2.8f);
 
         while (pipedesTimer > 0) {
             pipedesTimer -= 0.02f;
@@ -1964,7 +1971,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             blinker.material.color = newColor;
         }
        
-        Destroy(entryPipe); //Destroys the EntryPipe object
+        Destroy(entryPipe); //ACCURACY: Destroys the EntryPipe object
     }
 
     //ACCURACY: Beta Lightning Thunder Background animation
@@ -2038,7 +2045,7 @@ void HandleTornado() {   //ACCURACY: add tornado
     private System.Collections.IEnumerator blockSquish()
     {
         yield return new WaitForSeconds(0.1f); 
-        if(SceneManager.GetActiveScene().buildIndex == 4 && (hitRoof && !(state == Enums.PowerupState.Mushroom) && !(state == Enums.PowerupState.MiniMushroom))){
+        if(Castle && (hitRoof && !(state == Enums.PowerupState.Mushroom) && !(state == Enums.PowerupState.MiniMushroom))){
             photonView.RPC(nameof(Powerdown), RpcTarget.All, true);
         }
         
@@ -3522,15 +3529,26 @@ void HandleTornado() {   //ACCURACY: add tornado
         //Ground
         if (onGround) {
             wallJumpFacingLock = false;
-            if (photonView.IsMine && hitRoof && crushGround && hitInvincibilityCounter <= 2.65 && body.velocity.y <= 0.1 && state != Enums.PowerupState.MegaMushroom) {
+            if (photonView.IsMine && hitRoof && crushGround && body.velocity.y <= 0.1 && state != Enums.PowerupState.MegaMushroom) {
                 //Crushed.
-                
-               Debug.Log("CRUSHADO");
+
+                hitInvincibilityCounter = 0f;
+                powerupCompleted = true;
+                befstate = Enums.PowerupState.Mushroom;//ACCURACY: SPAGHETTI WAY OF FIXING CRUSHING ON FORTRESS GETTING MESSED UP BY POWERUP ANIMATION.
+                afstate = state;
                 photonView.RPC(nameof(Powerdown), RpcTarget.All, true);
-               
-
-                 
-
+                
+               /* if(Castle){
+                    GameObject[] squishy = GameObject.FindGameObjectsWithTag("Squishy");
+                        foreach (GameObject obje in squishy) {
+                            if (obje.transform.position.y < 0.37f) {
+                                if (photonView.IsMine){
+                                    photonView.RPC(nameof(Death), RpcTarget.All, false, false);//ACCURACY: FORCE KILL IF COMPLETELY CRUSHED BY CEILING
+                                }
+                            }
+                        }
+                }*/
+               Debug.Log("CRUSHADO");
             }
 
             koyoteTime = 0;

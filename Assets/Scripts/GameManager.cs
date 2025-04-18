@@ -784,11 +784,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             text.GetComponent<Animator>().SetTrigger("startNegative");
         }
         //TOOD: make a results screen?
-
         yield return new WaitForSecondsRealtime(secondsUntilMenu);
         if (PhotonNetwork.IsMasterClient){
             PhotonNetwork.DestroyAll();
-            GlobalController.Instance.musicOrdering++;
         }
         if (isLocalGame){
             PhotonNetwork.LeaveRoom();
@@ -999,8 +997,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         //ACCURACY: Music alternating made like the original
         //it starts playing SNOW and alternates with OVERWORLD theme each game
+        Debug.Log("seq SOUNDADO: "+GlobalController.Instance.musicOrdering);
         var normalSongToPlay = sequencePlayerMain.player;
-        if (((GlobalController.Instance.musicOrdering % 2 != 0) && (!isE3Level)) || (isE3Level && betaCustomMusic))
+        if (((GlobalController.Instance.musicOrdering % 2 == 0) && (!isE3Level)) || (isE3Level && betaCustomMusic))
         {
             normalSongToPlay = sequencePlayerSecondary.player;
         }
@@ -1010,6 +1009,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             Enums.MusicState.Starman => sequencePlayerInvincible.player,
             _ => null
         };
+        
         if (songPlayer != null) songPlayer.Play();   
 
 
@@ -1071,7 +1071,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                 //ACCURACY: Music alternating made like the original
                 //it starts playing SNOW and alternates with OVERWORLD theme each game
                 var normalSongToPlay = mainMusic;
-                if (((GlobalController.Instance.musicOrdering % 2 != 0) && (!isE3Level)) || (isE3Level && betaCustomMusic))
+                if (((GlobalController.Instance.musicOrdering % 2 == 0) && (!isE3Level)) || (isE3Level && betaCustomMusic))
                 {
                     normalSongToPlay = secondaryMusic;
                 }
