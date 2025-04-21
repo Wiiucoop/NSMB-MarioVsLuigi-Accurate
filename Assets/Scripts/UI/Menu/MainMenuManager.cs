@@ -493,6 +493,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
 #if PLATFORM_WEBGL || PLATFORM_ANDROID
         fullscreenToggle.interactable = false;
+        timeEnabled.interactable = false;
 #else
         if (!GlobalController.Instance.checkedForVersion) {
             UpdateChecker.IsUpToDate((upToDate, latestVersion) => {
