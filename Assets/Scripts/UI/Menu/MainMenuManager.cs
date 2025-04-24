@@ -521,7 +521,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
             //version separation
             Match match = Regex.Match(Application.version, "^\\w*\\.\\w*\\.\\w*");
-            PhotonNetwork.NetworkingClient.AppVersion = match.Groups[0].Value + "-accurate2REMOVER" ;
+            PhotonNetwork.NetworkingClient.AppVersion = match.Groups[0].Value + "-superidol" ;
 
             string id = PlayerPrefs.GetString("id", null);
             string token = PlayerPrefs.GetString("token", null);
