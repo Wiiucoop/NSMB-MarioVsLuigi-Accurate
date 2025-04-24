@@ -3788,8 +3788,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "<color=purple>MOD created by</color>\nHD Erick (bestluigiplayerYT)\n\n<color=purple>Mod
-    Contributors</color>\nVic (3D models and UI changes)\nitsumi_mario (misc SFX
-    and tester)\nKingKittyTurnip (Level Creator)\nFoxyyy (Level Creator)\nBluCorDev
+    Contributors</color>\nVic (3D models, scripts and UI changes)\nitsumi_mario (misc
+    SFX and tester)\nKingKittyTurnip (Level Creator)\nFoxyyy (Level Creator)\nBluCorDev
     (Level Creator)\nFrostyCake (Level Creator)\nMiiBumm (New BlueShell model)\nMark19
     (Android support)\nAndrat & FD-Samu (Custom Music)\n\n<color=yellow>Base game
     by</color>\nipodtouch0218\n\n<color=yellow>Github Contributors</color>\nGradedWarrior\nTheMoogle\nSkillz\nSkarph\nZest\nkittenchilly\nAmy54Desu\nKraken\nShadowWalker13\nPerez\nmindnomad\n\n<color=yellow>Music</color>\nRENREN\n\n<color=yellow>QA
@@ -80561,7 +80561,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 19.6
+  m_fontSize: 19.65
   m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 1
