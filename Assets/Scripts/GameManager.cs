@@ -797,7 +797,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     private IEnumerator BigStarRespawn(bool wait = true) {
         if (wait)
-            yield return new WaitForSeconds(10.4f - playerCount / 5f);
+            yield return new WaitForSeconds(10f - playerCount / 5f);
 
         if (!PhotonNetwork.IsMasterClient || gameover)
             yield break;
