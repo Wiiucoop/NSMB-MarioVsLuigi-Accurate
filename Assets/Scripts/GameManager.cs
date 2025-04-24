@@ -820,7 +820,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                 }
             }
             }else{
-                foreach (var hit in Physics2D.OverlapCircleAll(spawnPos, 2)) {
+                foreach (var hit in Physics2D.OverlapCircleAll(spawnPos, 0)) {
                 if (hit.gameObject.CompareTag("Player")) {
                     //cant spawn here
                     remainingSpawns.RemoveAt(index);
