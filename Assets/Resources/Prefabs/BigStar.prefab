@@ -4880,7 +4880,7 @@ Transform:
   - {fileID: 7308630834410186342}
   - {fileID: 2942793993665947634}
   m_Father: {fileID: 0}
-  m_RootOrder: -2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1973747262660636110
 MonoBehaviour:
@@ -4897,9 +4897,9 @@ MonoBehaviour:
   pulseAmount: 0.15
   pulseSpeed: 16
   moveSpeed: 1.5
-  rotationSpeed: 6
-  bounceAmount: 7
-  deathBoostAmount: 8.5
+  rotationSpeed: 3
+  bounceAmount: 6
+  deathBoostAmount: 9.5
   blinkingSpeed: 0.25
   lifespan: 15
   body: {fileID: 0}

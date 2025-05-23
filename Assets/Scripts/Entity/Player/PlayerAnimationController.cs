@@ -101,18 +101,11 @@ public class PlayerAnimationController : MonoBehaviourPun {
                 }
                 
                 instant = true;
-            } else if (controller.dead) {
-                if (animator.GetBool("firedeath") && deathTimer > deathUpTime) {
-                    targetEuler = new Vector3(-15, controller.facingRight ? 110 : 250, 0);
-                } else {
-                    targetEuler = new Vector3(0, 180, 0);
-                }
-                instant = true;
-            } else if ((controller.state == Enums.PowerupState.BlueShell || controller.state == Enums.PowerupState.MegaMushroom) && !controller.inShell && controller.facingRight && !controller.crouching && !controller.onSpinner && !controller.sliding && !controller.flying) {
+            } else if ((controller.state == Enums.PowerupState.BlueShell) && !controller.inShell && controller.facingRight && !controller.crouching && !controller.onSpinner && !controller.sliding && !controller.flying) {
                 targetEuler = new Vector3(0, 90, 0);
                 instant = true;
             }
-            else if ((controller.state == Enums.PowerupState.BlueShell || controller.state == Enums.PowerupState.MegaMushroom) && !controller.inShell && !controller.facingRight && !controller.crouching && !controller.onSpinner && !controller.sliding && !controller.flying) {
+            else if ((controller.state == Enums.PowerupState.BlueShell) && !controller.inShell && !controller.facingRight && !controller.crouching && !controller.onSpinner && !controller.sliding && !controller.flying) {
                 targetEuler = new Vector3(0, -90, 0);
                 instant = true;
             }
@@ -149,6 +142,20 @@ public class PlayerAnimationController : MonoBehaviourPun {
             propellerVelocity = Mathf.Clamp(propellerVelocity + (1800 * ((controller.flying || controller.propeller || controller.usedPropellerThisJump) ? -1 : 1) * Time.deltaTime), -2500, -300);
             propeller.transform.Rotate(Vector3.forward, propellerVelocity * Time.deltaTime);
 
+            wasTurnaround = animator.GetCurrentAnimatorStateInfo(0).IsName("turnaround");
+        }
+
+        if (!controller.Frozen && (!GameManager.Instance.gameover || (GameManager.Instance.gameover && GameManager.Instance.winningPlayer != photonView.Owner)))
+        {
+            if (controller.dead)
+            {
+                if (animator.GetBool("firedeath") && deathTimer > deathUpTime)
+                    targetEuler = new Vector3(-15, controller.facingRight ? 110 : 250, 0);
+                else
+                    targetEuler = new Vector3(0, 180, 0);
+                instant = true;
+            }
+
             if (instant || wasTurnaround) {
                 models.transform.rotation = Quaternion.Euler(targetEuler);
             } else {
@@ -163,7 +170,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
             if (changeFacing)
                 controller.facingRight = models.transform.eulerAngles.y < 180;
 
-            wasTurnaround = animator.GetCurrentAnimatorStateInfo(0).IsName("turnaround");
+           
         }
 
         //Particles
@@ -388,7 +395,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
     public void ForcePowerupAnimation(){//ACCURACY: Manually force powerup grow/shrink animation to play
         animator.SetTrigger("SizeChange");
     }
-    void HandleDeathAnimation() {
+    public void HandleDeathAnimation() {
         if (!controller.dead) {
             deathTimer = 0;
             return;
@@ -414,7 +421,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
             body.velocity = new Vector2(0, Mathf.Max(-deathForce, body.velocity.y));
         }
         if (controller.photonView.IsMine && deathTimer + Time.fixedDeltaTime > (3 - 0.43f) && deathTimer < (3 - 0.43f)){
-            controller.fadeOut.FadeOutAndIn();//ACCURACY: Fade out in transition animation
+            if (!GameManager.Instance.gameover) controller.fadeOut.FadeOutAndIn();//ACCURACY: Fade out in transition animation
         }
 
         if(deathTimer + Time.fixedDeltaTime > (3 - 0.5f) && deathTimer < (3f)){//ACCURACY: FREEZE PLAYER IN AIR DURING DEATH TRANSITION
@@ -429,7 +436,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
             animator.speed = 1f;
         }
 
-        if (photonView.IsMine && deathTimer >= 3f){
+        if (photonView.IsMine && deathTimer >= 3f && !GameManager.Instance.gameover){
             photonView.RPC("PreRespawn", RpcTarget.All);
         }
             

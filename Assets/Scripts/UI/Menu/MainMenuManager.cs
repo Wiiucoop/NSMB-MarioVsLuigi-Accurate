@@ -521,7 +521,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
             //version separation
             Match match = Regex.Match(Application.version, "^\\w*\\.\\w*\\.\\w*");
-            PhotonNetwork.NetworkingClient.AppVersion = match.Groups[0].Value + "-superidol" ;
+            PhotonNetwork.NetworkingClient.AppVersion = match.Groups[0].Value + "-finalesplendido" ;
 
             string id = PlayerPrefs.GetString("id", null);
             string token = PlayerPrefs.GetString("token", null);
@@ -541,6 +541,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         masterSlider.value = Settings.Instance.VolumeMaster;
 
         //ACCURACY: REMOVE PLAYER SKINS
+        Settings.Instance.skin = 0;
         paletteDisabled.SetActive(true);
         palette.SetActive(false);
 
@@ -600,6 +601,10 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     public void EnterRoom() {
         Room room = PhotonNetwork.CurrentRoom;
         PlayerPrefs.SetString("in-room", null);
+        //ACCURACY: REMOVE PLAYER SKINS part2
+        Settings.Instance.skin = 0;
+        paletteDisabled.SetActive(true);
+        palette.SetActive(false);
         PlayerPrefs.Save();
 
         Utils.GetCustomProperty(Enums.NetRoomProperties.GameStarted, out bool started);

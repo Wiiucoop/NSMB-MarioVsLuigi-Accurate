@@ -412,10 +412,18 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             return;
         }
         if (GameManager.Instance.gameover) {
-            body.velocity = Vector2.zero;
-            animator.enabled = false;
-            body.isKinematic = true;
-            return;
+            var shouldFinishDeathAnim = dead && GameManager.Instance.winningPlayer != photonView.Owner;
+            animator.enabled = shouldFinishDeathAnim;
+            body.isKinematic = !shouldFinishDeathAnim;
+            if (shouldFinishDeathAnim)
+            {
+                //AnimationController.HandleDeathAnimation();
+            }
+            else
+            {
+                body.velocity = Vector2.zero;
+                return;
+            }
         }
 
         if (GameManager.Instance.paused) {//Accuracy: ONLINE PAUSING  , POSTPONED to another update!!!
@@ -1883,7 +1891,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         {//Particle plays if pipe entry is disabled
             Instantiate(Resources.Load("Prefabs/Particle/Puff"), transform.position, Quaternion.identity);
         }
-       // storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MiniMushroom");//REMOVER
+        //storedPowerup = (Powerup) Resources.Load("Scriptables/Powerups/MiniMushroom");//REMOVER
         gameObject.SetActive(true);
         dead = false;
         spawned = true;
@@ -2256,14 +2264,10 @@ void HandleTornado() {   //ACCURACY: add tornado
 
         
         invertRotation = false;
-
-        if (knockback || fireballKnockback)
-            starsToDrop = Mathf.Min(1, starsToDrop);
-
         knockback = true;
         fireballKnockback = fireball;
         initialKnockbackFacingRight = facingRight;
-        knockbackTimer = fireballKnockback ? 1f : 0.5f;//ACCURACY: LONGER KNOCKBACK DEPENDING ON HOW IT HAPPENS delay*
+        knockbackTimer = fireball ? 1f : 0.5f;//ACCURACY: LONGER KNOCKBACK DEPENDING ON HOW IT HAPPENS delay*
 
         PhotonView attacker = PhotonNetwork.GetPhotonView(attackerView);
         if (attackerView >= 0) {
@@ -2333,7 +2337,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         drill = false;
         body.gravityScale = normalGravity;
         wallSlideLeft = wallSlideRight = false;
-
+        Debug.Log("ZACARIAS");
         SpawnStars(starsToDrop, false);
         HandleLayerState();
     }
@@ -2352,16 +2356,12 @@ void HandleTornado() {   //ACCURACY: add tornado
             return;
         }
 
-        
-
-        if (knockback || bumpingKnockback)
-            starsToDrop = Mathf.Min(1, starsToDrop);
 
         knockback = true;
         bumpingKnockback = true;
         fireballKnockback = true;
         initialKnockbackFacingRight = facingRight;
-        knockbackTimer = fireballKnockback ? 1f : 0.5f;//ACCURACY: LONGER KNOCKBACK DEPENDING ON HOW IT HAPPENS delay*
+        knockbackTimer = 1f;//ACCURACY: LONGER KNOCKBACK on bumping
 
         PhotonView attacker = PhotonNetwork.GetPhotonView(attackerView);
         
@@ -2404,9 +2404,9 @@ void HandleTornado() {   //ACCURACY: add tornado
         HandleLayerState();
     }
 
-    public void ResetKnockbackFromAnim() {
+    public void ResetKnockbackFromAnim() {//ACCURACY: DEPRECATED
         if (photonView.IsMine){
-            photonView.RPC(nameof(ResetKnockback), RpcTarget.All);
+           //photonView.RPC(nameof(ResetKnockback), RpcTarget.All);
         }
             
     }
@@ -2522,7 +2522,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         }
     }
 
-    private void HandleSlopes() {//ACCURACY: REMOVER UNUSED CODE DEPRECATED
+    private void HandleSlopes() {
         if (!onGround) {
             floorAngle = 0;
             return;
@@ -2531,6 +2531,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         RaycastHit2D hit = Physics2D.BoxCast(body.position + (Vector2.up * 0.05f), new Vector2((MainHitbox.size.x - Physics2D.defaultContactOffset * 2f) * transform.lossyScale.x, 0.1f), 0, body.velocity.normalized, (body.velocity * Time.fixedDeltaTime).magnitude, Layers.MaskAnyGround);
         if (hit) {
             //hit ground
+           
             float angle = Vector2.SignedAngle(Vector2.up, hit.normal);
             if (Mathf.Abs(angle) > 89)
                 return;
@@ -2543,24 +2544,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             body.velocity = new Vector2(x, change);
             onGround = true;
             doGroundSnap = true;
-        } else if (onGround) {
-            hit = Physics2D.BoxCast(body.position + (Vector2.up * 0.05f), new Vector2((MainHitbox.size.x + Physics2D.defaultContactOffset * 3f) * transform.lossyScale.x, 0.1f), 0, Vector2.down, 0.3f, Layers.MaskAnyGround);
-            if (hit) {
-                float angle = Vector2.SignedAngle(Vector2.up, hit.normal);
-                if (Mathf.Abs(angle) > 89)
-                    return;
-
-                float x = floorAngle != angle ? previousFrameVelocity.x : body.velocity.x;
-                floorAngle = angle;
-
-                float change = Mathf.Sin(angle * Mathf.Deg2Rad) * x * 1.25f;
-                body.velocity = new Vector2(x, change);
-                onGround = true;
-                doGroundSnap = true;
-            } else {
-                floorAngle = 0;
-            }
-        }
+        } 
     }
 
     void HandleLayerState() {
@@ -2681,7 +2665,7 @@ void HandleTornado() {   //ACCURACY: add tornado
 
     bool ForceCrouchCheck() {
         //janky fortress ceilingn check, m8
-        if (state == Enums.PowerupState.BlueShell && onGround && SceneManager.GetActiveScene().buildIndex != 4)
+        if (onGround && !Castle)
             return false;
         if (state <= Enums.PowerupState.MiniMushroom)
             return false;
@@ -2937,7 +2921,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         }
 
         if (crouching)
-            height *= state <= Enums.PowerupState.Small ? 0.7f : 0.5f;
+            height *= state <= Enums.PowerupState.Small ? 0.8f : 0.7f;
 
         return new(MainHitbox.size.x, height);
     }
@@ -3116,7 +3100,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         Vector2 checkSize = WorldHitboxSize * new Vector2(1, 0.75f);
         Vector2 checkPos = transform.position + (Vector3) (Vector2.up * checkSize / 2f);
 
-        if (!Utils.IsAnyTileSolidBetweenWorldBox(checkPos, checkSize * 0.9f, false)) {
+        if (!Utils.IsAnyTileSolidBetweenWorldBox(checkPos, checkSize * 1.0285f, false)) {
             alreadyStuckInBlock = stuckInBlock = false;
             return false;
         }
@@ -3529,13 +3513,14 @@ void HandleTornado() {   //ACCURACY: add tornado
         //Ground
         if (onGround) {
             wallJumpFacingLock = false;
-            if (photonView.IsMine && hitRoof && crushGround && body.velocity.y <= 0.1 && state != Enums.PowerupState.MegaMushroom) {
+            if (!Snow && photonView.IsMine && hitRoof && crushGround && body.velocity.y <= 0.1 && state != Enums.PowerupState.MegaMushroom) {
                 //Crushed.
 
                 hitInvincibilityCounter = 0f;
                 powerupCompleted = true;
                 befstate = Enums.PowerupState.Mushroom;//ACCURACY: SPAGHETTI WAY OF FIXING CRUSHING ON FORTRESS GETTING MESSED UP BY POWERUP ANIMATION.
                 afstate = state;
+                //Debug.Log("DAHBUG");
                 photonView.RPC(nameof(Powerdown), RpcTarget.All, true);
                 
                /* if(Castle){
@@ -3548,7 +3533,7 @@ void HandleTornado() {   //ACCURACY: add tornado
                             }
                         }
                 }*/
-               Debug.Log("CRUSHADO");
+           //    Debug.Log("CRUSHADO");
             }
 
             koyoteTime = 0;
@@ -3580,7 +3565,7 @@ void HandleTornado() {   //ACCURACY: add tornado
         HandleTornado();//ACCURACY: TORNADO
         HandleWallslide(left, right, jump);
 
-    //    HandleSlopes();
+        HandleSlopes();
 
         if (crouch && !alreadyGroundpounded) {
             HandleGroundpoundStart(left, right);
@@ -3638,7 +3623,7 @@ void HandleTornado() {   //ACCURACY: add tornado
             photonView.RPC(nameof(EndMega), RpcTarget.All);
         }
 
-       // HandleSlopes();
+        HandleSlopes();
         HandleSliding(up, crouch, left, right);
         HandleFacingDirection();
 

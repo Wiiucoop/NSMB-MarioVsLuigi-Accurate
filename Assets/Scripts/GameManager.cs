@@ -80,6 +80,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public Enums.MusicState? musicState = null;
 
     public GameObject localPlayer, otherPlayer;
+
+    public Player winningPlayer;
     public bool paused, loaded, started;
     public GameObject pauseUI, pausePanel, pauseButton, hostExitUI, hostExitButton, mobileUI, LocalReserve, LocalTrack, LocalTrackIcons;
     public bool gameover = false, musicEnabled = false;
@@ -723,6 +725,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     private IEnumerator EndGame(Player winner) {
         string winnerName = "Mario";
+        
         if(winner != null){
             winnerName = winner.GetUniqueNickname();
         }
@@ -750,6 +753,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         text.GetComponent<Animator>().Play("wintext");
         text.GetComponent<TMP_Text>().colorGradientPreset = marioGradient;
         if(winner != null && !winner.IsLocal){//ACCURACY: SET LOSE TEXT IF YOU LOSE
+            winningPlayer = winner;
             if(players.Count <= 2){
                 text.GetComponent<TMP_Text>().text = $"{ winnerName } Loses!";
             }
@@ -797,7 +801,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
     private IEnumerator BigStarRespawn(bool wait = true) {
         if (wait)
-            yield return new WaitForSeconds(10.4f - playerCount / 5f);
+            yield return new WaitForSeconds(10f - playerCount / 5f);
 
         if (!PhotonNetwork.IsMasterClient || gameover)
             yield break;
@@ -820,7 +824,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                 }
             }
             }else{
-                foreach (var hit in Physics2D.OverlapCircleAll(spawnPos, 2)) {
+                foreach (var hit in Physics2D.OverlapCircleAll(spawnPos, 0)) {
                 if (hit.gameObject.CompareTag("Player")) {
                     //cant spawn here
                     remainingSpawns.RemoveAt(index);
