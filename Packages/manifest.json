@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.cziberpv.unity-bridge": "https://github.com/cziberpv/unity-bridge.git",
     "com.jimmycushnie.noisynodes": "https://github.com/JimmyCushnie/Noisy-Nodes.git",
     "com.unity.2d.animation": "9.0.1",
     "com.unity.2d.pixel-perfect": "5.0.3",

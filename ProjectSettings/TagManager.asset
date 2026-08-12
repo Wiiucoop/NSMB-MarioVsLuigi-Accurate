@@ -32,6 +32,10 @@ TagManager:
   - lava
   - MarioBrosPlatform
   - frozencube
+  - starttext
+  - pipeSpawn
+  - tornado
+  - Squishy
   layers:
   - Default
   - TransparentFX
@@ -49,10 +53,10 @@ TagManager:
   - PassthroughInvalid
   - IceBlock
   - LooseCoin
-  - 
-  - 
-  - 
-  - 
+  -
+  -
+  -
+  -
   - 
   - 
   - 

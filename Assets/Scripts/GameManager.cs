@@ -84,6 +84,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public Player winningPlayer;
     public bool paused, loaded, started;
     public GameObject pauseUI, pausePanel, pauseButton, hostExitUI, hostExitButton, mobileUI, LocalReserve, LocalTrack, LocalTrackIcons;
+    public GameObject cameraRigPlayer1, cameraRigPlayer2; //ACCURACY: LOCAL SPLIT-SCREEN camera rigs
+    public GameObject backgroundsOnline, backgroundsLocal; //ACCURACY: LOCAL SPLIT-SCREEN backgrounds
     public bool gameover = false, musicEnabled = false;
     public readonly HashSet<Player> loadedPlayers = new();
     public int starRequirement, timedGameDuration = -1, coinRequirement;
@@ -480,6 +482,18 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         PhotonNetwork.RaiseEvent((byte) Enums.NetEventIds.StartGame, null, options, SendOptions.SendReliable);
     }
 
+    //ACCURACY: LOCAL SPLIT-SCREEN. Activates player 2's camera rig and splits the two rigs top/bottom. Only ever called when isLocalGame.
+    private void SetupSplitScreenCameras() {
+        cameraRigPlayer2.SetActive(true);
+        SetRigViewport(cameraRigPlayer1, new Rect(0, 0.5f, 1, 0.5f)); //top half
+        SetRigViewport(cameraRigPlayer2, new Rect(0, 0f, 1, 0.5f)); //bottom half
+    }
+
+    private static void SetRigViewport(GameObject rig, Rect rect) {
+        foreach (Camera cam in rig.GetComponentsInChildren<Camera>(true))
+            cam.rect = rect;
+    }
+
     public void Awake() {
         Instance = this;
          //ACCURACY: ENABLE MIDI MUSIC PLAYBACK
@@ -487,8 +501,19 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             UsesMidi = MainMenuManager.Instance.timeEnabled.isOn;
         }
         
-        isLocalGame = SceneManager.GetActiveScene().buildIndex >= (10 + 2);
+        //ACCURACY: LOCAL SPLIT-SCREEN. isLocalGame is now set by whichever MainMenuManager function started this level
+        //(e.g. StartLocalGrass), not by scene build index, so any level (not just the dedicated Local* ones) can run local play.
+        isLocalGame = GlobalController.Instance.startingLocalGame;
+        GlobalController.Instance.startingLocalGame = false; //consume-once, so it doesn't leak into the next scene load
         enableBeta = SceneManager.GetActiveScene().buildIndex >= (12 + 2);
+
+        //ACCURACY: LOCAL SPLIT-SCREEN. Switch to a dedicated local-only background before BackgroundLoop.Start() (which
+        //looks up the active "Backgrounds"-tagged object) runs - all Awake()s finish before any Start() does.
+        if (backgroundsLocal) {
+            backgroundsOnline.SetActive(!isLocalGame);
+            backgroundsLocal.SetActive(isLocalGame);
+        }
+
         bg = GameObject.FindGameObjectWithTag("Backgrounds");
     }
 
@@ -500,9 +525,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         startText = GameObject.FindWithTag("starttext");//ACCURACY: MARIO/LUIGI START
         if(isLocalGame){
             Settings.Instance.fourByThreeRatio = false;
-                   
-            blackLoadBG.SetActive(true);   
+
+            blackLoadBG.SetActive(true);
             LoadLocalLogic();
+            SetupSplitScreenCameras();
         }
 
         

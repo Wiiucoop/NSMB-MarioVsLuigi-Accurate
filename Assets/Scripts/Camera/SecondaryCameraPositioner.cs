@@ -14,7 +14,8 @@ public class SecondaryCameraPositioner : MonoBehaviour {
                 destroyed = true;
                 return;
             }
-            bool right = Camera.main.transform.position.x > GameManager.Instance.GetLevelMiddleX();
+            //ACCURACY: LOCAL SPLIT-SCREEN. Use our own rig's tracking camera instead of the shared Camera.main.
+            bool right = transform.parent.position.x > GameManager.Instance.GetLevelMiddleX();
             transform.localPosition = new Vector3(GameManager.Instance.levelWidthTile * (right ? -1 : 1), 0, 0);
         }
     }

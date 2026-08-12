@@ -33,11 +33,8 @@ public class HorizontalCamera : MonoBehaviour {
     }
 
     private void AdjustCamera() {
-        float aspect = ourCamera.aspect;
+        //ACCURACY: Keep vertical FOV constant regardless of aspect ratio - horizontal FOV is left to vary naturally with the screen/window shape.
         double size = orthoSize + OFFSET;
-        // double size = orthographicSize;
-        // Credit: https://forum.unity.com/threads/how-to-calculate-horizontal-field-of-view.16114/#post-2961964
-        double aspectReciprocals = 1d / aspect;
-        ourCamera.orthographicSize = Mathf.Min((float) size, (float) (size * (16d/9d) * aspectReciprocals));
+        ourCamera.orthographicSize = (float) size;
     }
 }

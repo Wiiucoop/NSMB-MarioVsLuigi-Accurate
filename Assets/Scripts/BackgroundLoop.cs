@@ -50,6 +50,10 @@ public class BackgroundLoop : MonoBehaviour {
 
     #region Public Methods
     public void Reposition() {
+        //ACCURACY: LOCAL SPLIT-SCREEN. Per-rig background scrolling isn't correct yet (each camera would need its own background set), so just freeze it in local mode for now.
+        if (GameManager.Instance && GameManager.Instance.isLocalGame)
+            return;
+
         for (int i = 0; i < children.Length; i++) {
             GameObject obj = children[i];
             float difference = transform.position.x - lastPosition.x + (obj.transform.position.x - positionsAfterPixelSnap[i].x);

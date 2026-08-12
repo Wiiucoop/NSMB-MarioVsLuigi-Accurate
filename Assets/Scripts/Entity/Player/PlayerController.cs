@@ -319,6 +319,16 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         hitboxes = GetComponents<BoxCollider2D>();
         trackIcon = UIUpdater.Instance.CreatePlayerIcon(this);
         transform.position = body.position = GameManager.Instance.spawnpoint;
+
+        //ACCURACY: LOCAL SPLIT-SCREEN. Rebind each local player to their own camera rig instead of the shared Camera.main.
+        //isLocalGame must be checked first: "PlayerLuigi(Clone)" is also a valid name in online play.
+        if (isLocalGame) {
+            GameObject rig = gameObject.name.Equals("PlayerLuigi(Clone)")
+                ? GameManager.Instance.cameraRigPlayer2
+                : GameManager.Instance.cameraRigPlayer1;
+            cameraController.SetTargetCamera(rig.GetComponent<Camera>());
+        }
+
         cameraController.Recenter();
         Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnimsToggle); //ACCURACY: ENABLE E3 BETA ANIMATIONS
         betaAnims = betaAnimsToggle;
@@ -1835,7 +1845,7 @@ void HandleTornado() {   //ACCURACY: add tornado
     {
         float elapsedTime = 0f;
         float finalZoomSize = HorizontalCamera.getZoom();
-        float finalLocalZoomSize = finalZoomSize+1f;
+        float finalLocalZoomSize = finalZoomSize;
         float finaltime = 1f;
 
         if(isLocalGame){

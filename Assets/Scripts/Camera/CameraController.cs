@@ -16,14 +16,21 @@ public class CameraController : MonoBehaviour {
     private PlayerController controller;
     private Vector3 smoothDampVel, playerPos;
     public Camera targetCamera;
+    private BackgroundLoop backgroundLoop;
     private float startingZ, lastFloor;
 
     public void Awake() {
         //only control the camera if we're the local player.
-        targetCamera = Camera.main;
-        startingZ = targetCamera.transform.position.z;
         controller = GetComponent<PlayerController>();
+        SetTargetCamera(Camera.main);
+    }
+
+    //ACCURACY: LOCAL SPLIT-SCREEN. Lets a player be rebound to their own camera rig instead of the shared Camera.main.
+    public void SetTargetCamera(Camera newCamera) {
+        targetCamera = newCamera;
+        startingZ = targetCamera.transform.position.z;
         targetCamera.GetComponentsInChildren(secondaryPositioners);
+        backgroundLoop = targetCamera.GetComponent<BackgroundLoop>();
     }
 
     public void LateUpdate() {
@@ -35,8 +42,8 @@ public class CameraController : MonoBehaviour {
                 shakeOffset = new Vector3((Random.value - 0.5f) * ScreenShake, (Random.value - 0.5f) * ScreenShake);
 
             targetCamera.transform.position = currentPosition + shakeOffset;
-            if (BackgroundLoop.Instance)
-                BackgroundLoop.Instance.Reposition();
+            if (backgroundLoop)
+                backgroundLoop.Reposition();
 
             secondaryPositioners.RemoveAll(scp => scp == null);
             secondaryPositioners.ForEach(scp => scp.UpdatePosition());
@@ -81,8 +88,8 @@ public class CameraController : MonoBehaviour {
             currentPosition.x += (right ? -1 : 1) * GameManager.Instance.levelWidthTile / 2f;
             xDifference = Vector2.Distance(Vector2.right * currentPosition.x, Vector2.right * playerPos.x);
             right = currentPosition.x > playerPos.x;
-            if (IsControllingCamera)
-                BackgroundLoop.Instance.wrap = true;
+            if (IsControllingCamera && backgroundLoop)
+                backgroundLoop.wrap = true;
         }
 
         if (xDifference > 0.25f)

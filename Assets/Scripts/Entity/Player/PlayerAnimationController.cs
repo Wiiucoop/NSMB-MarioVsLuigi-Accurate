@@ -199,7 +199,8 @@ public class PlayerAnimationController : MonoBehaviourPun {
             }
         }
 
-        if (controller.cameraController.IsControllingCamera)
+        //ACCURACY: LOCAL SPLIT-SCREEN. Skip in local play so the (still-shared/static) zoom-out offset can't leak between the two viewports.
+        if (controller.cameraController.IsControllingCamera && !GameManager.Instance.isLocalGame)
             HorizontalCamera.OFFSET_TARGET = (controller.flying || controller.propeller) ? 0.5f : 0f;
 
         if (controller.crouching || controller.sliding || controller.skidding) {
@@ -473,7 +474,10 @@ public class PlayerAnimationController : MonoBehaviourPun {
         PipeManager pe = controller.pipeEntering;
 
         if(!isTransitioning && !pe.isRed){
-            controller.fadeOut.PipeFadeOutAndIn();//ACCURACY: Pipe Fade out in transition animation
+            if (!GameManager.Instance.isLocalGame)
+            {
+                controller.fadeOut.PipeFadeOutAndIn();//ACCURACY: Pipe Fade out in transition animation
+            }
             isTransitioning = true;
         }
 

@@ -426,7 +426,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
             OpenErrorBox(GlobalController.Instance.disconnectCause.Value);
             GlobalController.Instance.disconnectCause = null;
         }
-
+        HorizontalCamera.setZoom(3f);
         Camera.main.transform.position = levelCameraPositions[0].transform.position;
         levelDropdown.AddOptions(maps);
         if(powerupsEnabled.isOn){//ACCURACY: E3 BETA EXPERIENCE MAP DISPLAY ON LOBBY
@@ -883,30 +883,55 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void StartLocalGrass() {
-        
+
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
+        GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN
 
-       SceneManager.LoadSceneAsync(10 + 2, LoadSceneMode.Single);
+       SceneManager.LoadSceneAsync(2, LoadSceneMode.Single);
 
     }
 
     public void StartLocalBricks() {
-        
+
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
+        GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN
 
 
-       SceneManager.LoadSceneAsync(11 + 2, LoadSceneMode.Single);
+       SceneManager.LoadSceneAsync(3, LoadSceneMode.Single);
     }
 
-    public void StartLocalBeta() {
-        
+
+
+    public void StartLocalSnow() {
+
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
+        GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN
 
 
-       SceneManager.LoadSceneAsync(12 + 2, LoadSceneMode.Single);
+       SceneManager.LoadSceneAsync(6, LoadSceneMode.Single);
+    }
+
+    public void StartLocalPipes() {
+
+        PhotonNetwork.Disconnect();
+        PhotonNetwork.OfflineMode = true;
+        GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN
+
+
+       SceneManager.LoadSceneAsync(5, LoadSceneMode.Single);
+    }
+
+    public void StartLocalFort() {
+
+        PhotonNetwork.Disconnect();
+        PhotonNetwork.OfflineMode = true;
+        GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN
+
+
+       SceneManager.LoadSceneAsync(4, LoadSceneMode.Single);
     }
 
     public void ChangeNewPowerups(bool value) {//ACCURACY: ChangeNewPowerups IS THE E3 BETA EXPERIENCE TOGGLE 

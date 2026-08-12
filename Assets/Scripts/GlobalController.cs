@@ -25,6 +25,10 @@ public class GlobalController : Singleton<GlobalController>, IInRoomCallbacks, I
 
     private bool isLocalGame = false;
     public bool joinedAsSpectator = false, checkedForVersion = false;
+
+    //ACCURACY: LOCAL SPLIT-SCREEN. Set by MainMenuManager's local-play start functions (e.g. StartLocalGrass) right before
+    //loading a level, and consumed once by GameManager.Awake() in the loaded scene instead of a buildIndex check.
+    public bool startingLocalGame = false;
     public DisconnectCause? disconnectCause = null;
 
     int targetHeight = 224;
