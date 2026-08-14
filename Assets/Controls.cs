@@ -799,6 +799,169 @@ public partial class @Controls : IInputActionCollection2, IDisposable
             ]
         },
         {
+            ""name"": ""LocalPlayer1Gamepad"",
+            ""id"": ""a1b2c3d4-1111-4a1a-9111-111111111101"",
+            ""actions"": [
+                {
+                    ""name"": ""Movement"",
+                    ""type"": ""Value"",
+                    ""id"": ""a1b2c3d4-1111-4a1a-9111-111111111102"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": ""StickDeadzone"",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Jump"",
+                    ""type"": ""Button"",
+                    ""id"": ""a1b2c3d4-1111-4a1a-9111-111111111103"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Sprint"",
+                    ""type"": ""Value"",
+                    ""id"": ""a1b2c3d4-1111-4a1a-9111-111111111104"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Powerup Action"",
+                    ""type"": ""Button"",
+                    ""id"": ""a1b2c3d4-1111-4a1a-9111-111111111105"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Reserve Item"",
+                    ""type"": ""Button"",
+                    ""id"": ""a1b2c3d4-1111-4a1a-9111-111111111106"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""a1b2c3d4-2222-4a1a-9222-111111111201"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a1b2c3d4-2222-4a1a-9222-111111111202"",
+                    ""path"": ""<Gamepad>/dpad"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a1b2c3d4-2222-4a1a-9222-111111111203"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a1b2c3d4-2222-4a1a-9222-111111111204"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a1b2c3d4-2222-4a1a-9222-111111111205"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Powerup Action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a1b2c3d4-2222-4a1a-9222-111111111206"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Powerup Action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a1b2c3d4-2222-4a1a-9222-111111111207"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Reserve Item"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a1b2c3d4-2222-4a1a-9222-111111111208"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Reserve Item"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a1b2c3d4-2222-4a1a-9222-111111111209"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a1b2c3d4-2222-4a1a-9222-111111111210"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
             ""name"": ""UI"",
             ""id"": ""407e7f51-380f-4302-9bff-60ad8404c389"",
             ""actions"": [
@@ -1543,6 +1706,13 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         m_LocalPlayer2_Sprint = m_LocalPlayer2.FindAction("Sprint", throwIfNotFound: true);
         m_LocalPlayer2_PowerupAction = m_LocalPlayer2.FindAction("Powerup Action", throwIfNotFound: true);
         m_LocalPlayer2_ReserveItem = m_LocalPlayer2.FindAction("Reserve Item", throwIfNotFound: true);
+        // LocalPlayer1Gamepad
+        m_LocalPlayer1Gamepad = asset.FindActionMap("LocalPlayer1Gamepad", throwIfNotFound: true);
+        m_LocalPlayer1Gamepad_Movement = m_LocalPlayer1Gamepad.FindAction("Movement", throwIfNotFound: true);
+        m_LocalPlayer1Gamepad_Jump = m_LocalPlayer1Gamepad.FindAction("Jump", throwIfNotFound: true);
+        m_LocalPlayer1Gamepad_Sprint = m_LocalPlayer1Gamepad.FindAction("Sprint", throwIfNotFound: true);
+        m_LocalPlayer1Gamepad_PowerupAction = m_LocalPlayer1Gamepad.FindAction("Powerup Action", throwIfNotFound: true);
+        m_LocalPlayer1Gamepad_ReserveItem = m_LocalPlayer1Gamepad.FindAction("Reserve Item", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1808,6 +1978,71 @@ public partial class @Controls : IInputActionCollection2, IDisposable
     }
     public LocalPlayer2Actions @LocalPlayer2 => new LocalPlayer2Actions(this);
 
+    // LocalPlayer1Gamepad
+    private readonly InputActionMap m_LocalPlayer1Gamepad;
+    private ILocalPlayer1GamepadActions m_LocalPlayer1GamepadActionsCallbackInterface;
+    private readonly InputAction m_LocalPlayer1Gamepad_Movement;
+    private readonly InputAction m_LocalPlayer1Gamepad_Jump;
+    private readonly InputAction m_LocalPlayer1Gamepad_Sprint;
+    private readonly InputAction m_LocalPlayer1Gamepad_PowerupAction;
+    private readonly InputAction m_LocalPlayer1Gamepad_ReserveItem;
+    public struct LocalPlayer1GamepadActions
+    {
+        private @Controls m_Wrapper;
+        public LocalPlayer1GamepadActions(@Controls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Movement => m_Wrapper.m_LocalPlayer1Gamepad_Movement;
+        public InputAction @Jump => m_Wrapper.m_LocalPlayer1Gamepad_Jump;
+        public InputAction @Sprint => m_Wrapper.m_LocalPlayer1Gamepad_Sprint;
+        public InputAction @PowerupAction => m_Wrapper.m_LocalPlayer1Gamepad_PowerupAction;
+        public InputAction @ReserveItem => m_Wrapper.m_LocalPlayer1Gamepad_ReserveItem;
+        public InputActionMap Get() { return m_Wrapper.m_LocalPlayer1Gamepad; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(LocalPlayer1GamepadActions set) { return set.Get(); }
+        public void SetCallbacks(ILocalPlayer1GamepadActions instance)
+        {
+            if (m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface != null)
+            {
+                @Movement.started -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnMovement;
+                @Movement.performed -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnMovement;
+                @Movement.canceled -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnMovement;
+                @Jump.started -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnJump;
+                @Jump.performed -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnJump;
+                @Jump.canceled -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnJump;
+                @Sprint.started -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnSprint;
+                @Sprint.performed -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnSprint;
+                @Sprint.canceled -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnSprint;
+                @PowerupAction.started -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnPowerupAction;
+                @PowerupAction.performed -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnPowerupAction;
+                @PowerupAction.canceled -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnPowerupAction;
+                @ReserveItem.started -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnReserveItem;
+                @ReserveItem.performed -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnReserveItem;
+                @ReserveItem.canceled -= m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface.OnReserveItem;
+            }
+            m_Wrapper.m_LocalPlayer1GamepadActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @Movement.started += instance.OnMovement;
+                @Movement.performed += instance.OnMovement;
+                @Movement.canceled += instance.OnMovement;
+                @Jump.started += instance.OnJump;
+                @Jump.performed += instance.OnJump;
+                @Jump.canceled += instance.OnJump;
+                @Sprint.started += instance.OnSprint;
+                @Sprint.performed += instance.OnSprint;
+                @Sprint.canceled += instance.OnSprint;
+                @PowerupAction.started += instance.OnPowerupAction;
+                @PowerupAction.performed += instance.OnPowerupAction;
+                @PowerupAction.canceled += instance.OnPowerupAction;
+                @ReserveItem.started += instance.OnReserveItem;
+                @ReserveItem.performed += instance.OnReserveItem;
+                @ReserveItem.canceled += instance.OnReserveItem;
+            }
+        }
+    }
+    public LocalPlayer1GamepadActions @LocalPlayer1Gamepad => new LocalPlayer1GamepadActions(this);
+
     // UI
     private readonly InputActionMap m_UI;
     private IUIActions m_UIActionsCallbackInterface;
@@ -1963,6 +2198,14 @@ public partial class @Controls : IInputActionCollection2, IDisposable
         void OnReserveItem(InputAction.CallbackContext context);
     }
     public interface ILocalPlayer2Actions
+    {
+        void OnMovement(InputAction.CallbackContext context);
+        void OnJump(InputAction.CallbackContext context);
+        void OnSprint(InputAction.CallbackContext context);
+        void OnPowerupAction(InputAction.CallbackContext context);
+        void OnReserveItem(InputAction.CallbackContext context);
+    }
+    public interface ILocalPlayer1GamepadActions
     {
         void OnMovement(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);

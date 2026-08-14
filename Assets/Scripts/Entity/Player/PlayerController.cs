@@ -30,6 +30,10 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
 
     public static bool isLocalGame = false;
 
+    //ACCURACY: LOCAL SPLIT-SCREEN CONTROLLER AUTO-ASSIGNMENT. Cached at Awake so OnDestroy unsubscribes exactly what was
+    //subscribed, even if a controller gets connected/disconnected mid-match.
+    private bool hasLocalGamepadMario, hasLocalSecondGamepadLuigi;
+
     // == MONOBEHAVIOURS ==
 
     public bool betaAnims = false;
@@ -290,6 +294,23 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             InputSystem.controls.Player.PowerupAction.performed += OnPowerupAction;
             InputSystem.controls.Player.ReserveItem.performed += OnReserveItem;
         }else if(isLocalGame && gameObject.name.Equals("PlayerMario(Clone)")){
+            //ACCURACY: LOCAL SPLIT-SCREEN CONTROLLER AUTO-ASSIGNMENT. Mario is driven by the first connected controller, if any.
+            //If none is connected, Mario simply has no input source for now (known gap, not handled here).
+            var gamepads = Gamepad.all;
+            hasLocalGamepadMario = gamepads.Count >= 1;
+            if (hasLocalGamepadMario) {
+                InputSystem.controls.LocalPlayer1Gamepad.Get().devices = new InputDevice[] { gamepads[0] };
+                InputSystem.controls.LocalPlayer1Gamepad.Movement.performed += OnMovement;
+                InputSystem.controls.LocalPlayer1Gamepad.Movement.canceled += OnMovement;
+                InputSystem.controls.LocalPlayer1Gamepad.Jump.performed += OnJump;
+                InputSystem.controls.LocalPlayer1Gamepad.Sprint.started += OnSprint;
+                InputSystem.controls.LocalPlayer1Gamepad.Sprint.canceled += OnSprint;
+                InputSystem.controls.LocalPlayer1Gamepad.PowerupAction.performed += OnPowerupAction;
+                InputSystem.controls.LocalPlayer1Gamepad.ReserveItem.performed += OnReserveItem;
+            }
+        }else if(isLocalGame){
+            //ACCURACY: LOCAL SPLIT-SCREEN CONTROLLER AUTO-ASSIGNMENT. Luigi is always driven by the keyboard, plus a second
+            //controller if one is connected (no need to disconnect anything, both sources work at once).
             InputSystem.controls.LocalPlayer1.Movement.performed += OnMovement;
             InputSystem.controls.LocalPlayer1.Movement.canceled += OnMovement;
             InputSystem.controls.LocalPlayer1.Jump.performed += OnJump;
@@ -297,14 +318,19 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             InputSystem.controls.LocalPlayer1.Sprint.canceled += OnSprint;
             InputSystem.controls.LocalPlayer1.PowerupAction.performed += OnPowerupAction;
             InputSystem.controls.LocalPlayer1.ReserveItem.performed += OnReserveItem;
-        }else if(isLocalGame){
-            InputSystem.controls.LocalPlayer2.Movement.performed += OnMovement;
-            InputSystem.controls.LocalPlayer2.Movement.canceled += OnMovement;
-            InputSystem.controls.LocalPlayer2.Jump.performed += OnJump;
-            InputSystem.controls.LocalPlayer2.Sprint.started += OnSprint;
-            InputSystem.controls.LocalPlayer2.Sprint.canceled += OnSprint;
-            InputSystem.controls.LocalPlayer2.PowerupAction.performed += OnPowerupAction;
-            InputSystem.controls.LocalPlayer2.ReserveItem.performed += OnReserveItem;
+
+            var gamepads = Gamepad.all;
+            hasLocalSecondGamepadLuigi = gamepads.Count >= 2;
+            if (hasLocalSecondGamepadLuigi) {
+                InputSystem.controls.LocalPlayer2.Get().devices = new InputDevice[] { gamepads[1] };
+                InputSystem.controls.LocalPlayer2.Movement.performed += OnMovement;
+                InputSystem.controls.LocalPlayer2.Movement.canceled += OnMovement;
+                InputSystem.controls.LocalPlayer2.Jump.performed += OnJump;
+                InputSystem.controls.LocalPlayer2.Sprint.started += OnSprint;
+                InputSystem.controls.LocalPlayer2.Sprint.canceled += OnSprint;
+                InputSystem.controls.LocalPlayer2.PowerupAction.performed += OnPowerupAction;
+                InputSystem.controls.LocalPlayer2.ReserveItem.performed += OnReserveItem;
+            }
         }
 
         GameManager.Instance.players.Add(this);
@@ -350,6 +376,16 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             InputSystem.controls.Player.ReserveItem.performed -= OnReserveItem;
         }else if(isLocalGame && gameObject.name.Equals("PlayerMario(Clone)")){
             HorizontalCamera.setZoom(HorizontalCamera.getZoom()-1f);//ACCURACY: FIX CAMERA ZOOM FOR LOCALMODE
+            if (hasLocalGamepadMario) {
+                InputSystem.controls.LocalPlayer1Gamepad.Movement.performed -= OnMovement;
+                InputSystem.controls.LocalPlayer1Gamepad.Movement.canceled -= OnMovement;
+                InputSystem.controls.LocalPlayer1Gamepad.Jump.performed -= OnJump;
+                InputSystem.controls.LocalPlayer1Gamepad.Sprint.started -= OnSprint;
+                InputSystem.controls.LocalPlayer1Gamepad.Sprint.canceled -= OnSprint;
+                InputSystem.controls.LocalPlayer1Gamepad.PowerupAction.performed -= OnPowerupAction;
+                InputSystem.controls.LocalPlayer1Gamepad.ReserveItem.performed -= OnReserveItem;
+            }
+        }else if(isLocalGame){
             InputSystem.controls.LocalPlayer1.Movement.performed -= OnMovement;
             InputSystem.controls.LocalPlayer1.Movement.canceled -= OnMovement;
             InputSystem.controls.LocalPlayer1.Jump.performed -= OnJump;
@@ -357,14 +393,16 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
             InputSystem.controls.LocalPlayer1.Sprint.canceled -= OnSprint;
             InputSystem.controls.LocalPlayer1.PowerupAction.performed -= OnPowerupAction;
             InputSystem.controls.LocalPlayer1.ReserveItem.performed -= OnReserveItem;
-        }else if(isLocalGame){
-            InputSystem.controls.LocalPlayer2.Movement.performed -= OnMovement;
-            InputSystem.controls.LocalPlayer2.Movement.canceled -= OnMovement;
-            InputSystem.controls.LocalPlayer2.Jump.performed -= OnJump;
-            InputSystem.controls.LocalPlayer2.Sprint.started -= OnSprint;
-            InputSystem.controls.LocalPlayer2.Sprint.canceled -= OnSprint;
-            InputSystem.controls.LocalPlayer2.PowerupAction.performed -= OnPowerupAction;
-            InputSystem.controls.LocalPlayer2.ReserveItem.performed -= OnReserveItem;
+
+            if (hasLocalSecondGamepadLuigi) {
+                InputSystem.controls.LocalPlayer2.Movement.performed -= OnMovement;
+                InputSystem.controls.LocalPlayer2.Movement.canceled -= OnMovement;
+                InputSystem.controls.LocalPlayer2.Jump.performed -= OnJump;
+                InputSystem.controls.LocalPlayer2.Sprint.started -= OnSprint;
+                InputSystem.controls.LocalPlayer2.Sprint.canceled -= OnSprint;
+                InputSystem.controls.LocalPlayer2.PowerupAction.performed -= OnPowerupAction;
+                InputSystem.controls.LocalPlayer2.ReserveItem.performed -= OnReserveItem;
+            }
         }
     }
 
