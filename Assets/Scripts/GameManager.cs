@@ -85,7 +85,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public bool paused, loaded, started;
     public GameObject pauseUI, pausePanel, pauseButton, hostExitUI, hostExitButton, mobileUI, LocalReserve, LocalTrack, LocalTrackIcons;
     public GameObject cameraRigPlayer1, cameraRigPlayer2; //ACCURACY: LOCAL SPLIT-SCREEN camera rigs
-    public GameObject backgroundsOnline, backgroundsLocal; //ACCURACY: LOCAL SPLIT-SCREEN backgrounds
+    public GameObject backgroundsOnline, backgroundsLocal, backgroundsLocalP2; //ACCURACY: LOCAL SPLIT-SCREEN backgrounds
     public bool gameover = false, musicEnabled = false;
     public readonly HashSet<Player> loadedPlayers = new();
     public int starRequirement, timedGameDuration = -1, coinRequirement;
@@ -218,7 +218,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
             setPiranaplantCanspawn(true);
             //ACCURACY: Change enemy spawns in a 1v1 match PART 2
-            if(players.Count > 2 || isLocalGame){
+            if(players.Count > 2 ){
                 foreach (EnemySpawnpoint point in enemySpawnpoints)
                 point.AttemptSpawning();
             }
@@ -505,13 +505,15 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         //(e.g. StartLocalGrass), not by scene build index, so any level (not just the dedicated Local* ones) can run local play.
         isLocalGame = GlobalController.Instance.startingLocalGame;
         GlobalController.Instance.startingLocalGame = false; //consume-once, so it doesn't leak into the next scene load
-        enableBeta = SceneManager.GetActiveScene().buildIndex >= (12 + 2);
+        enableBeta = !isLocalGame && SceneManager.GetActiveScene().buildIndex >= (12 + 2); //ACCURACY: LOCAL SPLIT-SCREEN. Beta moveset/animations/sfx are a distinct feature from local play - never enable them locally, regardless of which level.
 
         //ACCURACY: LOCAL SPLIT-SCREEN. Switch to a dedicated local-only background before BackgroundLoop.Start() (which
         //looks up the active "Backgrounds"-tagged object) runs - all Awake()s finish before any Start() does.
         if (backgroundsLocal) {
             backgroundsOnline.SetActive(!isLocalGame);
             backgroundsLocal.SetActive(isLocalGame);
+            if (backgroundsLocalP2)
+                backgroundsLocalP2.SetActive(isLocalGame);
         }
 
         bg = GameObject.FindGameObjectWithTag("Backgrounds");
@@ -909,7 +911,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             HandleMusic();
 
         //ACCURACY: Change enemy spawns in a 1v1 match  PART 1
-        if(players.Count <= 2 && !isLocalGame){
+        if(players.Count <= 2 ){
             foreach (EnemySpawnpoint point in enemySpawnpoints)
             point.AttemptSpawning1v1();
         }

@@ -5,6 +5,11 @@ public class BackgroundLoop : MonoBehaviour {
 
     public static BackgroundLoop Instance { get; private set; }
 
+    //ACCURACY: LOCAL SPLIT-SCREEN. Explicit per-rig background set. Left unassigned, falls back to the old tag lookup
+    //(unchanged behavior for the shared/online rig); assigned explicitly for player 2's rig so each camera loops its
+    //own independent copy instead of fighting over one shared "Backgrounds" object.
+    [SerializeField] private Transform backgroundsRoot;
+
     private GameObject[] children;
     private Vector3[] truePositions, positionsAfterPixelSnap;
     private float[] ppus, halfWidths;
@@ -19,7 +24,7 @@ public class BackgroundLoop : MonoBehaviour {
     public void Start() {
         Instance = this;
 
-        Transform t = GameObject.FindGameObjectWithTag("Backgrounds").transform;
+        Transform t = backgroundsRoot ? backgroundsRoot : GameObject.FindGameObjectWithTag("Backgrounds").transform;
 
         children = new GameObject[t.childCount];
         ppus = new float[t.childCount];
@@ -50,10 +55,6 @@ public class BackgroundLoop : MonoBehaviour {
 
     #region Public Methods
     public void Reposition() {
-        //ACCURACY: LOCAL SPLIT-SCREEN. Per-rig background scrolling isn't correct yet (each camera would need its own background set), so just freeze it in local mode for now.
-        if (GameManager.Instance && GameManager.Instance.isLocalGame)
-            return;
-
         for (int i = 0; i < children.Length; i++) {
             GameObject obj = children[i];
             float difference = transform.position.x - lastPosition.x + (obj.transform.position.x - positionsAfterPixelSnap[i].x);
