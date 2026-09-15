@@ -422,7 +422,10 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         GlobalController.Instance.joinedAsSpectator = false;
         Time.timeScale = 1;
 
-        if (GlobalController.Instance.disconnectCause != null) {
+
+
+
+        if (!(GlobalController.Instance.disconnectCause.ToString().Equals("None") || GlobalController.Instance.disconnectCause == null || GlobalController.Instance.disconnectCause.ToString().Equals("DisconnectByClientLogic") || GlobalController.Instance.disconnectCause.ToString().Equals("CustomAuthenticationFailed"))) {//ACCURACY: FIX LOCALPLAY DISCONNECT ERROR BOX
             OpenErrorBox(GlobalController.Instance.disconnectCause.Value);
             GlobalController.Instance.disconnectCause = null;
         }
@@ -663,7 +666,10 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
         creditsMenu.SetActive(false);
         privatePrompt.SetActive(false);
 
-        EventSystem.current.SetSelectedGameObject(mainMenuSelected);
+        //ACCURACY: select the title screen itself (not mainMenuSelected, which belongs to the next screen and is
+        //inactive here) so its EventTrigger's Submit entry has a valid target - otherwise gamepad/keyboard confirm
+        //presses have nothing to route to and only a mouse click can dismiss this screen.
+        EventSystem.current.SetSelectedGameObject(title);
     }
     public void OpenMainMenu() {
         title.SetActive(false);
@@ -799,6 +805,12 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void OpenErrorBox(DisconnectCause cause) {
+        if(PhotonNetwork.OfflineMode){
+            return;
+        }
+
+        
+
         if (!errorBox.activeSelf)
             sfx.PlayOneShot(Enums.Sounds.UI_Error.GetClip());
 
