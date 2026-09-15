@@ -87,6 +87,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public GameObject cameraRigPlayer1, cameraRigPlayer2; //ACCURACY: LOCAL SPLIT-SCREEN camera rigs
     public GameObject backgroundsOnline, backgroundsLocal, backgroundsLocalP2; //ACCURACY: LOCAL SPLIT-SCREEN backgrounds
     public GameObject fadeOutPlayer1, fadeOutPlayer2; //ACCURACY: LOCAL SPLIT-SCREEN fade overlays, one per player
+    public GameObject levelEdgeMask; //ACCURACY: LOCAL SPLIT-SCREEN. Optional, only assigned on scenes short enough that wide local-play aspect ratios show level pop-in at the edges (e.g. DefaultBricks) - null everywhere else.
     public bool gameover = false, musicEnabled = false;
     public readonly HashSet<Player> loadedPlayers = new();
     public int starRequirement, timedGameDuration = -1, coinRequirement;
@@ -552,6 +553,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             LoadLocalLogic();
             SetupSplitScreenCameras();
             SetupSplitScreenFadeOut();
+            if (levelEdgeMask)
+                levelEdgeMask.SetActive(true);
         }
 
         
