@@ -260,7 +260,7 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         fadeOut = GameObject.FindGameObjectWithTag("FadeUI").GetComponent<FadeOutManager>();//ACCURACY: FADE OUT transition animation
         isLocalGame = GameManager.Instance.isLocalGame;
         if(isLocalGame){
-            fadeOut = null;
+          //  fadeOut = null;
         }
 
         body.position = transform.position = GameManager.Instance.GetSpawnpoint(playerId);

@@ -50,7 +50,7 @@ public class UIUpdater : MonoBehaviour {
 
     private bool isP2LifeAnimationRunning = false;
 
-    private int coins = -1, coins2 = -1, stars = -1, p2stars = -1, lives = -1, timer = -1;
+    private int coins = -1, coins2 = -1, stars = -1, p2stars = -1, lives = -1, p2lives = -1, timer = -1;
 
     public void Start() {
         Instance = this;
@@ -228,12 +228,15 @@ public class UIUpdater : MonoBehaviour {
 
 private System.Collections.IEnumerator LastLifeAnimation()
 {
+    //ACCURACY: LOCAL SPLIT-SCREEN. Blank the text instead of toggling livesParent's active state, so the duplicated
+    //column (a passive TextMirror of uiLives) blinks in sync too, instead of only the original.
+    string onText = uiLives.text;
     yield return new WaitForSeconds(4.5f);
     while(player.lives == 1){
         yield return new WaitForSeconds(0.2f);
-        livesParent.SetActive(false);
+        uiLives.text = "";
         yield return new WaitForSeconds(0.2f);
-        livesParent.SetActive(true);
+        uiLives.text = onText;
         yield return null;
     }
 }
@@ -241,12 +244,13 @@ private System.Collections.IEnumerator LastLifeAnimation()
 private System.Collections.IEnumerator p2LastLifeAnimation()
 {
     isP2LifeAnimationRunning = true;
+    string onText = p2UiLives.text;
     yield return new WaitForSeconds(4.5f);
     while(other.lives == 1){
         yield return new WaitForSeconds(0.2f);
-        p2LivesParent.SetActive(false);
+        p2UiLives.text = "";
         yield return new WaitForSeconds(0.2f);
-        p2LivesParent.SetActive(true);
+        p2UiLives.text = onText;
         yield return null;
     }
 }
@@ -589,22 +593,28 @@ private void flushStars(string p1) {
             lifeIcon = "<sprite=4>";
         }
 
-        if (other.lives == 0) {
-            p2UiLives.text = "";
-            isP2LifeAnimationRunning = false;
-        }else if (other.lives == 1){
-            p2UiLives.text = lifeIcon;
-            if(!isP2LifeAnimationRunning){
-                StartCoroutine(p2LastLifeAnimation());
+        //ACCURACY: LOCAL SPLIT-SCREEN. Gate on change like Mario's uiLives does - without this, the text gets
+        //rewritten every frame while other.lives stays the same, fighting p2LastLifeAnimation's blink.
+        if (other.lives != p2lives) {
+            p2lives = other.lives;
+
+            if (other.lives == 0) {
+                p2UiLives.text = "";
+                isP2LifeAnimationRunning = false;
+            }else if (other.lives == 1){
+                p2UiLives.text = lifeIcon;
+                if(!isP2LifeAnimationRunning){
+                    StartCoroutine(p2LastLifeAnimation());
+                }
+            }else if (other.lives == 2){
+                p2UiLives.text = lifeIcon+lifeIcon;
+            }else if (other.lives == 3){
+                p2UiLives.text = lifeIcon+lifeIcon+lifeIcon;
+            }else if (other.lives == 4){
+                p2UiLives.text = lifeIcon+lifeIcon+lifeIcon+lifeIcon;
+            }else if (other.lives == 5){
+                p2UiLives.text = lifeIcon+lifeIcon+lifeIcon+lifeIcon+lifeIcon;
             }
-        }else if (other.lives == 2){
-            p2UiLives.text = lifeIcon+lifeIcon;
-        }else if (other.lives == 3){
-            p2UiLives.text = lifeIcon+lifeIcon+lifeIcon;
-        }else if (other.lives == 4){
-            p2UiLives.text = lifeIcon+lifeIcon+lifeIcon+lifeIcon;
-        }else if (other.lives == 5){
-            p2UiLives.text = lifeIcon+lifeIcon+lifeIcon+lifeIcon+lifeIcon;
         }
     }
 
