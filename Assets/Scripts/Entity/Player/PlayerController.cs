@@ -257,10 +257,15 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         sfxBrick = GetComponents<AudioSource>()[1];
         //hitboxManager = GetComponent<WrappingHitbox>();
         AnimationController = GetComponent<PlayerAnimationController>();
-        fadeOut = GameObject.FindGameObjectWithTag("FadeUI").GetComponent<FadeOutManager>();//ACCURACY: FADE OUT transition animation
         isLocalGame = GameManager.Instance.isLocalGame;
-        if(isLocalGame){
-          //  fadeOut = null;
+        if (isLocalGame) {
+            //ACCURACY: LOCAL SPLIT-SCREEN. Each player gets their own fade overlay, confined to their half of the
+            //screen, instead of sharing the single online one. isLocalGame is checked first since "PlayerLuigi(Clone)"
+            //is also a valid name in online play.
+            GameObject fadeGO = gameObject.name.Equals("PlayerLuigi(Clone)") ? GameManager.Instance.fadeOutPlayer2 : GameManager.Instance.fadeOutPlayer1;
+            fadeOut = fadeGO.GetComponent<FadeOutManager>();
+        } else {
+            fadeOut = GameObject.FindGameObjectWithTag("FadeUI").GetComponent<FadeOutManager>();//ACCURACY: FADE OUT transition animation
         }
 
         body.position = transform.position = GameManager.Instance.GetSpawnpoint(playerId);

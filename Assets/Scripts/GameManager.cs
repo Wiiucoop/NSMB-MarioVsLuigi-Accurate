@@ -86,6 +86,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
     public GameObject pauseUI, pausePanel, pauseButton, hostExitUI, hostExitButton, mobileUI, LocalReserve, LocalTrack, LocalTrackIcons;
     public GameObject cameraRigPlayer1, cameraRigPlayer2; //ACCURACY: LOCAL SPLIT-SCREEN camera rigs
     public GameObject backgroundsOnline, backgroundsLocal, backgroundsLocalP2; //ACCURACY: LOCAL SPLIT-SCREEN backgrounds
+    public GameObject fadeOutPlayer1, fadeOutPlayer2; //ACCURACY: LOCAL SPLIT-SCREEN fade overlays, one per player
     public bool gameover = false, musicEnabled = false;
     public readonly HashSet<Player> loadedPlayers = new();
     public int starRequirement, timedGameDuration = -1, coinRequirement;
@@ -494,6 +495,23 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             cam.rect = rect;
     }
 
+    //ACCURACY: LOCAL SPLIT-SCREEN. Confines each player's fade overlay to their own half of the screen (online keeps
+    //the single full-size default untouched).
+    private void SetupSplitScreenFadeOut() {
+        fadeOutPlayer2.SetActive(true);
+        PositionFadeOutRig(fadeOutPlayer1, 0.76f); //top half center
+        PositionFadeOutRig(fadeOutPlayer2, 0.25f); //bottom half center
+    }
+
+    private static void PositionFadeOutRig(GameObject rig, float anchorY) {
+        RectTransform rt = rig.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, anchorY);
+        rt.anchoredPosition = Vector2.zero;
+        //ACCURACY: LOCAL SPLIT-SCREEN. Only Y needs to shrink to fit a half-height split; each half is still
+        //full screen WIDTH, so scaling X down too (as a uniform scale would) leaves gaps on the sides.
+        rt.localScale = new Vector3(1f, 0.31f, 1f);
+    }
+
     public void Awake() {
         Instance = this;
          //ACCURACY: ENABLE MIDI MUSIC PLAYBACK
@@ -533,6 +551,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
             blackLoadBG.SetActive(true);
             LoadLocalLogic();
             SetupSplitScreenCameras();
+            SetupSplitScreenFadeOut();
         }
 
         
@@ -679,10 +698,18 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                     yield return new WaitForSeconds(3.5f);
                 }
             bool isMario = Utils.GetCharacterData(PhotonNetwork.LocalPlayer).uistring.Equals("<sprite=3>");
-            fader.SetIsMario(isMario);
-            fader.FadeOut();
-            if(isLocalGame){
+            if (isLocalGame) {
+                //ACCURACY: LOCAL SPLIT-SCREEN. fader (=fadeOutPlayer1) always reveals as Mario's side, and
+                //fadeOutPlayer2 always reveals as Luigi's side, independent of which player is PhotonNetwork.LocalPlayer.
+                fader.SetIsMario(true);
+                fader.FadeOut();
+                FadeOutManager faderP2 = fadeOutPlayer2.GetComponent<FadeOutManager>();
+                faderP2.SetIsMario(false);
+                faderP2.FadeOut();
                 blackLoadBG.SetActive(false);
+            } else {
+                fader.SetIsMario(isMario);
+                fader.FadeOut();
             }
             StartCoroutine(PlayerController.ZoomOutAnim());//ACCURACY: ZOOMOUT ANIMATION
             

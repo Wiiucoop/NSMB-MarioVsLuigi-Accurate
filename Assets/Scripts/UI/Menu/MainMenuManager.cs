@@ -904,6 +904,16 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
     }
 
+    public void StartLocalBeta() {
+
+        PhotonNetwork.Disconnect();
+        PhotonNetwork.OfflineMode = true;
+        GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN
+
+       SceneManager.LoadSceneAsync(2, LoadSceneMode.Single);
+
+    }
+
     public void StartLocalBricks() {
 
         PhotonNetwork.Disconnect();

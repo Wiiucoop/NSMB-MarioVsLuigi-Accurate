@@ -474,10 +474,7 @@ public class PlayerAnimationController : MonoBehaviourPun {
         PipeManager pe = controller.pipeEntering;
 
         if(!isTransitioning && !pe.isRed){
-            if (!GameManager.Instance.isLocalGame)
-            {
-                controller.fadeOut.PipeFadeOutAndIn();//ACCURACY: Pipe Fade out in transition animation
-            }
+            controller.fadeOut.PipeFadeOutAndIn();//ACCURACY: Pipe Fade out in transition animation
             isTransitioning = true;
         }
 
