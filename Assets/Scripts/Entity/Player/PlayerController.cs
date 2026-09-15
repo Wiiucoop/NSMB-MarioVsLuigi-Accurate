@@ -351,6 +351,9 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
         trackIcon = UIUpdater.Instance.CreatePlayerIcon(this);
         transform.position = body.position = GameManager.Instance.spawnpoint;
 
+        Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnimsToggle); //ACCURACY: ENABLE E3 BETA ANIMATIONS
+        betaAnims = betaAnimsToggle;
+
         //ACCURACY: LOCAL SPLIT-SCREEN. Rebind each local player to their own camera rig instead of the shared Camera.main.
         //isLocalGame must be checked first: "PlayerLuigi(Clone)" is also a valid name in online play.
         if (isLocalGame) {
@@ -358,11 +361,12 @@ public class PlayerController : MonoBehaviourPun, IFreezableEntity, ICustomSeria
                 ? GameManager.Instance.cameraRigPlayer2
                 : GameManager.Instance.cameraRigPlayer1;
             cameraController.SetTargetCamera(rig.GetComponent<Camera>());
+
+           
         }
 
         cameraController.Recenter();
-        Utils.GetCustomProperty(Enums.NetRoomProperties.NewPowerups, out bool betaAnimsToggle); //ACCURACY: ENABLE E3 BETA ANIMATIONS
-        betaAnims = betaAnimsToggle;
+
         IsTagDefined("tornado");
         LoadFromGameState();
     }

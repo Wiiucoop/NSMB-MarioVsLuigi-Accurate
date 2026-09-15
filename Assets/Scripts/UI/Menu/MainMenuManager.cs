@@ -883,7 +883,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void StartGame(float levelpic) {
-        Debug.Log(levelpic+"NIVEL");
+       // Debug.Log(levelpic+"NIVEL");
         PhotonNetwork.CurrentRoom.SetCustomProperties(new() { [Enums.NetRoomProperties.Level] = (int)levelpic });
         
         //set started game
@@ -895,7 +895,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void StartLocalGrass() {
-
+        GlobalController.Instance.musicOrdering++;
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
         GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN
@@ -905,17 +905,17 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void StartLocalBeta() {
-
+        GlobalController.Instance.musicOrdering = 0;
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
         GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN
 
-       SceneManager.LoadSceneAsync(2, LoadSceneMode.Single);
+       SceneManager.LoadSceneAsync(Random.Range(7, 12), LoadSceneMode.Single);
 
     }
 
     public void StartLocalBricks() {
-
+        GlobalController.Instance.musicOrdering++;
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
         GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN
@@ -927,7 +927,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
 
 
     public void StartLocalSnow() {
-
+        GlobalController.Instance.musicOrdering++;
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
         GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN
@@ -937,7 +937,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void StartLocalPipes() {
-
+        GlobalController.Instance.musicOrdering++;
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
         GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN
@@ -947,7 +947,7 @@ public class MainMenuManager : MonoBehaviour, ILobbyCallbacks, IInRoomCallbacks,
     }
 
     public void StartLocalFort() {
-
+        GlobalController.Instance.musicOrdering++;
         PhotonNetwork.Disconnect();
         PhotonNetwork.OfflineMode = true;
         GlobalController.Instance.startingLocalGame = true; //ACCURACY: LOCAL SPLIT-SCREEN

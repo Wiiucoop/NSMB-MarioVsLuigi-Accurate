@@ -523,7 +523,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         //(e.g. StartLocalGrass), not by scene build index, so any level (not just the dedicated Local* ones) can run local play.
         isLocalGame = GlobalController.Instance.startingLocalGame;
         GlobalController.Instance.startingLocalGame = false; //consume-once, so it doesn't leak into the next scene load
-        enableBeta = SceneManager.GetActiveScene().buildIndex >= (12 + 2); //ACCURACY: LOCAL SPLIT-SCREEN. Beta moveset/animations/sfx are a distinct feature from local play - never enable them locally, regardless of which level.
+        enableBeta = SceneManager.GetActiveScene().buildIndex >= 7; //ACCURACY: Enable beta physics and mechanics on beta level indexes
 
         //ACCURACY: LOCAL SPLIT-SCREEN. Switch to a dedicated local-only background before BackgroundLoop.Start() (which
         //looks up the active "Backgrounds"-tagged object) runs - all Awake()s finish before any Start() does.
@@ -1068,7 +1068,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
 
         //ACCURACY: Music alternating made like the original
         //it starts playing SNOW and alternates with OVERWORLD theme each game
-        Debug.Log("seq SOUNDADO: "+GlobalController.Instance.musicOrdering);
+        //Debug.Log("seq SOUNDADO: "+GlobalController.Instance.musicOrdering);
         var normalSongToPlay = sequencePlayerMain.player;
         if (((GlobalController.Instance.musicOrdering % 2 == 0) && (!isE3Level)) || (isE3Level && betaCustomMusic))
         {
@@ -1142,6 +1142,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
                 //ACCURACY: Music alternating made like the original
                 //it starts playing SNOW and alternates with OVERWORLD theme each game
                 var normalSongToPlay = mainMusic;
+               // Debug.Log("ordem MUSICAL: "+GlobalController.Instance.musicOrdering);
                 if (((GlobalController.Instance.musicOrdering % 2 == 0) && (!isE3Level)) || (isE3Level && betaCustomMusic))
                 {
                     normalSongToPlay = secondaryMusic;
