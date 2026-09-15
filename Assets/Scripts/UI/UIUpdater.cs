@@ -17,6 +17,7 @@ public class UIUpdater : MonoBehaviour {
 
     public TMP_Text p2UiStar1,p2UiStar2,p2UiStar3,p2UiStar4,p2UiStar5, p2UiLives;
     public Image itemReserve, itemColor;
+    public Image itemReserveP2; //ACCURACY: LOCAL SPLIT-SCREEN - Luigi's reserve item box (Mario keeps the original itemReserve/itemColor)
     public float pingSample = 0;
 
     public bool isLocalGame = false;
@@ -28,6 +29,8 @@ public class UIUpdater : MonoBehaviour {
     private static readonly int ParamHasItem = Animator.StringToHash("has-item");
     [SerializeField] private Animator reserveAnimator;
     private Powerup previousPowerup;
+    [SerializeField] private Animator reserveAnimatorP2;
+    private Powerup previousPowerupP2;
 
     private Material timerMaterial;
     private GameObject starsParent, coinsParent, livesParent, p2LivesParent, timerParent;
@@ -68,6 +71,22 @@ public class UIUpdater : MonoBehaviour {
         if(isLocalGame){
             middleColumnParent.transform.position += new Vector3(0f, 28f, 0f);
             uiCountdown.text = Utils.GetSymbolString("C" + "0" + "/" + GameManager.Instance.coinRequirement);
+
+            //ACCURACY: LOCAL SPLIT-SCREEN. Timer no longer lives inside middleColumnParent (moved out for the screen-center
+            //fix), so scale it and coinsParent separately rather than scaling middleColumnParent as a whole.
+            coinsParent.transform.localScale = Vector3.one * 0.8f;
+            timerParent.transform.localScale = Vector3.one * 0.8f;
+
+            //ACCURACY: LOCAL SPLIT-SCREEN. Mario keeps the original reserve box, just moved to right-center so it isn't
+            //sitting inside Luigi's half of the screen (online keeps its default bottom-right position, untouched).
+            //Luigi gets a second box (itemReserveP2), which defaults to inactive and to Mario's old bottom-right
+            //spot in the prefab - just activate it here.
+            RectTransform marioReserveRect = (RectTransform) itemReserve.transform.parent;
+            marioReserveRect.anchorMin = marioReserveRect.anchorMax = marioReserveRect.pivot = new Vector2(1f, 0.5f);
+            marioReserveRect.anchoredPosition = new Vector2(-10f, 40f);
+
+            itemReserveP2.transform.parent.gameObject.SetActive(true);
+            
         }
 
         
@@ -156,32 +175,38 @@ public class UIUpdater : MonoBehaviour {
     }
 
      private void UpdateStoredItemUI() {
-        if (!player ) {
-            return;
-        }
+        if (player)
+            UpdateReserveDisplay(player.storedPowerup, itemReserve, reserveAnimator, ref previousPowerup);
 
-        Powerup powerup = player.storedPowerup;
-       
-        
-        reserveAnimator.SetBool(ParamHasItem, powerup && powerup.reserveSprite);
-        
+        //ACCURACY: LOCAL SPLIT-SCREEN. Luigi's box, only tracked/shown in local play.
+        if (isLocalGame && other)
+            UpdateReserveDisplay(other.storedPowerup, itemReserveP2, reserveAnimatorP2, ref previousPowerupP2);
+    }
+
+    private void UpdateReserveDisplay(Powerup powerup, Image reserveImage, Animator animator, ref Powerup previousPowerupField) {
+        animator.SetBool(ParamHasItem, powerup && powerup.reserveSprite);
+
         if (!powerup) {
-            if (previousPowerup != powerup) {
-                reserveAnimator.SetTrigger(ParamOut);
-                previousPowerup = powerup;
+            if (previousPowerupField != powerup) {
+                animator.SetTrigger(ParamOut);
+                previousPowerupField = powerup;
             }
             return;
         }
 
-        itemReserve.sprite = powerup.reserveSprite ? powerup.reserveSprite : storedItemNull;
-        if (previousPowerup != powerup) {
-            reserveAnimator.SetTrigger(ParamIn);
-            previousPowerup = powerup;
+        reserveImage.sprite = powerup.reserveSprite ? powerup.reserveSprite : storedItemNull;
+        if (previousPowerupField != powerup) {
+            animator.SetTrigger(ParamIn);
+            previousPowerupField = powerup;
         }
     }
 
     public void OnReserveItemStaticStarted() {
         itemReserve.sprite = storedItemNull;
+    }
+
+    public void OnReserveItemStaticStartedP2() {
+        itemReserveP2.sprite = storedItemNull;
     }
 
 

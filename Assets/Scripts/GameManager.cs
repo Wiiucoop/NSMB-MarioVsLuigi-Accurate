@@ -534,9 +534,19 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         }
 
         
-        LocalReserve.SetActive(!isLocalGame);
-        LocalTrack.SetActive(!isLocalGame);
-        LocalTrackIcons.SetActive(!isLocalGame);
+        LocalReserve.SetActive(true);
+        LocalTrack.SetActive(true); //ACCURACY: LOCAL SPLIT-SCREEN. Was disabled for local play during testing - re-enabled, recentered below for local play.
+        LocalTrackIcons.SetActive(true);
+
+        if (isLocalGame) {
+            RectTransform trackRect = LocalTrack.GetComponent<RectTransform>();
+            trackRect.anchorMin = trackRect.anchorMax = trackRect.pivot = new Vector2(0.5f, 0.5f);
+            trackRect.anchoredPosition = Vector2.zero;
+
+            RectTransform trackIconsRect = LocalTrackIcons.GetComponent<RectTransform>();
+            trackIconsRect.anchorMin = trackIconsRect.anchorMax = trackIconsRect.pivot = new Vector2(0.5f, 0.5f);
+            trackIconsRect.anchoredPosition = new Vector2(0f, 17f); //icons sit 7 units above the track itself, matching their original relative offset
+        }
 
         InputSystem.controls.LoadBindingOverridesFromJson(GlobalController.Instance.controlsJson);
         
