@@ -36,7 +36,9 @@ public class UIUpdater : MonoBehaviour {
     private GameObject starsParent, coinsParent, livesParent, p2LivesParent, timerParent;
 
     public GameObject middleColumnParent;
-    
+    public GameObject leftColumnLocalCopy, rightColumnLocalCopy; //ACCURACY: LOCAL SPLIT-SCREEN - passive TextMirror copies near Luigi's half, inactive/unused online
+    public GameObject pingLocalCopy; //ACCURACY: LOCAL SPLIT-SCREEN - passive TextMirror copy of the ping indicator, moved near center
+
     public RectTransform leftColumnParent, rightColumnParent, track1, track2;
     private readonly List<Image> backgrounds = new();
     private bool uiHidden;
@@ -69,7 +71,7 @@ public class UIUpdater : MonoBehaviour {
         isLocalGame = GameManager.Instance.isLocalGame;
 
         if(isLocalGame){
-            middleColumnParent.transform.position += new Vector3(0f, 28f, 0f);
+            middleColumnParent.transform.position += new Vector3(-10f, 28f, 0f);
             uiCountdown.text = Utils.GetSymbolString("C" + "0" + "/" + GameManager.Instance.coinRequirement);
 
             //ACCURACY: LOCAL SPLIT-SCREEN. Timer no longer lives inside middleColumnParent (moved out for the screen-center
@@ -86,7 +88,20 @@ public class UIUpdater : MonoBehaviour {
             marioReserveRect.anchoredPosition = new Vector2(-10f, 40f);
 
             itemReserveP2.transform.parent.gameObject.SetActive(true);
-            
+
+            //ACCURACY: LOCAL SPLIT-SCREEN. Stars/lives stay left/right like the originals, just duplicated lower down
+            //so Luigi's half of the split screen has its own visible copy. These are passive TextMirror copies -
+            //the actual tracking/update logic above is untouched.
+            leftColumnLocalCopy.SetActive(true);
+            rightColumnLocalCopy.SetActive(true);
+
+            leftColumnParent.transform.localScale = Vector3.one * 0.9f;
+            rightColumnParent.transform.localScale = Vector3.one * 0.9f;
+            leftColumnLocalCopy.transform.localScale = Vector3.one * 0.9f;
+            rightColumnLocalCopy.transform.localScale = Vector3.one * 0.9f;
+
+            //ACCURACY: LOCAL SPLIT-SCREEN. Ping indicator, duplicated the same passive-mirror way, moved near center.
+            pingLocalCopy.SetActive(true);
         }
 
         

@@ -527,6 +527,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback, IInRoomCallbacks, IC
         startText = GameObject.FindWithTag("starttext");//ACCURACY: MARIO/LUIGI START
         if(isLocalGame){
             Settings.Instance.fourByThreeRatio = false;
+            Settings.Instance.ndsResolution = false;
+            Settings.Instance.n3dsResolution = false;
 
             blackLoadBG.SetActive(true);
             LoadLocalLogic();
